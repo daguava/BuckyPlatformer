@@ -399,16 +399,16 @@ function begin_game() {
 		for(var k = 0; k<map[i].length; k++){
 			// handle grass and its tiling
 			if(map[i][k]==1){
-				var checkArray =   [  [  			0		   			  , (i-1>=0)?((map[i-1][k]==1)?1:0):0	 	 ,  			0		   						 ],
-									  [ (k-1>=0)?((map[i][k-1]==1)?1:0):0 ,             1 	      					 , (k+1<map[i].length)?((map[i][k+1]==1)?1:0):0  ],
-									  [  			0		   			  , (i+1<map.length)?((map[i+1][k]==1)?1:0):0 ,  			0		   					     ]  ];
+				var checkArray =   [  [  			0		   			  , (i-1>=0)?((map[i-1][k]==1)?1:0):0	 	  ,  			0		   						  ],
+									  [ (k-1>=0)?((map[i][k-1]==1)?1:0):0 ,             1 	      					  , (k+1<map[i].length)?((map[i][k+1]==1)?1:0):0  ],
+									  [  			0		   			  , (i+1<map.length)?((map[i+1][k]==1)?1:0):0 ,  			0		   					      ]  ];
 				imageMap[i][k] = GrassTileset.getTile(checkArray);
 			}
 			// handle dirt platforms
 			if(map[i][k]==2){
-				var checkArray =   [  [  			0		   			  , (i-1>=0)?((map[i-1][k]==2)?1:0):0	 	 ,  			0		   						 ],
-									  [ (k-1>=0)?((map[i][k-1]==2)?1:0):0 ,             1 	      					 , (k+1<map[i].length)?((map[i][k+1]==2)?1:0):0  ],
-									  [  			0		   			  , (i+1<map.length)?((map[i+1][k]==2)?1:0):0 ,  			0		   					     ]  ];
+				var checkArray =   [  [  			0		   			  , (i-1>=0)?((map[i-1][k]==2)?1:0):0	 	  ,  			0		   						  ],
+									  [ (k-1>=0)?((map[i][k-1]==2)?1:0):0 ,             1 	      					  , (k+1<map[i].length)?((map[i][k+1]==2)?1:0):0  ],
+									  [  			0		   			  , (i+1<map.length)?((map[i+1][k]==2)?1:0):0 ,  			0		   					      ]  ];
 				imageMap[i][k] = RockTileset.getTile(checkArray);
 			}
 			// handle spikes and their tiling
