@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<head>
+<script>
+var start, end, time;
+
+
+var platforms = new Array();
+var num_collisions = 0;
+
+var blocksWidth		= parseInt(prompt("Enter how many blocks wide", ""));
+var blocksHeight	= parseInt(prompt("Enter how many blocks tall", ""));
+
+var gameWidth = blocksWidth * 25;
+var gameHeight = blocksHeight * 25;
+
+var blockChoice = 0;
+
+
+	// nice little piece of code that uses a browser's native
+	// request animation frame function if it exists. If it doesn't,
+	// it reverts back to setTimeout
+
+(function() {
+    var lastTime = 0;
+    //var vendors = ['ms', 'moz', 'webkit', 'o'];
+    var vendors = ['pie'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelRequestAnimationFrame = window[vendors[x]+
+          'CancelRequestAnimationFrame'];
+    } 
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            //var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+            	var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              16);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}())
+
+
+
+var fps = 60, now, lastUpdate = (new Date)*1 - 1, fpsControl = 1, x, y, map;
+
+// The higher this value, the less the FPS will be affected by quick changes
+// Setting this to 1 will show you the FPS of the last sampled frame only
+var fpsFilter = 2;
+
+function updateBlockChoice(newChoice){
+	blockChoice = newChoice;
+}
+
+
+function Control() {
+	this.space = false;
+	this.shift = false;
+	this.left = false;
+	this.right = false;
+	this.up = false;
+	this.down = false;
+	this.mouse_left = false;
+	this.mouse_right = false;
+	this.mouse_middle = false;
+}
+
+function Platform(x, y) {
+	this.x = x;
+	this.y = y;
+	this.image = new Image();
+	this.image.src = "grass_tile.gif";
+	this.width = 25;
+	this.height = 25;
+}
+
+function Game(ctx, x_boundary, y_boundary, frame_delay){
+	this.ctx = ctx;					// canvas context
+	this.frame_delay = frame_delay;	// ms delay between drawing
+	this.x_boundary = x_boundary;	// x-coord boundary
+	this.y_boundary = y_boundary;	// y-coord boundary
+	this.clearColor = "rgb(100, 100, 100)";			// initial clear color is null
+	//this.clearScreen = doScreenClear(arg_rgb_clear);
+	// define a screen clearing function
+	// If a color is sent as a parameter, use it, otherwise use the default fill color.
+}
+
+function screenClear(currentGame){ 
+	ctx.fillStyle = currentGame.clearColor;
+	ctx.fillRect(0, 0, currentGame.x_boundary, currentGame.y_boundary);
+	return true;
+}
+
+function drawObject(drawableObject, ctx){
+	ctx.drawImage(drawableObject.image, drawableObject.x, drawableObject.y);
+	return true;
+}
+
+function page_load() {
+	// this code adds an event listener for mouse scrolling, it will call the mouse_scroll function every time an event is throw (the mouse is scrolled)
+	var mousewheelevt=(/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel" //FF doesn't recognize mousewheel as of FF3.x 
+	if (document.attachEvent) //if IE (and Opera depending on user setting)
+		document.attachEvent("on"+mousewheelevt, function(e) {mouse_scroll(e)}, false);
+	else if (document.addEventListener) //WC3 browsers
+		document.addEventListener(mousewheelevt, function(e) {mouse_scroll(e)}, false);
+	
+	begin_game();	// Begin the game
+}
+
+function mouse_scroll(e) {
+	var evt=window.event || e //equalize event object
+	var delta=evt.detail? evt.detail*(-120) : evt.wheelDelta //check for detail first so Opera uses that instead of wheelDelta
+	// delta now holds the amount that the wheel was scrolled
+}
+
+function mouse_move(event) {
+	x = event.offsetX?(event.offsetX):event.pageX-document.getElementById("draw_canvas").offsetLeft;
+	y = event.offsetY?(event.offsetY):event.pageY-document.getElementById("draw_canvas").offsetTop;
+	
+	// x and y now hold the position onscreen of the mouse after the mouse was moved
+}
+
+function mouse_press(event) {
+	x = event.offsetX?(event.offsetX):event.pageX-document.getElementById("draw_canvas").offsetLeft;
+	y = event.offsetY?(event.offsetY):event.pageY-document.getElementById("draw_canvas").offsetTop;
+	
+	// x and y now hold the position onscreen of the mouse click
+}
+
+function key_event(event) {
+	switch(event.keyCode){
+		case 32:				Controller.space = true;	break;		// space
+		case 16:				Controller.shift = true;	break;		// shift
+		case 39: case 68:		Controller.right = true;	break;		// right
+		case 37: case 65:		Controller.left = true;		break;		// left
+		case 38: case 87:		Controller.up = true; 		break;		// up
+		case 40: case 83:		Controller.down = true;		break;		// down
+	}
+}
+
+function key_event_up(event) {
+	switch(event.keyCode){
+		// space       32
+		//           arrow wasd
+		// leftarrow   37 65
+		// rightarrow  39 68
+		// uparrow     38 87
+		// downarrow   40 83
+		case 32:				Controller.space = false;	break;		// space
+		case 16:				Controller.shift = false;	break;		// shift
+		case 39: case 68:		Controller.right = false;	break;		// right
+		case 37: case 65:		Controller.left = false;	break;		// left
+		case 38: case 87:		Controller.up = false; 		break;		// up
+		case 40: case 83:		Controller.down = false;	break;		// down
+	}
+}
+
+function mouse_up(event) {
+	switch(event.which){
+		case 1: Controller.mouse_left = false; break;
+		case 2: Controller.mouse_middle = false; break;
+		case 3: Controller.mouse_right = false; break;
+	}
+}
+
+
+function mouse_down(event) {
+	switch(event.which){
+		case 1: Controller.mouse_left = true; break;
+		case 2: Controller.mouse_middle = true; break;
+		case 3: Controller.mouse_right = true; break;
+	}
+}
+
+function begin_game() {
+
+	/*map = [
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	];*/
+
+	map = new Array(blocksHeight);
+	for(i = 0; i<blocksHeight; i++){
+		map[i] = new Array(blocksWidth);
+	}
+
+	for(i = 0; i<map.length; i++){
+		for(k = 0; k<map[0].length; k++){
+			map[i][k] = 0;
+		}
+	}
+
+
+	// prepare context for object creation
+	var canvas = document.getElementById("draw_canvas");
+	ctx = canvas.getContext("2d");
+	
+	// DEFINE BEGINNING OBJECTS
+	Controller = new Control();
+	BuckyGame = new Game(ctx, gameWidth, gameHeight, 10)		// (context, x_boundary, y_boundary, ms_delay)
+				// (x-position, y-position)
+
+	Grass = new Platform();
+	Block = new Platform();
+	Block.image.src = "platform_placeholder.gif";
+	
+	// put code here to set up your game,d create your character objects, give them initial positions and speeds, etc.
+
+
+
+
+	frame();
+}
+
+function frame(){
+
+
+	if(Controller.mouse_left){
+		x_tile = Math.floor(x/25);
+		y_tile = Math.floor(y/25);
+		if(y_tile < blocksHeight && x_tile < blocksWidth)
+		map[y_tile][x_tile] = blockChoice;
+	}
+	if(Controller.mouse_right){
+		x_tile = Math.floor(x/25);
+		y_tile = Math.floor(y/25);
+		if(y_tile < blocksHeight && x_tile < blocksWidth && y_tile > 0 && x_tile > 0)
+		map[y_tile][x_tile] = 0;
+	}
+
+
+	if(Controller.shift){
+		var output_string = "map = [<br />";
+		for(i = 0; i<map.length; i++){
+			for(k = 0; k<map[0].length; k++){
+				if(k == 0){
+					output_string += "[" + map[i][k] + ", ";
+				} else if(k==map[0].length-1 && i != map.length-1){
+					output_string += map[i][k] + "],<br />";
+				} else if(i == map.length-1 && k == map[0].length-1){
+					output_string += map[i][k] + "]<br />];";
+				}	else {
+					output_string += map[i][k] + ", ";
+				}
+			}
+		}
+		document.write(output_string);
+	}
+	var start = new Date().getTime();
+
+	BuckyGame.clearColor = "rgb(255,255,255)";
+	screenClear(BuckyGame);
+
+	var end = new Date().getTime();
+	var time = end - start;
+
+	draw_world();
+	 
+	setTimeout(frame, 0);
+}
+
+function draw_world() {  
+	var canvas = document.getElementById("draw_canvas");
+	if (canvas.getContext) {
+		
+		
+		// DEBUGGING, draws a large number of rectangles
+		// for performance testing
+		
+		
+
+		
+		ctx = canvas.getContext("2d");
+
+		Grass = new Platform();
+		Block = new Platform();
+		Spike = new Platform();
+		Beer  = new Platform();
+		Enemy = new Platform();
+
+		Grass.image = new Image();
+		Block.image = new Image();
+		Spike.image = new Image();
+		Beer.image  = new Image();
+		Enemy.image = new Image();
+
+		Grass.image.src = "grass_tile.png";
+		Block.image.src = "platform.png";
+		Spike.image.src = "spike_pit.png";
+		Beer.image.src 	= "beer_mug.png";
+		Enemy.image.src = "generic_enemy_placeholder.gif";
+
+		// draw out the map
+		
+		for(var i = 0; i<map.length; i++){
+			for(var k = 0; k<map[i].length; k++){
+				if(map[i][k]==1){
+					ctx.drawImage(Grass.image, k*25, i*25);
+				}
+				if(map[i][k]==2){
+					ctx.drawImage(Block.image, k*25, i*25);
+				}
+				if(map[i][k]==3){
+					ctx.drawImage(Beer.image, k*25, i*25);
+				}
+				if(map[i][k]==4){
+					ctx.drawImage(Spike.image, k*25, i*25);
+				}
+				if(map[i][k]==5){
+					ctx.drawImage(Enemy.image, k*25, i*25);
+				}
+			}
+		}
+		
+		ctx.stokeStyle = "rgb(0,0,0)";
+		for(var i = 0; i*25<=blocksWidth*25; i++){
+			ctx.stokeStyle = "rgb(0,0,0)";
+			ctx.beginPath();
+  			ctx.moveTo(0,i*25);
+  			ctx.lineTo(blocksWidth*25,i*25);
+  			ctx.stroke();
+
+  			ctx.stokeStyle = "rgb(0,0,0)";
+  			ctx.beginPath();
+  			ctx.moveTo(i*25,0);
+  			ctx.lineTo(i*25,blocksHeight*25);
+  			ctx.stroke();
+
+  			ctx.stokeStyle = "rgb(0,0,0)";
+		}
+
+
+
+
+
+		var thisFrameFPS = 1000 / ((now=new Date) - lastUpdate);
+		var lastfps = fps;
+		fps += (thisFrameFPS - fps) / fpsFilter;
+		if(isNaN(fps)){
+			// fps counter has glitched up, set it to a nice value
+			fps = 60;
+		}
+		lastUpdate = now;
+		  
+		fpsControl = 60/fps;
+		fpsControl = 1;
+		// doing this until I can sort out the fps issues            
+		//fpsControl = 1;
+		
+		
+		
+	}
+}
+
+window.addEventListener('keydown',key_event,true);
+window.addEventListener('keyup',key_event_up,true);
+window.addEventListener('mouseup', mouse_up, false);
+window.addEventListener('mousedown', mouse_down, false);
+	
+</script> 
+</head>
+<body  onload="page_load()">
+
+<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas"  oncontextmenu="return false;" width="100%"></canvas>
+
+<div style="position: fixed; bottom: 100px; left: 50px; width: 400px; background-color: #FFFFFF; height: 100px; border: 1px solid black;">
+	<img src="grass_tile.png" width="50" 				onclick="updateBlockChoice(1);" />
+	<img src="platform.png" width="50"  				onclick="updateBlockChoice(2);" />
+	<img src="beer_mug.png" width="50"					onclick="updateBlockChoice(3);" />
+	<img src="spike_pit.png" width="50"  				onclick="updateBlockChoice(4);" />
+	<img src="generic_enemy_placeholder.gif" width="50" onclick="updateBlockChoice(5);" />
+</div>
+
+
+<script type="text/javascript">
+	gameCanvas = document.getElementById("draw_canvas");
+	gameCanvas.width = gameWidth;
+	gameCanvas.height = gameHeight;
+
+</script>
+
+</body>
+</html>
+
