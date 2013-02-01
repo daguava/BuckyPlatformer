@@ -5,7 +5,7 @@
 var ctx;
 var blocksize = 25;
 var imageMap;
-var GRAVITY = 1;
+var GRAVITY = 0.1;
 var CollidingBlocks = new Array();
 
 function Game(x_boundary, y_boundary){
@@ -31,6 +31,7 @@ function Player(x_pos, y_pos) {
 	this.action = 					function(){};
 	this.jump = 					function(){};
 	this.jump.toggle = 				false;
+	this.jump.release = 			true;
 	this.position = 				function(){};
 	this.position.x = 	 			x_pos;  // x pos
 	this.position.y = 	  			y_pos;	// y pos
@@ -47,16 +48,14 @@ function Player(x_pos, y_pos) {
 	this.image.visible =  			true;
 	this.collision = 				function(){};
 	this.collision.width_offset = 	5;
-	this.collision.height_offset = 	5;
+	this.collision.height_offset = 	10;
 	this.alcohol = 					function(){};
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
 
 	this.draw = function() {
-		ctx.drawImage(this.image, Math.round(this.position.x), Math.round(this.position.y), this.image.width, this.image.height);
-		console.log(this.position.x);
-		console.log(this.position.y);
+		ctx.drawImage(this.image, Math.round(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
    	}
 
 	this.update = function() {
@@ -70,28 +69,29 @@ function Player(x_pos, y_pos) {
 		}
 
 		if(Controller.shift && this.state == ALIVE){
-			this.vel.x = 25;
+			this.vel.x = 2.5;
 		} else if(!Controller.shift && this.state == ALIVE){
-			this.vel.x = 15;
+			this.vel.x = 1.5;
 		} else {
 			this.vel.x = 0;
 		}
 
 		if(Controller.space && this.jump.toggle){
-			this.vel.y = -60;
+			this.vel.y = -6.0;
 			this.jump.toggle = !this.jump.toggle;
 		}
 
-		if(!this.jump.toggle && !Controller.space && this.vel.y < 0){
-			this.vel.y = 0;
+		if(!this.jump.toggle && !Controller.space && this.vel.y < 0 && !this.jump.release){
+			this.jump.release = true;
+			this.vel.y *= 0.2;
 		}
 
 		this.vel.y += GRAVITY;
 
 		this.image.src = "images/bucky/bucky_small.gif";
 
-		this.position.x += this.vel.x * this.vel.dir.x / 10;
-		this.position.y += this.vel.y * this.vel.dir.y / 10;
+		this.position.x += this.vel.x * this.vel.dir.x;
+		this.position.y += this.vel.y * this.vel.dir.y;
 
 		for(i = 0; i<CollidingBlocks.length; i++){
 			correctCollision(this, CollidingBlocks[i]);
@@ -138,6 +138,7 @@ function correctCollision(movable, stationary){
 			//this.y_speed = 0;
 			//this.grounded = true;
 			movable.jump.toggle = true;
+			movable.jump.release = false;
 			movable.vel.y = 0;
 		} else {
 			movable.vel.y = 0;
