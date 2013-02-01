@@ -5,12 +5,14 @@
 var ctx;
 var blocksize = 25;
 var imageMap;
+var GRAVITY = 1;
+var CollidingBlocks = new Array();
 
 function Game(x_boundary, y_boundary){
 	this.boundary =   function(){};
 	this.boundary.x = x_boundary;	// x-coord boundary
 	this.boundary.y = y_boundary;	// y-coord boundary
-	this.clearColor = "rgba(100, 100, 100, 0.01)";			// initial clear color is null
+	this.clearColor = "#7ADAE1";			// initial clear color is null
 	this.state = null;
 
 	this.resetGame = function() {
@@ -24,6 +26,8 @@ function Game(x_boundary, y_boundary){
 }
 
 function Player(x_pos, y_pos) {
+	DEAD = 1;
+	ALIVE = 2;
 	this.position = 				function(){};
 	this.position.x = 	 			x_pos;  // x pos
 	this.position.y = 	  			y_pos;	// y pos
@@ -31,12 +35,12 @@ function Player(x_pos, y_pos) {
 	this.vel.x =					0;		// x speed
 	this.vel.y =					0;		// y speed
 	this.vel.dir = 					function(){};
-	this.vel.dir.x = 				0;		// x dir
-	this.vel.dir.x = 				0;		// y dir
-	this.state = 		  			0; 
+	this.vel.dir.x = 				1;		// x dir
+	this.vel.dir.y = 				1;		// y dir
+	this.state = 		  			ALIVE; 
 	this.image = 		  			new Image();
-	this.image.width  =   			50;
-	this.image.height =   			64;
+	this.image.width  =   			32;
+	this.image.height =   			41;
 	this.image.visible =  			true;
 	this.collision = 				function(){};
 	this.collision.width_offset = 	5;
@@ -52,6 +56,84 @@ function Player(x_pos, y_pos) {
 
 	this.update = function() {
 		// update x and y position
+		if(Controller.right){
+			this.vel.dir.x = 1;
+		} else if(Controller.left){
+			this.vel.dir.x = -1;
+		} else {
+			this.vel.dir.x = 0;
+		}
+
+		if(Controller.shift && this.state == ALIVE){
+			this.vel.x = 5 * 5;
+		} else if(!Controller.shift && this.state == ALIVE){
+			this.vel.x = 3 * 5;
+		} else {
+			this.vel.x = 0;
+		}
+
+		if(Controller.space){
+			this.vel.y = -10 * 5;
+		}
+
+		this.vel.y += GRAVITY;
+
+		this.image.src = "images/bucky/bucky_small.gif";
+
+		this.position.x += this.vel.x * this.vel.dir.x / 10;
+		this.position.y += this.vel.y * this.vel.dir.y / 10;
+
+		for(i = 0; i<CollidingBlocks.length; i++){
+			correctCollision(this, CollidingBlocks[i]);
+		}
+	}
+}
+
+function correctCollision(movable, stationary){
+
+	var movableCenterX = 0;
+	var movableCenterY = 0;
+	var stationaryCenterX = 0;
+	var stationaryCenterY = 0;
+	var distanceX = 0;
+	var distanceY = 0;
+	var minDistanceX = 0;
+	var minDistanceY = 0;
+	var depthX = 0;
+	var depthY = 0;
+
+	movableCenterX = movable.position.x + movable.image.width/2;
+	movableCenterY = movable.position.y + movable.image.height/2;
+	stationaryCenterX = stationary.position.x + stationary.image.width/2;
+	stationaryCenterY = stationary.position.y + stationary.image.height/2;
+
+	distanceX = movableCenterX - stationaryCenterX;
+	distanceY = movableCenterY - stationaryCenterY;
+
+	minDistanceX = movable.image.width/2 + stationary.image.width/2;
+	minDistanceY = movable.image.height/2 + stationary.image.height/2;
+
+	if(Math.abs(distanceX) >= minDistanceX || Math.abs(distanceY) >= minDistanceY){
+		depthX = 0;
+		depthY = 0;
+	} else {
+		depthX = distanceX > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
+		depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
+	}
+
+	if(Math.abs(depthY) < Math.abs(depthX)){ // resolve y first if true
+		movable.position.y += depthY;
+		if(depthY<0){
+			//this.airtime = 0;
+			//this.y_speed = 0;
+			//this.grounded = true;
+			movable.vel.y = 0;
+		} else {
+			//this.airtime = 3;
+		}
+	} else { // resolve x first if the first statement was false
+		movable.position.x += depthX;
+		//this.x_speed = 0;
 	}
 }
 
@@ -63,10 +145,6 @@ function Block(x_pos, y_pos) {
 	this.image.width  = 		25;
 	this.image.height = 		25;
 	this.image.visible = 		true;
-
-	this.draw = function() {
-		ctx.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
-   	}
 
 	this.update = function() {
 		// update x and y position
@@ -156,7 +234,7 @@ function TileSet(imageUrlArray, typeNum, tileType) {
 	this.arrayCompare = function(array1, array2){
 		for(i = 0; i<array1.length; i++){
 			for(k = 0; k<array1[i].length; k++){
-				if( ( array1[i][k] != array2[i][k] ) && ( array2[i][k] != 9  ) ) return false;
+				if( ( array1[i][k] != array2[i][k] ) && ( array2[i][k] != 9 ) ) return false;
 			}
 		}
 		return true;
@@ -208,7 +286,6 @@ function TileSet(imageUrlArray, typeNum, tileType) {
 			}  else if( this.arrayCompare(surrounding, [[9,this.num,9],[0,this.num,0],[9,this.num,9]] ) ){ // middle single vertical
 				return this.tileArray[14];
 			} else {											  	  // middle middle
-				console.log(surrounding);
 				return this.tileArray[4];
 			}
 
@@ -351,9 +428,9 @@ function begin_game() {
 	var canvas = document.getElementById("draw_canvas");
 	ctx = canvas.getContext("2d");
 
-	Buckingham = new Player(50, 300);
+	Buckingham = new Player(25, 300);
 	Controller = new Control();
-	BuckyGame = new Game(ctx, 800, 600);
+	BuckyGame = new Game(800, 600);
 
 	Buckingham.image.src  = "bucky_small.gif";
 	scorebar = new Image();
@@ -380,9 +457,9 @@ function begin_game() {
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
-	 [2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+	 [2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
-	 [2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+	 [2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
@@ -399,12 +476,17 @@ function begin_game() {
 
 	imageMap = new Array(map.length);
 
+	collideTypes = new Array(GrassTileset, RockTileset);
+
 	for(i = 0; i<map.length; i++){
 		imageMap[i] = new Array(map[0].length);
 	}
 
+	// process map file for use in drawing, and logic segments
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
+
+			// process tiles for producing an image map
 			for(j = 0; j<TilesetArrays.length; j++){
 				var checkArray =   [  [  			0		   , (i-1>=0)?map[i-1][k]:0	 	    ,  			0		   				   ],
 									  [ (k-1>=0)?map[i][k-1]:0 ,          map[i][k] 	      	, (k+1<map[i].length)?(map[i][k+1]):0  ],
@@ -415,21 +497,41 @@ function begin_game() {
 				}
 			}
 			if(imageMap[i][k] == undefined) imageMap[i][k] = null;
-			}
-	}
 
-	//frame();
-	draw_world();
+
+
+
+			// process map file to find colliding surfaces
+			for(j = 0; j<collideTypes.length; j++){
+				if(map[i][k] == collideTypes[j].num){
+					CollidingBlocks.push(new Block(k*blocksize, i*blocksize));
+				}
+			}
+		}	
+	}
+	caller();
+}
+
+function caller(){
+	setInterval(physics, 3);
+	setInterval(draw_world, 15);
+}
+
+function physics(){
+	Buckingham.update();
 }
 
 
+function draw_world() { 
 
-function draw_world() {  
+	BuckyGame.clearScreen();
+
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
 			if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], k*blocksize, Math.floor(i*blocksize));
 		}
 	}
+	Buckingham.draw();
 }
 
 
