@@ -26,8 +26,11 @@ function Game(x_boundary, y_boundary){
 }
 
 function Player(x_pos, y_pos) {
-	DEAD = 1;
-	ALIVE = 2;
+	DEAD = 							1;
+	ALIVE = 						2;
+	this.action = 					function(){};
+	this.jump = 					function(){};
+	this.jump.toggle = 				false;
 	this.position = 				function(){};
 	this.position.x = 	 			x_pos;  // x pos
 	this.position.y = 	  			y_pos;	// y pos
@@ -44,14 +47,16 @@ function Player(x_pos, y_pos) {
 	this.image.visible =  			true;
 	this.collision = 				function(){};
 	this.collision.width_offset = 	5;
-	this.collision.height_offset = 	0;
+	this.collision.height_offset = 	5;
 	this.alcohol = 					function(){};
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
 
 	this.draw = function() {
-		ctx.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+		ctx.drawImage(this.image, Math.round(this.position.x), Math.round(this.position.y), this.image.width, this.image.height);
+		console.log(this.position.x);
+		console.log(this.position.y);
    	}
 
 	this.update = function() {
@@ -65,15 +70,20 @@ function Player(x_pos, y_pos) {
 		}
 
 		if(Controller.shift && this.state == ALIVE){
-			this.vel.x = 5 * 5;
+			this.vel.x = 25;
 		} else if(!Controller.shift && this.state == ALIVE){
-			this.vel.x = 3 * 5;
+			this.vel.x = 15;
 		} else {
 			this.vel.x = 0;
 		}
 
-		if(Controller.space){
-			this.vel.y = -10 * 5;
+		if(Controller.space && this.jump.toggle){
+			this.vel.y = -60;
+			this.jump.toggle = !this.jump.toggle;
+		}
+
+		if(!this.jump.toggle && !Controller.space && this.vel.y < 0){
+			this.vel.y = 0;
 		}
 
 		this.vel.y += GRAVITY;
@@ -110,8 +120,8 @@ function correctCollision(movable, stationary){
 	distanceX = movableCenterX - stationaryCenterX;
 	distanceY = movableCenterY - stationaryCenterY;
 
-	minDistanceX = movable.image.width/2 + stationary.image.width/2;
-	minDistanceY = movable.image.height/2 + stationary.image.height/2;
+	minDistanceX = (movable.image.width-movable.collision.width_offset)/2 + (stationary.image.width-stationary.collision.width_offset)/2;
+	minDistanceY = (movable.image.height-movable.collision.height_offset)/2 + (stationary.image.height-stationary.collision.height_offset)/2;
 
 	if(Math.abs(distanceX) >= minDistanceX || Math.abs(distanceY) >= minDistanceY){
 		depthX = 0;
@@ -127,9 +137,10 @@ function correctCollision(movable, stationary){
 			//this.airtime = 0;
 			//this.y_speed = 0;
 			//this.grounded = true;
+			movable.jump.toggle = true;
 			movable.vel.y = 0;
 		} else {
-			//this.airtime = 3;
+			movable.vel.y = 0;
 		}
 	} else { // resolve x first if the first statement was false
 		movable.position.x += depthX;
@@ -138,13 +149,16 @@ function correctCollision(movable, stationary){
 }
 
 function Block(x_pos, y_pos) {
-	this.position = 			function(){};
-	this.position.x = 			x_pos;
-	this.position.y = 			y_pos;
-	this.image = 				new Image();
-	this.image.width  = 		25;
-	this.image.height = 		25;
-	this.image.visible = 		true;
+	this.position = 				function(){};
+	this.position.x = 				x_pos;
+	this.position.y = 				y_pos;
+	this.image = 					new Image();
+	this.image.width  = 			25;
+	this.image.height = 			25;
+	this.image.visible = 			true;
+	this.collision = 				function(){};
+	this.collision.width_offset = 	0;
+	this.collision.height_offset = 	0;
 
 	this.update = function() {
 		// update x and y position
@@ -428,7 +442,7 @@ function begin_game() {
 	var canvas = document.getElementById("draw_canvas");
 	ctx = canvas.getContext("2d");
 
-	Buckingham = new Player(25, 300);
+	Buckingham = new Player(50, 300);
 	Controller = new Control();
 	BuckyGame = new Game(800, 600);
 
