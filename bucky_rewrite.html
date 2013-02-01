@@ -14,6 +14,7 @@ function Game(x_boundary, y_boundary){
 	this.boundary.y = y_boundary;	// y-coord boundary
 	this.clearColor = "#7ADAE1";			// initial clear color is null
 	this.state = null;
+	this.drawOffset = 0;
 
 	this.resetGame = function() {
 		// reset the game
@@ -90,7 +91,26 @@ function Player(x_pos, y_pos) {
 
 		this.image.src = "images/bucky/bucky_small.gif";
 
-		this.position.x += this.vel.x * this.vel.dir.x;
+		x_change = this.vel.x * this.vel.dir.x;
+		y_change = this.vel.y * this.vel.dir.y;
+
+		if(this.position.x >= 450 && this.vel.dir.x == 1){
+			// move platforms
+			for(i = 0; i<CollidingBlocks.length; i++){
+				CollidingBlocks[i].update(-x_change);
+			}
+			BuckyGame.drawOffset -= x_change;
+			
+		} else if(this.position.x <= 200 && this.vel.dir.x == -1){
+			// move platforms
+			for(i = 0; i<CollidingBlocks.length; i++){
+				CollidingBlocks[i].update(-x_change);
+			}
+			BuckyGame.drawOffset -= x_change;
+		} else {
+			this.position.x += x_change;
+		}
+
 		this.position.y += this.vel.y * this.vel.dir.y;
 
 		for(i = 0; i<CollidingBlocks.length; i++){
@@ -161,8 +181,9 @@ function Block(x_pos, y_pos) {
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
 
-	this.update = function() {
+	this.update = function(x_change) {
 		// update x and y position
+		this.position.x += x_change;
 	}
 }
 
@@ -443,7 +464,7 @@ function begin_game() {
 	var canvas = document.getElementById("draw_canvas");
 	ctx = canvas.getContext("2d");
 
-	Buckingham = new Player(50, 300);
+	Buckingham = new Player(225, 300);
 	Controller = new Control();
 	BuckyGame = new Game(800, 600);
 
@@ -543,7 +564,7 @@ function draw_world() {
 
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
-			if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], k*blocksize, Math.floor(i*blocksize));
+			if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], k*blocksize+BuckyGame.drawOffset, Math.floor(i*blocksize));
 		}
 	}
 	Buckingham.draw();
