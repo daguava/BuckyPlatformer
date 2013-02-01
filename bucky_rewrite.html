@@ -3,10 +3,12 @@
 <script type = "text/javascript">
 
 var ctx;
-var blocksize = 25;
+var blocksize = 		25;
 var imageMap;
-var GRAVITY = 0.1;
-var CollidingBlocks = new Array();
+var GRAVITY = 			0.2;
+var CollidingBlocks = 	new Array();
+var	DEAD = 				1;
+var	ALIVE = 			2;
 
 function Game(x_boundary, y_boundary){
 	this.boundary =   function(){};
@@ -27,8 +29,6 @@ function Game(x_boundary, y_boundary){
 }
 
 function Player(x_pos, y_pos) {
-	DEAD = 							1;
-	ALIVE = 						2;
 	this.action = 					function(){};
 	this.jump = 					function(){};
 	this.jump.toggle = 				false;
@@ -78,7 +78,7 @@ function Player(x_pos, y_pos) {
 		}
 
 		if(Controller.space && this.jump.toggle){
-			this.vel.y = -6.0;
+			this.vel.y = -8.0;
 			this.jump.toggle = !this.jump.toggle;
 		}
 
@@ -549,7 +549,7 @@ function begin_game() {
 }
 
 function caller(){
-	setInterval(physics, 3);
+	setInterval(physics, 7);
 	setInterval(draw_world, 15);
 }
 
@@ -564,7 +564,7 @@ function draw_world() {
 
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
-			if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], k*blocksize+BuckyGame.drawOffset, Math.floor(i*blocksize));
+			if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor(i*blocksize));
 		}
 	}
 	Buckingham.draw();
