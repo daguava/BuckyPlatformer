@@ -139,11 +139,12 @@ function TileCollection(imageUrlArray) {
 }
 
 // used to implement autotiling, making map creating much easier
-function TileSet(imageUrlArray, typeNum) {
+function TileSet(imageUrlArray, typeNum, tileType) {
 	// starts off with 9 set, ends with 4 set
 	// topleft, topmiddle, topright, middleleft, middlemiddle, middleright, bottomleft, bottommiddle, bottomright
 	// topsingle, leftsingle, rightsingle, bottomsingle
 	this.tileArray = new Array(imageUrlArray.length-1);
+	this.type = tileType;
 	this.num = typeNum;
 
 	for(i = 0; i<imageUrlArray.length; i++){
@@ -155,17 +156,27 @@ function TileSet(imageUrlArray, typeNum) {
 	this.arrayCompare = function(array1, array2){
 		for(i = 0; i<array1.length; i++){
 			for(k = 0; k<array1[i].length; k++){
-				if( ( array1[i][k] != array2[i][k] ) && ( array2[i][k] != 9 ) ) return false;
+				if( ( array1[i][k] != array2[i][k] ) && ( array2[i][k] != 9  ) ) return false;
 			}
 		}
-		console.log("We found a match.");
 		return true;
 	}
 
 
 	this.getTile = function(surrounding){
 		// get sent a 3x3 array of the tiles around current spot (this one being the middle)
-		if(surrounding.length == 3 && surrounding[0].length == 3){
+
+		for(i = 0; i<surrounding.length; i++){
+			for(k = 0; k<surrounding[1].length; k++){
+				if(surrounding[i][k] != this.num){
+					surrounding[i][k] = 0;
+				}
+			}
+		}
+
+		if(this.num != surrounding[1][1]) return false;
+
+		if(this.type == "full"){
 			if( 	   this.arrayCompare(surrounding,  [[9,0,9],[0,this.num,this.num],[9,this.num,9]] ) ){ // top left
 				return this.tileArray[0];
 			} else if( this.arrayCompare(surrounding,  [[9,0,9],[this.num,this.num,this.num],[9,this.num,9]] ) ){ // top middle
@@ -197,15 +208,17 @@ function TileSet(imageUrlArray, typeNum) {
 			}  else if( this.arrayCompare(surrounding, [[9,this.num,9],[0,this.num,0],[9,this.num,9]] ) ){ // middle single vertical
 				return this.tileArray[14];
 			} else {											  	  // middle middle
+				console.log(surrounding);
 				return this.tileArray[4];
 			}
 
-		} else if(surrounding.length == 3 && surrounding[0].length != 3){
-
-			if( this.arrayCompare(surrounding, [[0],[1],[1]]) ){
+		} else if(this.type="dual"){
+			if( 	   this.arrayCompare(surrounding, [[9,0,9],[9,this.num,9],[9,this.num,9]])){
 				return this.tileArray[0];							  // top
-			} else {						
-				return this.tileArray[1];					  		  // bottom
+			} else if( this.arrayCompare(surrounding, [[9,0,9],[9,this.num,9],[9,0,9]])){						
+				return this.tileArray[0];					  		  // bottom
+			} else {
+				return this.tileArray[1];
 			}
 
 		}
@@ -317,28 +330,21 @@ function begin_game() {
 		"images/grass_tileset/grass_right_single.png", 
 		"images/grass_tileset/grass_bottom_single.png", 
 		"images/grass_tileset/grass_middle_single_horizontal.png", 
-		"images/grass_tileset/grass_middle_single_vertical.png"), 1 );
+		"images/grass_tileset/grass_middle_single_vertical.png"),
+		1,
+		"full");
 
 	RockTileset = new TileSet( new Array(
 		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png", 
-		"images/rock_tileset/platform.png"), 2 );
+		"images/rock_tileset/platform_underneath.png"), 
+		2, 
+		"dual");
 
 	SpikeTileset = new TileSet( new Array(
 		"images/spike_tileset/spike_pit.png", 
-		"images/spike_tileset/spike_lower.png"), 4 );
+		"images/spike_tileset/spike_lower.png"), 
+		4, 
+		"dual");
 
 	TilesetArrays = new Array(GrassTileset, RockTileset, SpikeTileset);
 
@@ -399,38 +405,15 @@ function begin_game() {
 
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
-			// handle grass and its tiling
-			threeCheckTypes = new Array("1, 2");
-
 			for(j = 0; j<TilesetArrays.length; j++){
 				var checkArray =   [  [  			0		   , (i-1>=0)?map[i-1][k]:0	 	    ,  			0		   				   ],
-									  [ (k-1>=0)?map[i][k-1]:0 ,             1 	      			, (k+1<map[i].length)?(map[i][k+1]):0  ],
+									  [ (k-1>=0)?map[i][k-1]:0 ,          map[i][k] 	      	, (k+1<map[i].length)?(map[i][k+1]):0  ],
 									  [  			0		   , (i+1<map.length)?map[i+1][k]:0 ,  			0		   				   ]  ];
-				imageMap[i][k] = TilesetArrays[j].getTile(checkArray);
+				var result = TilesetArrays[j].getTile(checkArray);
+				if(result){
+					imageMap[i][k] = result;
+				}
 			}
-
-			// if(map[i][k]==1){
-			// 	var checkArray =   [  [  			0		   			  , (i-1>=0)?((map[i-1][k]==1)?1:0):0	 	  ,  			0		   						  ],
-			// 						  [ (k-1>=0)?((map[i][k-1]==1)?1:0):0 ,             1 	      					  , (k+1<map[i].length)?((map[i][k+1]==1)?1:0):0  ],
-			// 						  [  			0		   			  , (i+1<map.length)?((map[i+1][k]==1)?1:0):0 ,  			0		   					      ]  ];
-			// 	imageMap[i][k] = GrassTileset.getTile(checkArray);
-			// }
-			// // handle dirt platforms
-			// if(map[i][k]==2){
-			// 	var checkArray =   [  [  			0		   			  , (i-1>=0)?((map[i-1][k]==2)?1:0):0	 	  ,  			0		   						  ],
-			// 						  [ (k-1>=0)?((map[i][k-1]==2)?1:0):0 ,             1 	      					  , (k+1<map[i].length)?((map[i][k+1]==2)?1:0):0  ],
-			// 						  [  			0		   			  , (i+1<map.length)?((map[i+1][k]==2)?1:0):0 ,  			0		   					      ]  ];
-			// 	imageMap[i][k] = RockTileset.getTile(checkArray);
-			// }
-			// // handle spikes and their tiling
-			 if(map[i][k]==4){
-			 	// make our 1x3 check array
-			 	var checkArray =   [[(i-1>=0)?((map[i-1][k]==4)?1:0):0 		  ],
-			 						[					1 					  ],
-			 						[(i+1<map.length)?((map[i+1][k]==4)?1:0):0]];
-			 	imageMap[i][k] = SpikeTileset.getTile(checkArray);
-			}
-			
 			if(imageMap[i][k] == undefined) imageMap[i][k] = null;
 			}
 	}
