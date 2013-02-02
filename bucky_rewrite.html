@@ -2,6 +2,32 @@
 <head>
 <script type = "text/javascript">
 
+// mmm... dat polyfill
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+        window.cancelAnimationFrame = 
+          window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+    }
+ 
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+ 
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+}());
+
 var ctx;
 var blocksize = 		25;
 var imageMap;
@@ -9,6 +35,12 @@ var GRAVITY = 			0.2;
 var CollidingBlocks = 	new Array();
 var	DEAD = 				1;
 var	ALIVE = 			2;
+var physicsTimer = 		null;
+var physExecuteMs = 	7;
+var physicsDelta = 		null;
+var drawTimer = 		null;
+var drawDelta = 		null;
+var drawFps =			60;
 
 function Game(x_boundary, y_boundary){
 	this.boundary =   function(){};
@@ -17,6 +49,7 @@ function Game(x_boundary, y_boundary){
 	this.clearColor = "#7ADAE1";			// initial clear color is null
 	this.state = null;
 	this.drawOffset = 0;
+	this.physCorrect = 1;
 
 	this.resetGame = function() {
 		// reset the game
@@ -28,7 +61,8 @@ function Game(x_boundary, y_boundary){
 	}
 }
 
-function Player(x_pos, y_pos) {
+function Player(x_pos, y_pos, curr_game) {
+	this.game = 					curr_game;
 	this.action = 					function(){};
 	this.jump = 					function(){};
 	this.jump.toggle = 				false;
@@ -48,7 +82,7 @@ function Player(x_pos, y_pos) {
 	this.image.height =   			41;
 	this.image.visible =  			true;
 	this.collision = 				function(){};
-	this.collision.width_offset = 	5;
+	this.collision.width_offset = 	10;
 	this.collision.height_offset = 	10;
 	this.alcohol = 					function(){};
 	this.alcohol.drunk = 			false;
@@ -87,12 +121,16 @@ function Player(x_pos, y_pos) {
 			this.vel.y *= 0.2;
 		}
 
-		this.vel.y += GRAVITY;
+		if(this.vel.y > 0){
+			this.jump.toggle = false;
+		}
+
+		this.vel.y += GRAVITY * BuckyGame.physCorrect;
 
 		this.image.src = "images/bucky/bucky_small.gif";
 
-		x_change = this.vel.x * this.vel.dir.x;
-		y_change = this.vel.y * this.vel.dir.y;
+		x_change = this.vel.x * this.vel.dir.x * BuckyGame.physCorrect;
+		y_change = this.vel.y * this.vel.dir.y * BuckyGame.physCorrect;
 
 		if(this.position.x >= 450 && this.vel.dir.x == 1){
 			// move platforms
@@ -111,7 +149,7 @@ function Player(x_pos, y_pos) {
 			this.position.x += x_change;
 		}
 
-		this.position.y += this.vel.y * this.vel.dir.y;
+		this.position.y += y_change;
 
 		for(i = 0; i<CollidingBlocks.length; i++){
 			correctCollision(this, CollidingBlocks[i]);
@@ -338,6 +376,32 @@ function TileSet(imageUrlArray, typeNum, tileType) {
 	}
 }
 
+function Parallax(imageSrc, imageWidth, imageHeight, percentMovementSpeed, currGame){
+	this.image = new Image();
+	this.image.src = imageSrc;
+	this.image.width = imageWidth;
+	this.image.height = imageHeight;
+	this.multiplier = percentMovementSpeed;
+	this.game = currGame;
+
+	this.draw = function(){
+
+		x_draw1 = Math.round(this.game.drawOffset * this.multiplier%this.image.width-this.image.width);
+		x_draw2 = Math.round(this.game.drawOffset * this.multiplier%this.image.width);
+		x_draw3 = Math.round(this.game.drawOffset * this.multiplier%this.image.width+this.image.width);
+
+		if(x_draw1 < this.game.boundary.x && x_draw1+this.image.width >= 0){
+			ctx.drawImage(this.image, x_draw1, 0);
+		}
+		if(x_draw2 < this.game.boundary.x && x_draw2+this.image.width >= 0){
+			ctx.drawImage(this.image, x_draw2, 0);
+		}
+		if(x_draw3 < this.game.boundary.x && x_draw3+this.image.width >= 0){
+			ctx.drawImage(this.image, x_draw3, 0);
+		}
+	}
+}
+
 function Control() {
 	this.keyboard = 			function(){};
 	this.keyboard.space = 		false;
@@ -464,9 +528,9 @@ function begin_game() {
 	var canvas = document.getElementById("draw_canvas");
 	ctx = canvas.getContext("2d");
 
-	Buckingham = new Player(225, 300);
 	Controller = new Control();
 	BuckyGame = new Game(800, 600);
+	Buckingham = new Player(225, 300, BuckyGame);
 
 	Buckingham.image.src  = "bucky_small.gif";
 	scorebar = new Image();
@@ -474,6 +538,8 @@ function begin_game() {
 
 	PlayButton = new Button(500, 450, 100, 30, "#CCCCCC", "#000000", "Play Game");
 	ResetButton = new Button(650, 10, 120, 30, "#CCCCCC", "#000000", "Reset Game");
+
+	Background = new Parallax("images/backgrounds/test_background.jpg", 2048, 896, 0.3, BuckyGame);
 
 	// 0 = blank space
 	// 1 = grass
@@ -549,18 +615,46 @@ function begin_game() {
 }
 
 function caller(){
-	setInterval(physics, 7);
-	setInterval(draw_world, 15);
+	setInterval(physics, physExecuteMs);
+	draw_world();
 }
 
 function physics(){
+
+	if(physicsTimer == null){
+		physicsTimer = new Date().getTime();
+	} else {
+		physicsDelta = new Date().getTime()-physicsTimer;
+		physicsTimer = new Date().getTime();
+		BuckyGame.physCorrect = BuckyGame.physCorrect * (4/5) + physicsDelta/physExecuteMs * (1/5);
+		if(BuckyGame.physCorrect > 3) BuckyGame.physCorrect = 3;
+	}
+	document.getElementById("fps").innerHTML = 
+		"Physics Delta: " 
+		+ physicsDelta 
+		+ "<br />PhysCorrect: " 
+		+ BuckyGame.physCorrect.toFixed(2) 
+		+ "<br />drawFPS: " 
+		+ drawFps.toFixed(2);
 	Buckingham.update();
+
 }
 
 
 function draw_world() { 
 
+	if(drawTimer == null){
+		drawTimer = new Date().getTime();
+	} else {
+		drawDelta = new Date().getTime()-drawTimer;
+		drawTimer = new Date().getTime(); 
+		drawFps = drawFps * (4/5) + 1000/drawDelta * 1/5;
+	}
+
+	window.requestAnimationFrame(draw_world);
 	BuckyGame.clearScreen();
+
+	Background.draw();
 
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
@@ -568,6 +662,7 @@ function draw_world() {
 		}
 	}
 	Buckingham.draw();
+	
 }
 
 
@@ -582,7 +677,7 @@ window.addEventListener('mousedown', mouse_down, false);
 
 <canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="800" height="600" tabindex="1"></canvas>
 
-<div id="fps" style="width: 50px;"></div><div id="ms" style="display: hidden;"></div>
+<div id="fps" style="width: 400px;"></div><div id="ms" style="display: hidden;"></div>
 
 <script type="text/javascript">
 	gameCanvas = document.getElementById("draw_canvas");
