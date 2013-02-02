@@ -30,6 +30,7 @@
 
 // Global Variables
 var ctx;
+var debugging = 		true;
 var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
@@ -182,20 +183,13 @@ function Player(x_pos, y_pos, curr_game) {
 		x_change = this.vel.x * this.vel.dir.x * curr_game.physCorrect;
 		y_change = this.vel.y * this.vel.dir.y * curr_game.physCorrect;
 
-		if(this.position.x >= 350 && this.vel.x >0){
+		if( (this.position.x >= 350 && this.vel.x >0) || (this.position.x <= 200 && this.vel.x < 0) ){
 			// move platforms
 			for(i = 0; i<UpdateArray.length; i++){
 				UpdateArray[i].update(-x_change);
 			}
-
 			curr_game.drawOffset -= x_change;
 			
-		} else if(this.position.x <= 200 && this.vel.x < 0){
-			// move platforms
-			for(i = 0; i<UpdateArray.length; i++){
-				UpdateArray[i].update(-x_change);
-			}
-			curr_game.drawOffset -= x_change;
 		} else {
 			this.position.x += x_change;
 		}
@@ -272,7 +266,6 @@ function collisionAction(movable, stationary){
 				movable.vel.y = 0;
 			} else {
 				movable.vel.y = 0;
-				stationary.image = stationary.hit.image
 				stationary.state = HIT;
 			}
 		} else { // resolve x first if the first statement was false
@@ -295,6 +288,14 @@ function Block(x_pos, y_pos) {
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
 
+	this.draw = function() {
+		if(debugging){
+			ctx.strokeStyle = "#FF0000";
+			ctx.lineWidth = 1;
+			ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+		}
+	}
+
 	this.update = function(x_change) {
 		// update x and y position
 		this.position.x += x_change;
@@ -316,6 +317,10 @@ function Item(x_pos, y_pos, passed_image) {
 	this.draw = function() {
 		if(this.visible){
 			ctx.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+		}
+		if(debugging){
+			ctx.strokeStyle = "#0000FF";
+			ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
 		}
    	}
 
@@ -340,13 +345,14 @@ function ItemBlock(x_pos, y_pos, passed_image, passed_image_second) {
 	this.collision.height_offset = 	0;
 
 	this.draw = function() {
-		if(this.state == HIT){
-			console.log("Hit!");
-		}
 		if(this.state == UNHIT){
 			ctx.drawImage(this.image, Math.floor(this.position.x), this.position.y, this.image.width, this.image.height);
 		} else {
 			ctx.drawImage(this.hit.image, Math.floor(this.position.x), this.position.y, this.image.width, this.image.height);
+		}
+		if(debugging){
+			ctx.strokeStyle = "#00FF00";
+			ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
 		}
    	}
 
@@ -777,7 +783,9 @@ function begin_game() {
 
 function caller(){
 	physInterval = setInterval(physics, physExecuteMs);
-	statsInterval = setInterval(stats, 100);
+	if(debugging){
+		statsInterval = setInterval(stats, 100);
+	}
 	draw_world();
 }
 
@@ -838,7 +846,6 @@ function draw_world() {
 	}
 
 	for(var i = 0; i<UpdateArray.length; i++){
-		if( !(UpdateArray[i] instanceof Block) )
 		UpdateArray[i].draw();
 	}
 
