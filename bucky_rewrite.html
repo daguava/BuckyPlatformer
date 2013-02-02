@@ -30,7 +30,7 @@
 
 // Global Variables
 var ctx;
-var debugging = 		true;
+var debugging = 		false;
 var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
@@ -189,7 +189,7 @@ function Player(x_pos, y_pos, curr_game) {
 				UpdateArray[i].update(-x_change);
 			}
 			curr_game.drawOffset -= x_change;
-			
+
 		} else {
 			this.position.x += x_change;
 		}
@@ -290,9 +290,12 @@ function Block(x_pos, y_pos) {
 
 	this.draw = function() {
 		if(debugging){
-			ctx.strokeStyle = "#FF0000";
-			ctx.lineWidth = 1;
-			ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x)
+			{
+				ctx.strokeStyle = "#FF0000";
+				ctx.lineWidth = 1;
+				ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+			}
 		}
 	}
 
@@ -316,11 +319,16 @@ function Item(x_pos, y_pos, passed_image) {
 
 	this.draw = function() {
 		if(this.visible){
-			ctx.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+				ctx.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+			}
 		}
 		if(debugging){
-			ctx.strokeStyle = "#0000FF";
-			ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+				ctx.strokeStyle = "#0000FF";
+				ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+			}
+			
 		}
    	}
 
@@ -345,14 +353,19 @@ function ItemBlock(x_pos, y_pos, passed_image, passed_image_second) {
 	this.collision.height_offset = 	0;
 
 	this.draw = function() {
-		if(this.state == UNHIT){
-			ctx.drawImage(this.image, Math.floor(this.position.x), this.position.y, this.image.width, this.image.height);
-		} else {
-			ctx.drawImage(this.hit.image, Math.floor(this.position.x), this.position.y, this.image.width, this.image.height);
+		if(this.state == HIT){
+			this.image = this.hit.image;
 		}
+
+		if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+				ctx.drawImage(this.image, Math.floor(this.position.x), this.position.y);
+		}
+
 		if(debugging){
-			ctx.strokeStyle = "#00FF00";
-			ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+				ctx.strokeStyle = "#00FF00";
+				ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+			}
 		}
    	}
 
@@ -634,6 +647,8 @@ function page_load() {
 
 function begin_game() {
 
+	UpdateArray = new Array();
+
 	statsDiv = document.getElementById("fps");
 
 	GrassTileset  = new TileSet(new Array(
@@ -841,7 +856,9 @@ function draw_world() {
 	// draw tile image map
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
-			if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor(i*blocksize));
+			if( (k+1)*blocksize+BuckyGame.drawOffset > 0 && (k-1)*blocksize+BuckyGame.drawOffset<BuckyGame.boundary.x){
+				if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor(i*blocksize));
+			}
 		}
 	}
 
