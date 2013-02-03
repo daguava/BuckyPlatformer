@@ -798,8 +798,8 @@ function begin_game() {
 
 function caller(){
 	physInterval = setInterval(physics, physExecuteMs);
-	if(debugging){
-		statsInterval = setInterval(stats, 100);
+	if(debugging || true){
+		statsInterval = setInterval(stats, 200);
 	}
 	draw_world();
 }
@@ -812,14 +812,16 @@ function physics(){
 		BuckyGame.resetGame();
 	}
 
-	// physics timer, to create uniform movement if setInterval is off
+	/******************************************
+	 PHYSICS TIMER, USED FOR ACCURATE MOVEMENT
+	 ******************************************/
 	if(physicsTimer == null){
 		physicsTimer = new Date().getTime();
 	} else {
 		physicsDelta = new Date().getTime()-physicsTimer;
 		physicsTimer = new Date().getTime();
 		BuckyGame.physCorrect = BuckyGame.physCorrect * (4/5) + physicsDelta/physExecuteMs * (1/5);
-		if(BuckyGame.physCorrect > 5) BuckyGame.physCorrect = 5;
+		if(BuckyGame.physCorrect > 2) BuckyGame.physCorrect = 2;
 	}
 	// print stats out to the screen
 	Buckingham.update();
@@ -831,7 +833,9 @@ function stats() {
 		"Physics Delta: " 
 		+ physicsDelta 
 		+ "<br />PhysCorrect: " 
+		+ ((BuckyGame.physCorrect>=2) ? "<span style='color: red;'>":"")
 		+ BuckyGame.physCorrect.toFixed(2) 
+		+ ((BuckyGame.physCorrect>=2) ? "</span>":"")
 		+ "<br />drawFPS: " 
 		+ drawFps.toFixed(2)
 		+ "<br />BuckyAccel : "
