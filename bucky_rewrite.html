@@ -134,6 +134,7 @@ function Player(x_pos, y_pos, curr_game) {
 	WALKING = 						1;
 	ATTACKING =						2;
 	JUMPING =						3;
+	DEAD = 							4;
 	this.game = 					curr_game;
 	this.action = 					function(){};
 	this.draw = 					function(){};
@@ -152,8 +153,8 @@ function Player(x_pos, y_pos, curr_game) {
 	this.vel.dir.y = 				1;		// y dir
 	this.vel.accel = 				function(){};
 	this.vel.accel.x = 				0.1;
-	this.vel.accel.y = 				0;
-	this.state = 		  			ALIVE; 
+	this.vel.accel.y = 				GRAVITY;
+	this.state = 		  			WALKING; 
 	this.image = 		  			new Image();
 	this.image.src = 				"images/bucky/bucky_small.gif";
 	this.image.width  =   			32;
@@ -167,7 +168,6 @@ function Player(x_pos, y_pos, curr_game) {
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
 	this.animation = 				function(){};
-	this.animation.state = 			WALKING;
 	this.animation.attack = 		new Animation(new Array(
 										"images/bucky/bucky_left.gif", 
 										"images/bucky/bucky_normal.gif"), 
@@ -177,7 +177,7 @@ function Player(x_pos, y_pos, curr_game) {
 									);
 
 	this.draw = function() {
-		if(this.animation.state == ATTACKING){
+		if(this.state == ATTACKING){
 			this.draw.image = this.animation.attack.frame.current();
 		} else {
 			this.draw.image = this.image;
@@ -257,7 +257,7 @@ function Player(x_pos, y_pos, curr_game) {
 			this.jump.toggle = false;
 		}
 
-		this.vel.y += GRAVITY * curr_game.physCorrect;
+		this.vel.y += this.vel.accel.y * curr_game.physCorrect;
 
 		this.image.src = "images/bucky/bucky_small.gif";
 
