@@ -74,6 +74,7 @@ function Game(x_boundary, y_boundary){
 function Timer(end_time, repeat, curr_game) {
 	IN_ACTION = 10;
 	DONE = 		11;
+
 	this.loop = repeat;
 	this.game = curr_game;
 	this.time = function(){};
@@ -106,7 +107,11 @@ function Timer(end_time, repeat, curr_game) {
 }
 
 function Animation(imageUrlArray, duration, repeat, curr_game){
+	IN_ACTION = 10;
+	DONE = 		11;
+
 	this.game = curr_game;
+	this.status = IN_ACTION;
 	this.imageArray = new Array(imageUrlArray.length-1);
 	parent = this;
 
@@ -120,13 +125,19 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 	this.frame = function(){};
 
 	this.frame.current = function(){
+		parent.status = parent.timer.status;
 		return parent.imageArray[ Math.round( (parent.timer.time.current / parent.timer.time.end) * (parent.imageArray.length-1) ) ];
 	}
 }
 
 function Player(x_pos, y_pos, curr_game) {
+	WALKING = 						1;
+	ATTACKING =						2;
+	JUMPING =						3;
 	this.game = 					curr_game;
 	this.action = 					function(){};
+	this.draw = 					function(){};
+	this.draw.image = 				new Image();
 	this.jump = 					function(){};
 	this.jump.toggle = 				false;
 	this.jump.release = 			true;
@@ -155,17 +166,23 @@ function Player(x_pos, y_pos, curr_game) {
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
-	this.animations = 				function(){};
-	this.animations.attack = 		new Animation(new Array(
+	this.animation = 				function(){};
+	this.animation.state = 			WALKING;
+	this.animation.attack = 		new Animation(new Array(
 										"images/bucky/bucky_left.gif", 
 										"images/bucky/bucky_normal.gif"), 
-										360, 
+										15, 
 										true,
 										this.game
 									);
 
 	this.draw = function() {
-		ctx.drawImage(this.animations.attack.frame.current(), Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
+		if(this.animation.state == ATTACKING){
+			this.draw.image = this.animation.attack.frame.current();
+		} else {
+			this.draw.image = this.image;
+		}
+		ctx.drawImage(this.draw.image, Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
    	}
 
 	this.update = function() {
