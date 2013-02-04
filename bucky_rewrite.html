@@ -34,15 +34,17 @@ var debugging = 		false;
 var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
-var UpdateArray = 		new Array();
+var UpdateManager = 	new Array();
 var	DEAD = 				1;
 var	ALIVE = 			2;
 var HIT =				3;
 var UNHIT = 			4;
 var physicsTimer = 		null;
 var physExecuteMs = 	7;
+var drawExecuteMs = 	16.667;
 var physicsDelta = 		null;
 var drawTimer = 		null;
+var graphics_drawTimer= null;
 var drawDelta = 		null;
 var drawFps =			60;
 var statsDiv;
@@ -55,6 +57,7 @@ function Game(x_boundary, y_boundary){
 	this.state = null;
 	this.drawOffset = 0;
 	this.physCorrect = 1;
+	this.drawCorrect = 1;
 	this.initialized = null;
 
 	this.resetGame = function() {
@@ -65,6 +68,59 @@ function Game(x_boundary, y_boundary){
 	this.clearScreen = function() { 
 		ctx.fillStyle = this.clearColor;
 		ctx.fillRect(0, 0, this.boundary.x, this.boundary.y);
+	}
+}
+
+function Timer(end_time, repeat, curr_game) {
+	IN_ACTION = 10;
+	DONE = 		11;
+	this.loop = repeat;
+	this.game = curr_game;
+	this.time = function(){};
+	this.time.current = 0;
+	this.time.end = end_time;
+	this.status = IN_ACTION;
+
+	UpdateManager.push(this);
+
+	this.update = function() {
+		if(this.status == IN_ACTION){
+			this.time.current += curr_game.drawCorrect;
+		}
+		if(this.time.current >= this.time.end){
+			if(!this.loop){
+				this.status = DONE;
+			}
+			// if the timer is done, remove it from the UpdateManager
+			if(this.loop){
+				this.time.current = 0;
+			} else {
+				for(i = 0; i<UpdateManager.length; i++){
+					if(this == UpdateManager[i]){
+						UpdateManager.splice(i, 1);
+					}
+				}
+			}
+		}
+	}
+}
+
+function Animation(imageUrlArray, duration, repeat, curr_game){
+	this.game = curr_game;
+	this.imageArray = new Array(imageUrlArray.length-1);
+	parent = this;
+
+	for(var i = 0; i<imageUrlArray.length; i++){
+		this.imageArray[i] = new Image();
+		this.imageArray[i].src = imageUrlArray[i];
+	}
+
+	this.timer = new Timer(duration, repeat, this.game);
+
+	this.frame = function(){};
+
+	this.frame.current = function(){
+		return parent.imageArray[ Math.round( (parent.timer.time.current / parent.timer.time.end) * (parent.imageArray.length-1) ) ];
 	}
 }
 
@@ -99,9 +155,17 @@ function Player(x_pos, y_pos, curr_game) {
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
+	this.animations = 				function(){};
+	this.animations.attack = 		new Animation(new Array(
+										"images/bucky/bucky_left.gif", 
+										"images/bucky/bucky_normal.gif"), 
+										360, 
+										true,
+										this.game
+									);
 
 	this.draw = function() {
-		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
+		ctx.drawImage(this.animations.attack.frame.current(), Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
    	}
 
 	this.update = function() {
@@ -185,9 +249,12 @@ function Player(x_pos, y_pos, curr_game) {
 
 		if( (this.position.x >= 350 && this.vel.x >0) || (this.position.x <= 200 && this.vel.x < 0) ){
 			// move platforms
-			for(i = 0; i<UpdateArray.length; i++){
-				UpdateArray[i].update(-x_change);
+			for(i = 0; i<UpdateManager.length; i++){
+				if(UpdateManager[i] instanceof Block || UpdateManager[i] instanceof ItemBlock || UpdateManager[i] instanceof Item){
+					UpdateManager[i].update(-x_change);
+				}
 			}
+
 			curr_game.drawOffset -= x_change;
 
 		} else {
@@ -197,8 +264,14 @@ function Player(x_pos, y_pos, curr_game) {
 
 		this.position.y += y_change;
 
-		for(i = 0; i<UpdateArray.length; i++){
-			collisionAction(this,UpdateArray[i]);
+		for(i = 0; i<UpdateManager.length; i++){
+			if(UpdateManager[i] instanceof Item 
+				|| UpdateManager[i] instanceof ItemBlock 
+				|| UpdateManager[i] instanceof Block){
+
+				collisionAction(this,UpdateManager[i]);
+
+			}
 		}
 	}
 }
@@ -647,7 +720,7 @@ function page_load() {
 
 function begin_game() {
 
-	UpdateArray = new Array();
+	UpdateManager = new Array();
 
 	statsDiv = document.getElementById("fps");
 
@@ -775,12 +848,12 @@ function begin_game() {
 			 ***********************************************/
 			for(j = 0; j<collideTypes.length; j++){
 				if(map[i][k] == collideTypes[j].num){
-					UpdateArray.push(new Block(k*blocksize, i*blocksize));
+					UpdateManager.push(new Block(k*blocksize, i*blocksize));
 				}
 			}
 			for(j = 0; j<itemTypes.length; j++){
 				if(map[i][k] == itemTypes[j].num){
-					UpdateArray.push(new Item(k*blocksize, i*blocksize, itemTypes[j].getTile()));
+					UpdateManager.push(new Item(k*blocksize, i*blocksize, itemTypes[j].getTile()));
 				}
 			}
 
@@ -789,7 +862,7 @@ function begin_game() {
 			 A COLLECTION
 			 ************************************************/
 			 if(map[i][k] == ItemBlockTileset.num){
-			 	UpdateArray.push(new ItemBlock(k*blocksize, i*blocksize, ItemBlockTileset.tileArray[0], ItemBlockTileset.tileArray[1]));
+			 	UpdateManager.push(new ItemBlock(k*blocksize, i*blocksize, ItemBlockTileset.tileArray[0], ItemBlockTileset.tileArray[1]));
 			 }
 		}	
 	}
@@ -836,6 +909,8 @@ function stats() {
 		+ ((BuckyGame.physCorrect>=2) ? "<span style='color: red;'>":"")
 		+ BuckyGame.physCorrect.toFixed(2) 
 		+ ((BuckyGame.physCorrect>=2) ? "</span>":"")
+		+ "<br />drawCorrect: "
+		+ BuckyGame.drawCorrect.toFixed(2)
 		+ "<br />drawFPS: " 
 		+ drawFps.toFixed(2)
 		+ "<br />BuckyAccel : "
@@ -845,12 +920,14 @@ function stats() {
 
 function draw_world() { 
 
-	if(drawTimer == null){
-		drawTimer = new Date().getTime();
+	if(graphics_drawTimer == null){
+		graphics_drawTimer = new Date().getTime();
 	} else {
-		drawDelta = new Date().getTime()-drawTimer;
-		drawTimer = new Date().getTime(); 
+		drawDelta = new Date().getTime()-graphics_drawTimer;
+		graphics_drawTimer = new Date().getTime(); 
 		drawFps = drawFps * (4/5) + 1000/drawDelta * 1/5;
+		BuckyGame.drawCorrect = BuckyGame.drawCorrect * (4/5) + drawDelta/drawExecuteMs * (1/5);
+		if(BuckyGame.drawCorrect > 2) BuckyGame.drawCorrect = 2;
 	}
 	
 	BuckyGame.clearScreen();
@@ -866,13 +943,17 @@ function draw_world() {
 		}
 	}
 
-	for(var i = 0; i<UpdateArray.length; i++){
-		UpdateArray[i].draw();
+	for(var i = 0; i<UpdateManager.length; i++){
+		if(UpdateManager[i] instanceof Block || UpdateManager[i] instanceof ItemBlock || UpdateManager[i] instanceof Item){
+			UpdateManager[i].draw();
+		} else if (UpdateManager[i] instanceof Timer){
+			UpdateManager[i].update();
+		}
 	}
-
 
 	Buckingham.draw();
 	ResetButton.draw();
+
 	animId = window.requestAnimationFrame(draw_world);
 	
 }
@@ -889,7 +970,7 @@ window.addEventListener('mousedown', mouse_down, false);
 
 <canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="800" height="600" tabindex="1"></canvas>
 
-<div id="fps" style="width: 400px;"></div><div id="ms" style="display: hidden;"></div>
+<div id="fps" style="width: 400px; display: inline-block; vertical-align: top;"></div>
 
 <script type="text/javascript">
 	gameCanvas = document.getElementById("draw_canvas");
