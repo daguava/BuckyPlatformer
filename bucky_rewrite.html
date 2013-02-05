@@ -48,9 +48,10 @@ var graphics_drawTimer= null;
 var drawDelta = 		null;
 var drawFps =			60;
 var statsDiv;
+var itemTypes;
 
 function Game(x_boundary, y_boundary){
-	this.boundary =   function(){};
+	this.boundary =   {};
 	this.boundary.x = x_boundary;	// x-coord boundary
 	this.boundary.y = y_boundary;	// y-coord boundary
 	this.clearColor = "#7ADAE1";			// initial clear color is null
@@ -77,7 +78,7 @@ function Timer(end_time, repeat, curr_game) {
 
 	this.loop = repeat;
 	this.game = curr_game;
-	this.time = function(){};
+	this.time = {};
 	this.time.current = 0;
 	this.time.end = end_time;
 	this.status = IN_ACTION;
@@ -122,7 +123,7 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 
 	this.timer = new Timer(duration, repeat, this.game);
 
-	this.frame = function(){};
+	this.frame = {};
 
 	this.frame.current = function(){
 		parent.status = parent.timer.status;
@@ -136,22 +137,22 @@ function Player(x_pos, y_pos, curr_game) {
 	JUMPING =						3;
 	DEAD = 							4;
 	this.game = 					curr_game;
-	this.action = 					function(){};
-	this.draw = 					function(){};
+	this.action = 					{};
+	this.draw = 					{};
 	this.draw.image = 				new Image();
-	this.jump = 					function(){};
+	this.jump = 					{};
 	this.jump.toggle = 				false;
 	this.jump.release = 			true;
-	this.position = 				function(){};
+	this.position = 				{};
 	this.position.x = 	 			x_pos;  // x pos
 	this.position.y = 	  			y_pos;	// y pos
-	this.vel = 						function(){};
+	this.vel = 						{};
 	this.vel.x =					0;		// x speed
 	this.vel.y =					0;		// y speed
-	this.vel.dir = 					function(){};
+	this.vel.dir = 					{};
 	this.vel.dir.x = 				1;		// x dir
 	this.vel.dir.y = 				1;		// y dir
-	this.vel.accel = 				function(){};
+	this.vel.accel = 				{};
 	this.vel.accel.x = 				0.1;
 	this.vel.accel.y = 				GRAVITY;
 	this.state = 		  			WALKING; 
@@ -160,14 +161,14 @@ function Player(x_pos, y_pos, curr_game) {
 	this.image.width  =   			32;
 	this.image.height =   			41;
 	this.visible =  				true;
-	this.collision = 				function(){};
+	this.collision = 				{};
 	this.collision.width_offset = 	10;
 	this.collision.height_offset = 	10;
-	this.alcohol = 					function(){};
+	this.alcohol = 					{};
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
-	this.animation = 				function(){};
+	this.animation = 				{};
 	this.animation.attack = 		new Animation(new Array(
 										"images/bucky/bucky_left.gif", 
 										"images/bucky/bucky_normal.gif"), 
@@ -356,6 +357,15 @@ function collisionAction(movable, stationary){
 				movable.vel.y = 0;
 			} else {
 				movable.vel.y = 0;
+				if(stationary.state != HIT){
+					for(i = 0; i<itemTypes.length; i++){
+						console.log("Comparing " + itemTypes[i].num + " to " + stationary.contains);
+						if(itemTypes[i].num == stationary.contains){
+
+							UpdateManager.push(new Item(stationary.position.x, stationary.position.y-blocksize, itemTypes[i].getTile()));
+						}
+					}
+				}
 				stationary.state = HIT;
 			}
 		} else { // resolve x first if the first statement was false
@@ -367,14 +377,14 @@ function collisionAction(movable, stationary){
 }
 
 function Block(x_pos, y_pos) {
-	this.position = 				function(){};
+	this.position = 				{};
 	this.position.x = 				x_pos;
 	this.position.y = 				y_pos;
 	this.image = 					new Image();
 	this.image.width  = 			25;
 	this.image.height = 			25;
 	this.visible = 					true;
-	this.collision = 				function(){};
+	this.collision = 				{};
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
 
@@ -396,14 +406,14 @@ function Block(x_pos, y_pos) {
 }
 
 function Item(x_pos, y_pos, passed_image) {
-	this.position = 				function(){};
+	this.position = 				{};
 	this.position.x = 				x_pos;
 	this.position.y = 				y_pos;
 	this.image = 					passed_image;
 	this.image.width  = 			25;
 	this.image.height = 			25;
 	this.visible = 					true;
-	this.collision = 				function(){};
+	this.collision = 				{};
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
 
@@ -428,17 +438,18 @@ function Item(x_pos, y_pos, passed_image) {
 	}
 }
 
-function ItemBlock(x_pos, y_pos, passed_image, passed_image_second) {
-	this.position = 				function(){};
+function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second) {
+	this.contains = 				item_number;
+	this.position = 				{};
 	this.position.x = 				x_pos;
 	this.position.y = 				y_pos;
 	this.image = 					passed_image;
 	this.image.width  = 			25;
 	this.image.height = 			25;
 	this.state = 					UNHIT;
-	this.hit = 						function(){};
+	this.hit = 						{};
 	this.hit.image = 				passed_image_second;
-	this.collision = 				function(){};
+	this.collision = 				{};
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
 
@@ -466,7 +477,7 @@ function ItemBlock(x_pos, y_pos, passed_image, passed_image_second) {
 }
 
 function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text) {
-	this.position = 		function(){};
+	this.position = 		{};
 	this.position.x = 		x_pos;
 	this.position.y = 		y_pos;
 	this.width = 			b_width;
@@ -650,21 +661,21 @@ function Parallax(imageSrc, percentMovementSpeed, currGame){
 }
 
 function Control() {
-	this.keyboard = 			function(){};
+	this.keyboard = 			{};
 	this.keyboard.space = 		false;
 	this.keyboard.shift = 		false;
 	this.keyboard.left = 		false;
 	this.keyboard.right = 		false;
 	this.keyboard.up = 			false;
 	this.keyboard.down = 		false;
-	this.mouse = 				function(){};
-	this.mouse.click = 			function(){};
+	this.mouse = 				{};
+	this.mouse.click = 			{};
 	this.mouse.click.left = 	false;
 	this.mouse.click.right = 	false;
 	this.mouse.click.middle = 	false;
 	this.mouse.click.x = 		null;
 	this.mouse.click.y = 		null;
-	this.mouse.move = 			function(){};
+	this.mouse.move = 			{};
 	this.mouse.move.x = 		null;
 	this.mouse.move.y = 		null;
 }
@@ -879,7 +890,7 @@ function begin_game() {
 			 A COLLECTION
 			 ************************************************/
 			 if(map[i][k] == ItemBlockTileset.num){
-			 	UpdateManager.push(new ItemBlock(k*blocksize, i*blocksize, ItemBlockTileset.tileArray[0], ItemBlockTileset.tileArray[1]));
+			 	UpdateManager.push(new ItemBlock(k*blocksize, i*blocksize, 3, ItemBlockTileset.tileArray[0], ItemBlockTileset.tileArray[1]));
 			 }
 		}	
 	}
@@ -942,7 +953,7 @@ function draw_world() {
 	} else {
 		drawDelta = new Date().getTime()-graphics_drawTimer;
 		graphics_drawTimer = new Date().getTime(); 
-		drawFps = drawFps * (4/5) + 1000/drawDelta * 1/5;
+		drawFps = drawFps * (49/50) + 1000/drawDelta * 1/50;
 		BuckyGame.drawCorrect = BuckyGame.drawCorrect * (4/5) + drawDelta/drawExecuteMs * (1/5);
 		if(BuckyGame.drawCorrect > 2) BuckyGame.drawCorrect = 2;
 	}
@@ -960,6 +971,11 @@ function draw_world() {
 		}
 	}
 
+	/********************************************
+	 RUN THROUGH UPDATEMANAGER ITEMS
+	 DRAW DRAWABLE ITEMS, UPDATE OTHERS
+	 *******************************************/
+
 	for(var i = 0; i<UpdateManager.length; i++){
 		if(UpdateManager[i] instanceof Block || UpdateManager[i] instanceof ItemBlock || UpdateManager[i] instanceof Item){
 			UpdateManager[i].draw();
@@ -972,7 +988,7 @@ function draw_world() {
 	ResetButton.draw();
 
 	animId = window.requestAnimationFrame(draw_world);
-	
+
 }
 
 
