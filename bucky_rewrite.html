@@ -29,16 +29,31 @@
 }());
 
 // Global Variables
+
+var	IN_ACTION = 		10;
+var	DONE = 				11;
+
+var	IMAGE_SHEET = 		12;
+var	MOVEMENT = 			13;
+
+var	DEAD = 				1;
+var	ALIVE = 			2;
+
+var HIT =				3;
+var UNHIT = 			4;
+
+var WALKING = 			1;
+var ATTACKING =			2;
+var JUMPING =			3;
+var DEAD = 				4;
+
 var ctx;
 var debugging = 		false;
 var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
 var UpdateManager = 	new Array();
-var	DEAD = 				1;
-var	ALIVE = 			2;
-var HIT =				3;
-var UNHIT = 			4;
+
 var physicsTimer = 		null;
 var physExecuteMs = 	7;
 var drawExecuteMs = 	16.667;
@@ -108,9 +123,6 @@ function Timer(end_time, repeat, curr_game) {
 }
 
 function Animation(imageUrlArray, duration, repeat, curr_game){
-	IN_ACTION = 10;
-	DONE = 		11;
-
 	this.game = curr_game;
 	this.status = IN_ACTION;
 	this.imageArray = new Array(imageUrlArray.length-1);
@@ -132,10 +144,7 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 }
 
 function Player(x_pos, y_pos, curr_game) {
-	WALKING = 						1;
-	ATTACKING =						2;
-	JUMPING =						3;
-	DEAD = 							4;
+
 	this.game = 					curr_game;
 	this.action = 					{};
 	this.draw = 					{};
@@ -174,6 +183,7 @@ function Player(x_pos, y_pos, curr_game) {
 										"images/bucky/bucky_normal.gif"), 
 										15, 
 										true,
+										IMAGE_SHEET,
 										this.game
 									);
 
@@ -362,7 +372,7 @@ function collisionAction(movable, stationary){
 						console.log("Comparing " + itemTypes[i].num + " to " + stationary.contains);
 						if(itemTypes[i].num == stationary.contains){
 
-							UpdateManager.push(new Item(stationary.position.x, stationary.position.y-blocksize, itemTypes[i].getTile()));
+							UpdateManager.push( new Item(stationary.position.x, stationary.position.y-blocksize, itemTypes[i].getTile()));
 						}
 					}
 				}
