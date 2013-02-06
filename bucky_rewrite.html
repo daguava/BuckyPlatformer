@@ -29,7 +29,7 @@
 }());
 
 // Global Variables
-
+var das_animation = 	"nothing";
 var	IN_ACTION = 		10;
 var	DONE = 				11;
 
@@ -42,10 +42,15 @@ var	ALIVE = 			2;
 var HIT =				3;
 var UNHIT = 			4;
 
-var WALKING = 			1;
-var ATTACKING =			2;
-var JUMPING =			3;
-var DEAD = 				4;
+var WALKING_RIGHT = 	52;
+var WALKING_LEFT = 		69;
+var ATTACKING =			3;
+var JUMPING =			4;
+var DEAD = 				5;
+var STILL =  			6;
+
+var LEFT = 				1;
+var RIGHT = 			2;
 
 var ctx;
 var debugging = 		false;
@@ -137,14 +142,15 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 
 	this.frame = {};
 
-	this.frame.current = function(){
-		parent.status = parent.timer.status;
-		return parent.imageArray[ Math.round( (parent.timer.time.current / parent.timer.time.end) * (parent.imageArray.length-1) ) ];
+	this.current = function(){
+		this.status = this.timer.status;
+		return this.imageArray[ Math.round( (this.timer.time.current / this.timer.time.end) * (this.imageArray.length-1) ) ];
 	}
 }
 
 function Player(x_pos, y_pos, curr_game) {
 
+	var parent = 					this;
 	this.game = 					curr_game;
 	this.action = 					{};
 	this.draw = 					{};
@@ -160,11 +166,12 @@ function Player(x_pos, y_pos, curr_game) {
 	this.vel.y =					0;		// y speed
 	this.vel.dir = 					{};
 	this.vel.dir.x = 				1;		// x dir
+	this.vel.dir.x.last = 			null
 	this.vel.dir.y = 				1;		// y dir
 	this.vel.accel = 				{};
 	this.vel.accel.x = 				0.1;
 	this.vel.accel.y = 				GRAVITY;
-	this.state = 		  			WALKING; 
+	this.state = 		  			WALKING_RIGHT; 
 	this.image = 		  			new Image();
 	this.image.src = 				"images/bucky/bucky_small.gif";
 	this.image.width  =   			32;
@@ -177,26 +184,43 @@ function Player(x_pos, y_pos, curr_game) {
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
-	this.animation = 				{};
-	this.animation.attack = 		new Animation(new Array(
-										"images/bucky/bucky_left.gif", 
-										"images/bucky/bucky_normal.gif"), 
-										15, 
-										true,
-										IMAGE_SHEET,
-										this.game
-									);
+	this.anim = 				{};
+	this.anim.walk = 			{};
+
+	this.anim.still = 			new Animation( new Array("images/bucky/bucky_right.gif"), 1, false, this.game );
+	this.anim.jump = 			new Animation( new Array("images/bucky/bucky_right_jump.gif"), 1, false, this.game );
+	this.anim.attack = 			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, false, this.game );
+	this.anim.walk_left =       new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_left_second.gif"), 15, true, this.game );
+	this.anim.walk_right = 		new Animation( new Array("images/bucky/bucky_right.gif", "images/bucky/bucky_right_second.gif"), 15, true, this.game );
 
 	this.draw = function() {
-		if(this.state == ATTACKING){
-			this.draw.image = this.animation.attack.frame.current();
+		
+		if(this.state === WALKING_RIGHT){
+			this.draw.image = this.anim.walk_right.current(); 
+			das_animation = 	"walk_right";
+		} else if (this.state === WALKING_LEFT){
+			this.draw.image = this.anim.walk_left.current();  
+			das_animation = 	"walk_left";
+		} else if (this.state === JUMPING){
+			this.draw.image = this.anim.jump.current(); 	 	 
+			das_animation = 	"jump";
+		} else if (this.state === ATTACKING){
+			this.draw.image = this.anim.attack.current(); 	 
+			das_animation = 	"attack";
 		} else {
-			this.draw.image = this.image;
+			this.draw.image = this.anim.still.current();
+			das_animation = "still (didn't change image)";
 		}
+		
+		//this.draw.image = this.animation.walk.right.current(); 
 		ctx.drawImage(this.draw.image, Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
    	}
 
 	this.update = function() {
+
+		/********************************************************************
+		 DEAL WITH CONTROLLER INPUT AND MOVEMENT. SET UP A BUNCH OF VARIABLES
+		 ********************************************************************/
 
 		// determine acceleration
 		if(Controller.shift){
@@ -266,6 +290,20 @@ function Player(x_pos, y_pos, curr_game) {
 
 		if(this.vel.y > 0){
 			this.jump.toggle = false;
+		}
+
+		if(this.jump.toggle){
+			if(this.vel.x > 0){
+				this.state = WALKING_RIGHT;
+			} else if(this.vel.x < 0) {
+				this.state = WALKING_LEFT;
+			} else {
+				this.state = STILL;
+			}
+		}
+
+		if(this.vel.y < 0){
+			this.state = JUMPING;
 		}
 
 		this.vel.y += this.vel.accel.y * curr_game.physCorrect;
@@ -952,7 +990,9 @@ function stats() {
 		+ "<br />drawFPS: " 
 		+ drawFps.toFixed(2)
 		+ "<br />BuckyAccel : "
-		+ Buckingham.vel.x;
+		+ Buckingham.vel.x
+		+ "<br />BuckyAnim : "
+		+ das_animation;
 }
 
 
