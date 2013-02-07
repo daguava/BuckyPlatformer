@@ -29,7 +29,6 @@
 }());
 
 // Global Variables
-var animation_status = 	"nothing";
 var	IN_ACTION = 		10;
 var	DONE = 				11;
 
@@ -154,6 +153,7 @@ function Player(x_pos, y_pos, curr_game) {
 	this.action = 					{};
 	this.draw = 					{};
 	this.draw.image = 				new Image();
+	this.draw.image.src = 			"images/bucky/bucky_small.gif";
 	this.jump = 					{};
 	this.jump.toggle = 				false;
 	this.jump.release = 			true;
@@ -183,46 +183,66 @@ function Player(x_pos, y_pos, curr_game) {
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
-	this.anim = 				{};
-	this.anim.walk = 			{};
-
-	// consider making an animations array that takes ACTIONS as keys and stores the ANIMATIONS as values?
-	this.anim.still_right = 	new Animation( new Array("images/bucky/bucky_right.gif"), 1, false, this.game );
-	this.anim.still_left = 		new Animation( new Array("images/bucky/bucky_left.gif"), 1, false, this.game );
-	this.anim.jump_right = 		new Animation( new Array("images/bucky/bucky_right_jump.gif"), 1, false, this.game );
-	this.anim.jump_left = 		new Animation( new Array("images/bucky/bucky_left_jump.gif"), 1, false, this.game );
-	this.anim.attack_right = 	new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, false, this.game );
-	this.anim.attack_left = 	new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, false, this.game );
-	this.anim.walk_right = 		new Animation( new Array("images/bucky/bucky_right.gif", "images/bucky/bucky_right_second.gif"), 15, true, this.game );
-	this.anim.walk_left =       new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_left_second.gif"), 15, true, this.game );
+	this.anim = 					{};
+	this.animations = new Array(
+		new Array(
+			new Animation(new Array("images/bucky/bucky_right.gif"), 1, false, this.game),
+			STILL,
+			RIGHT
+		),
+		new Array(
+			new Animation( new Array("images/bucky/bucky_left.gif"), 1, false, this.game ),
+			STILL,
+			LEFT
+		),
+		new Array(
+			new Animation( new Array("images/bucky/bucky_right_jump.gif"), 1, false, this.game ),
+			JUMPING,
+			RIGHT
+		),
+		new Array(
+			new Animation( new Array("images/bucky/bucky_left_jump.gif"), 1, false, this.game ),
+			JUMPING,
+			LEFT
+		),
+		new Array(
+			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, false, this.game ),
+			ATTACKING,
+			RIGHT
+		),
+		new Array(
+			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, false, this.game ),
+			ATTACKING,
+			LEFT
+		),
+		new Array(
+			new Animation( new Array("images/bucky/bucky_right.gif", "images/bucky/bucky_right_second.gif"), 15, true, this.game ),
+			WALKING,
+			RIGHT
+		),
+		new Array(
+			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_left_second.gif"), 15, true, this.game ),
+			WALKING,
+			LEFT
+		)
+	);
 	
 	this.draw = function() {
-		
-		if(this.state === WALKING){
-			this.draw.image = (this.vel.dir.last == RIGHT) ? this.anim.walk_right.current() : this.anim.walk_left.current();
-			animation_status = 	"walking";
-		} else if (this.state === JUMPING){
-			this.draw.image = (this.vel.dir.last == RIGHT) ? this.anim.jump_right.current() : this.anim.jump_left.current(); 	 
-			animation_status = 	"jumping";
-		} else if (this.state === ATTACKING){
-			this.draw.image = (this.vel.dir.last == RIGHT) ? this.anim.attack_right.current() : this.anim.attack_right.current();
-			animation_status = 	"attack_right";
-		} else {
-			this.draw.image = (this.vel.dir.last == RIGHT) ? this.anim.still_right.current() : this.anim.still_left.current();
-			animation_status = "still (didn't change image)";
+		for(i = 0; i<this.animations.length; i++){
+			if(this.state == this.animations[i][1] && this.vel.dir.last == this.animations[i][2]){
+				this.draw.image = this.animations[i][0].current();
+			}
 		}
-		
-		//this.draw.image = this.animation.walk.right.current(); 
+
 		ctx.drawImage(this.draw.image, Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
    	}
 
 	this.update = function() {
 
 		/********************************************************************
-		 DEAL WITH CONTROLLER INPUT AND MOVEMENT. SET UP A BUNCH OF VARIABLES
+		 Based on controller input, determine how to change acceleration
 		 ********************************************************************/
 
-		// determine acceleration
 		if(Controller.shift){
 			if(Controller.right){
 				if(this.vel.x<0){
@@ -253,12 +273,9 @@ function Player(x_pos, y_pos, curr_game) {
 			}
 		}
 
-		if(Math.abs(this.vel.x) < 0.0001){
-			this.vel.x = 0;
-		}
 
 		if(Controller.left || Controller.right){
-			this.vel.x += this.vel.accel.x //* this.vel.dir.x;
+			this.vel.x += this.vel.accel.x
 		} else {
 			this.vel.x *= 0.70;
 		}
@@ -278,6 +295,18 @@ function Player(x_pos, y_pos, curr_game) {
 			}
 		}
 
+	    /********************************************************************
+		 Set x velocity to zero if it is decenly close to it
+		 ********************************************************************/
+
+		if(Math.abs(this.vel.x) < 0.001){
+			this.vel.x = 0;
+		}
+
+		/********************************************************************
+		 Handle JUMPING input and its associated flags
+		 ********************************************************************/
+
 		if(Controller.space && this.jump.toggle){
 			this.vel.y = -8.0;
 			this.jump.toggle = !this.jump.toggle;
@@ -291,6 +320,10 @@ function Player(x_pos, y_pos, curr_game) {
 		if(this.vel.y > 0){
 			this.jump.toggle = false;
 		}
+
+		/********************************************************************
+		 Set LEFT / RIGHT status, used a lot for determining which animation
+		 ********************************************************************/
 
 		if(this.vel.x>0){
 			this.vel.dir.last = RIGHT;
@@ -308,9 +341,15 @@ function Player(x_pos, y_pos, curr_game) {
 			}
 		}
 
+		/********************************************************************
+		 If Y velocity is less than 0, we're going up, we are jumping
+		 *********************************************************************/
 		if(this.vel.y < 0){
 			this.state = JUMPING;
 		}
+		/********************************************************************
+		 Update Player's Y Position
+		 *********************************************************************/
 
 		this.vel.y += this.vel.accel.y * curr_game.physCorrect;
 
@@ -318,6 +357,13 @@ function Player(x_pos, y_pos, curr_game) {
 
 		x_change = this.vel.x * this.vel.dir.x * curr_game.physCorrect;
 		y_change = this.vel.y * this.vel.dir.y * curr_game.physCorrect;
+
+
+		/********************************************************************
+		 Update X Position
+		 Determine whether to move Player or Camera, then do it
+		 Also apply the change in position to all items that need it
+		 *********************************************************************/
 
 		if( (this.position.x >= 350 && this.vel.x >0) || (this.position.x <= 200 && this.vel.x < 0) ){
 			// move platforms
@@ -335,6 +381,10 @@ function Player(x_pos, y_pos, curr_game) {
 
 
 		this.position.y += y_change;
+
+		/********************************************************************
+		 Perform Collision Actions with types: Item, ItemBlock, Block
+		 *********************************************************************/
 
 		for(i = 0; i<UpdateManager.length; i++){
 			if(UpdateManager[i] instanceof Item 
@@ -995,10 +1045,8 @@ function stats() {
 		+ BuckyGame.drawCorrect.toFixed(2)
 		+ "<br />drawFPS: " 
 		+ drawFps.toFixed(2)
-		+ "<br />BuckyAccel : "
-		+ Buckingham.vel.x
-		+ "<br />BuckyAnim : "
-		+ animation_status;
+		+ "<br />BuckyVel : "
+		+ Buckingham.vel.x;
 }
 
 
