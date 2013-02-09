@@ -51,7 +51,7 @@ var LEFT = 				1;
 var RIGHT = 			2;
 
 var ctx;
-var debugging = 		false;
+var debugging = 		true;
 var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
@@ -242,12 +242,12 @@ function Enemy(x_pos, y_pos, curr_game) {
 		 for(i = 0; i<UpdateManager.length; i++){
 		 	temp = UpdateManager[i];
 		 	if(temp instanceof Block){
-		 		//if(    this.position.x < temp.position.x + temp.width 
-		 		//	&& this.position.x + this.width >= temp.position.x
-		 		//	&& this.position.y < temp.position.y + temp.height
-		 		//	&& this.position.y + this.height >= temp.position.y){
+		 		if(    this.position.x < temp.position.x + temp.width 
+		 			&& this.position.x + this.width >= temp.position.x
+		 			&& this.position.y < temp.position.y + temp.height
+		 			&& this.position.y + this.height >= temp.position.y){
 		 			collisionAction(this,temp);
-		 		//}
+		 		}
 		 	}
 		}
 	}
@@ -1157,7 +1157,7 @@ function begin_game() {
 			if(!blockfound && numfound > 0){
 				UpdateManager.push(new Block(start*blocksize, i*blocksize, numfound*blocksize, blocksize));
 				start = k+1;
-				console.log("Ended with numfound: " + numfound);
+
 				numfound = 0;
 			} else if(!blockfound) {
 				start = k+1;
@@ -1175,7 +1175,7 @@ function begin_game() {
 	 // shifted up or down one row. These we can combine into larger rectangles.
 
 	 u_length = UpdateManager.length;
-	 for(j = 0; j<5; j++){
+	 for(j = 0; j<5; j++){	// Perform 5 passes of the second pass type.
 	 	console.log("Pass: " + (j+1));
 		 for(i = 0; i<u_length; i++){
 		 	first = UpdateManager[i];
@@ -1188,13 +1188,6 @@ function begin_game() {
 		 					&& first.width == second.width){
 		 					// we have a match, join them up!
 
-		 					console.log(" K: " + k + " K-Width: " + second.width + " I: " + i + " I-Width: " + first.width);
-		 					console.log(" K-x: " + second.position.x/25 + " I-X: " + first.position.x/25);
-		 					console.log(" K-y: " + second.position.y/25 + " I-y: " + first.position.y/25);
-		 					console.log(" Splicing i: " + i);
-
-		 					console.log("####");
-		 					
 		 					new_x = first.position.x;
 		 					new_y = first.position.y;
 		 					new_w = first.width;
@@ -1202,10 +1195,6 @@ function begin_game() {
 		 					UpdateManager.splice(i, 1, new Block(new_x, new_y, new_w, new_h));
 
 		 					UpdateManager.splice(k, 1);
-		 					console.log(" Splicing k: " + k);
-		 					k=0;
-
-
 		 				}
 		 			}
 		 		}
