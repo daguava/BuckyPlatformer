@@ -179,6 +179,8 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.state = 		  			WALKING; 
 	this.image = 		  			new Image();
 	this.image.src = 				"images/enemy/generic_enemy_placeholder.gif";
+	this.width = 					this.image.width;
+	this.height = 					this.image.height;
 	this.visible =  				true;
 	this.collision = 				{};
 	this.collision.width_offset = 	10;
@@ -187,7 +189,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.collided_last_frame = 		false;
 	
 	this.draw = function() {
-		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
+		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y), this.width, this.height);
    	}
 
    	this.update = function(x_change){
@@ -240,15 +242,14 @@ function Enemy(x_pos, y_pos, curr_game) {
 		 for(i = 0; i<UpdateManager.length; i++){
 		 	temp = UpdateManager[i];
 		 	if(temp instanceof Block){
-		 		if(    this.position.x < temp.position.x + temp.image.width 
-		 			&& this.position.x + this.image.width >= temp.position.x
-		 			&& this.position.y < temp.position.y + temp.image.height
-		 			&& this.position.y + this.image.height >= temp.position.y){
+		 		//if(    this.position.x < temp.position.x + temp.width 
+		 		//	&& this.position.x + this.width >= temp.position.x
+		 		//	&& this.position.y < temp.position.y + temp.height
+		 		//	&& this.position.y + this.height >= temp.position.y){
 		 			collisionAction(this,temp);
-		 		}
+		 		//}
 		 	}
-		 }
-
+		}
 	}
 }
 
@@ -287,8 +288,8 @@ function Player(x_pos, y_pos, curr_game) {
 	this.state = 		  			WALKING; 
 	this.image = 		  			new Image();
 	this.image.src = 				"images/bucky/bucky_small.gif";
-	this.image.width  =   			32;
-	this.image.height =   			41;
+	this.width  =   				32;
+	this.height =   				41;
 	this.visible =  				true;
 	this.collision = 				{};
 	this.collision.width_offset = 	10;
@@ -348,7 +349,7 @@ function Player(x_pos, y_pos, curr_game) {
 			}
 		}
 
-		ctx.drawImage(this.draw.image, Math.floor(this.position.x), Math.floor(this.position.y), this.image.width, this.image.height);
+		ctx.drawImage(this.draw.image, Math.floor(this.position.x), Math.floor(this.position.y), this.width, this.height);
    	}
 
 	this.update = function() {
@@ -514,7 +515,6 @@ function Player(x_pos, y_pos, curr_game) {
 				|| temp instanceof Enemy){
 
 				collisionAction(this,temp);
-
 			}
 		}
 	}
@@ -538,16 +538,16 @@ function collisionAction(movable, stationary){
 	var depthX = 0;
 	var depthY = 0;
 
-	movableCenterX = movable.position.x + movable.image.width/2;
-	movableCenterY = movable.position.y + movable.image.height/2;
-	stationaryCenterX = stationary.position.x + stationary.image.width/2;
-	stationaryCenterY = stationary.position.y + stationary.image.height/2;
+	movableCenterX = movable.position.x + movable.width/2;
+	movableCenterY = movable.position.y + movable.height/2;
+	stationaryCenterX = stationary.position.x + stationary.width/2;
+	stationaryCenterY = stationary.position.y + stationary.height/2;
 
 	distanceX = movableCenterX - stationaryCenterX;
 	distanceY = movableCenterY - stationaryCenterY;
 
-	minDistanceX = (movable.image.width-movable.collision.width_offset)/2 + (stationary.image.width-stationary.collision.width_offset)/2;
-	minDistanceY = (movable.image.height-movable.collision.height_offset)/2 + (stationary.image.height-stationary.collision.height_offset)/2;
+	minDistanceX = (movable.width-movable.collision.width_offset)/2 + (stationary.width-stationary.collision.width_offset)/2;
+	minDistanceY = (movable.height-movable.collision.height_offset)/2 + (stationary.height-stationary.collision.height_offset)/2;
 
 	if(Math.abs(distanceX) >= minDistanceX || Math.abs(distanceY) >= minDistanceY){
 		return false;
@@ -612,13 +612,13 @@ function collisionAction(movable, stationary){
 	}
 }
 
-function Block(x_pos, y_pos) {
+function Block(x_pos, y_pos, arg_width, arg_height) {
 	this.position = 				{};
 	this.position.x = 				x_pos;
 	this.position.y = 				y_pos;
+	this.width = 					arg_width;
+	this.height = 					arg_height;
 	this.image = 					new Image();
-	this.image.width  = 			25;
-	this.image.height = 			25;
 	this.visible = 					true;
 	this.collision = 				{};
 	this.collision.width_offset = 	0;
@@ -626,11 +626,11 @@ function Block(x_pos, y_pos) {
 
 	this.draw = function() {
 		if(debugging){
-			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x)
+			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x)
 			{
 				ctx.strokeStyle = "#FF0000";
 				ctx.lineWidth = 1;
-				ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+				ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
 			}
 		}
 	}
@@ -646,8 +646,8 @@ function Item(x_pos, y_pos, passed_image) {
 	this.position.x = 				x_pos;
 	this.position.y = 				y_pos;
 	this.image = 					passed_image;
-	this.image.width  = 			25;
-	this.image.height = 			25;
+	this.width  = 					25;
+	this.height = 					25;
 	this.visible = 					true;
 	this.collision = 				{};
 	this.collision.width_offset = 	0;
@@ -655,14 +655,14 @@ function Item(x_pos, y_pos, passed_image) {
 
 	this.draw = function() {
 		if(this.visible){
-			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
-				ctx.drawImage(this.image, this.position.x, this.position.y, this.image.width, this.image.height);
+			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+				ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
 			}
 		}
 		if(debugging){
-			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x){
 				ctx.strokeStyle = "#0000FF";
-				ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+				ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
 			}
 			
 		}
@@ -680,8 +680,8 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 	this.position.x = 				x_pos;
 	this.position.y = 				y_pos;
 	this.image = 					passed_image;
-	this.image.width  = 			25;
-	this.image.height = 			25;
+	this.width  = 					25;
+	this.height = 					25;
 	this.state = 					UNHIT;
 	this.hit = 						{};
 	this.hit.image = 				passed_image_second;
@@ -694,14 +694,14 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 			this.image = this.hit.image;
 		}
 
-		if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+		if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x){
 				ctx.drawImage(this.image, Math.floor(this.position.x), this.position.y);
 		}
 
 		if(debugging){
-			if(this.position.x + this.image.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x){
 				ctx.strokeStyle = "#00FF00";
-				ctx.strokeRect(this.position.x, this.position.y, this.image.width, this.image.height);
+				ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
 			}
 		}
    	}
@@ -875,22 +875,24 @@ function TileSet(imageUrlArray, typeNum, tileType) {
 function Parallax(imageSrc, percentMovementSpeed, currGame){
 	this.image = new Image();
 	this.image.src = imageSrc;
+	this.width = this.image.width;
+	this.height = this.image.height;
 	this.multiplier = percentMovementSpeed;
 	this.game = currGame;
 
 	this.draw = function(){
 
-		x_draw1 = Math.round(this.game.drawOffset * this.multiplier%this.image.width-this.image.width);
-		x_draw2 = Math.round(this.game.drawOffset * this.multiplier%this.image.width);
-		x_draw3 = Math.round(this.game.drawOffset * this.multiplier%this.image.width+this.image.width);
+		x_draw1 = Math.round(this.game.drawOffset * this.multiplier%this.width-this.width);
+		x_draw2 = Math.round(this.game.drawOffset * this.multiplier%this.width);
+		x_draw3 = Math.round(this.game.drawOffset * this.multiplier%this.width+this.width);
 
-		if(x_draw1 < this.game.boundary.x && x_draw1+this.image.width >= 0){
+		if(x_draw1 < this.game.boundary.x && x_draw1+this.width >= 0){
 			ctx.drawImage(this.image, x_draw1, 0);
 		}
-		if(x_draw2 < this.game.boundary.x && x_draw2+this.image.width >= 0){
+		if(x_draw2 < this.game.boundary.x && x_draw2+this.width >= 0){
 			ctx.drawImage(this.image, x_draw2, 0);
 		}
-		if(x_draw3 < this.game.boundary.x && x_draw3+this.image.width >= 0){
+		if(x_draw3 < this.game.boundary.x && x_draw3+this.width >= 0){
 			ctx.drawImage(this.image, x_draw3, 0);
 		}
 	}
@@ -1055,8 +1057,8 @@ function begin_game() {
 	// 5 = enemy
 	map = [
 	//1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0
-	 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 	 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
@@ -1066,7 +1068,7 @@ function begin_game() {
 	 [2, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
-	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
 	 [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
@@ -1108,13 +1110,9 @@ function begin_game() {
 
 
 			/***********************************************
-			 PROCESS MAP FILE FOR COLLIDING BLOCKS AND ITEMS
+			 PROCESS MAP FILE FOR ITEMS
 			 ***********************************************/
-			for(j = 0; j<collideTypes.length; j++){
-				if(map[i][k] == collideTypes[j].num){
-					UpdateManager.push(new Block(k*blocksize, i*blocksize));
-				}
-			}
+			
 			for(j = 0; j<itemTypes.length; j++){
 				if(map[i][k] == itemTypes[j].num){
 					UpdateManager.push(new Item(k*blocksize, i*blocksize, itemTypes[j].getTile()));
@@ -1134,6 +1132,89 @@ function begin_game() {
 			 }
 		}	
 	}
+
+	/***********************************
+	 FIRST PASS OF COLLISION BLOCKS
+	 ***********************************/
+
+	for(var i = 0; i<map.length; i++){ // map y
+		var start = 0;
+		var numfound = 0;
+		for(var k = 0; k<map[i].length; k++){ // map x
+			var blockfound = false;
+			// scan along the map file horizontally looking for block strips. When found,
+			// continue until you don't find one. If it's at least one block, create the
+			// new large block.
+
+			for(j = 0; j<collideTypes.length; j++){
+				if(map[i][k] == collideTypes[j].num){
+					blockfound = true;
+					numfound ++;
+					//UpdateManager.push(new Block(k*blocksize, i*blocksize, blocksize, blocksize));
+				}
+			}
+
+			if(!blockfound && numfound > 0){
+				UpdateManager.push(new Block(start*blocksize, i*blocksize, numfound*blocksize, blocksize));
+				start = k+1;
+				console.log("Ended with numfound: " + numfound);
+				numfound = 0;
+			} else if(!blockfound) {
+				start = k+1;
+				numfound = 0;
+			}
+
+		}
+	}
+
+	/************************************
+	 SECOND PASS OF COLLISION BLOCKS
+	 ************************************/
+
+	 // check each strip of blocks in the UpdateManager to see if they are identical, except
+	 // shifted up or down one row. These we can combine into larger rectangles.
+
+	 u_length = UpdateManager.length;
+	 for(j = 0; j<5; j++){
+	 	console.log("Pass: " + (j+1));
+		 for(i = 0; i<u_length; i++){
+		 	first = UpdateManager[i];
+		 	if(first instanceof Block){
+		 		for(k = i; k<u_length; k++){
+		 			second = UpdateManager[k];
+		 			if(second instanceof Block && i != k){
+		 				if(first.position.x == second.position.x 
+		 					&& first.position.y + first.height == second.position.y
+		 					&& first.width == second.width){
+		 					// we have a match, join them up!
+
+		 					console.log(" K: " + k + " K-Width: " + second.width + " I: " + i + " I-Width: " + first.width);
+		 					console.log(" K-x: " + second.position.x/25 + " I-X: " + first.position.x/25);
+		 					console.log(" K-y: " + second.position.y/25 + " I-y: " + first.position.y/25);
+		 					console.log(" Splicing i: " + i);
+
+		 					console.log("####");
+		 					
+		 					new_x = first.position.x;
+		 					new_y = first.position.y;
+		 					new_w = first.width;
+		 					new_h = first.height + second.height;
+		 					UpdateManager.splice(i, 1, new Block(new_x, new_y, new_w, new_h));
+
+		 					UpdateManager.splice(k, 1);
+		 					console.log(" Splicing k: " + k);
+		 					k=0;
+
+
+		 				}
+		 			}
+		 		}
+		 	}
+		}
+		console.log("############## END OF PASS " + (j+1) + " ##############");
+	}
+
+
 	caller();
 }
 
