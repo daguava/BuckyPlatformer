@@ -13,3 +13,5 @@ http://heymitch.com/buckygame/rewrite/bucky_rewrite.html
 
 Because I haven't preloaded images yet, a few images won't show up right away.
 WHEN FIRST LOADING IT, CLICK THE RESET BUTTON, then all images will show up.
+
+http://i.imgur.com/WWLYo.gif
