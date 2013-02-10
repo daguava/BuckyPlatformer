@@ -146,12 +146,6 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 	}
 }
 
-
-
-
-
-
-
 function Enemy(x_pos, y_pos, curr_game) {
 
 	var parent = 					this;
@@ -167,7 +161,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.position.x = 	 			x_pos;  // x pos
 	this.position.y = 	  			y_pos;	// y pos
 	this.vel = 						{};
-	this.vel.x =					1.2;		// x speed
+	this.vel.x =					1.2;	// x speed
 	this.vel.y =					1;		// y speed
 	this.vel.dir = 					{};
 	this.vel.dir.x = 				1;		// x dir
@@ -629,8 +623,10 @@ function Block(x_pos, y_pos, arg_width, arg_height) {
 			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x)
 			{
 				ctx.strokeStyle = "#FF0000";
+				ctx.fillStyle = 'rgba(255,0,0, 0.25)';
 				ctx.lineWidth = 1;
 				ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+				ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
 			}
 		}
 	}
