@@ -3,36 +3,38 @@
 <script type = "text/javascript">
 
 /* IGNORE THIS CHUNK, it is used for browser compatibility, you really don't want to touch it. */
-(function() {
-    var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = 
-          window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-    }
- 
-    if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-              timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        };
- 
-    if (!window.cancelAnimationFrame)
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
-}());
+						(function() {
+						    var lastTime = 0;
+						    var vendors = ['ms', 'moz', 'webkit', 'o'];
+						    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+						        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+						        window.cancelAnimationFrame = 
+						          window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+						    }
+						 
+						    if (!window.requestAnimationFrame)
+						        window.requestAnimationFrame = function(callback, element) {
+						            var currTime = new Date().getTime();
+						            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+						            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+						              timeToCall);
+						            lastTime = currTime + timeToCall;
+						            return id;
+						        };
+						 
+						    if (!window.cancelAnimationFrame)
+						        window.cancelAnimationFrame = function(id) {
+						            clearTimeout(id);
+						        };
+						}());
 
-var ctx;
-var physExecuteMs = 7;
-var IN_ACTION = 	10;
-var	DONE = 			11;
 
+var ctx;					// CTX, your canvas
+var physExecuteMs = 7;		// physExecuteMs - How many ms are waited until the physics loop happens each time
+
+/* Game
+ * Game object, that holds some info you give it. Used to reset, and clear screen
+ */
 function Game(x_boundary, y_boundary){
 	this.boundary =   {};
 	this.boundary.x = x_boundary;	// x-coord boundary
@@ -52,6 +54,9 @@ function Game(x_boundary, y_boundary){
 	}
 }
 
+/* Player
+ * The player character
+ */
 function Player(x_pos, y_pos, curr_game) {
 
 	var parent = 					this;
@@ -136,7 +141,9 @@ function collisionAction(movable, stationary){
 }
 
 
-
+/* Button
+ * Used to make nice clickable buttons
+ */
 
 function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text) {
 	this.position = 		{};
@@ -186,7 +193,9 @@ function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text) {
 }
 
 // tile collection, used for sets of random-use tiles
-
+/* Control
+ * A controller object, used to make keyboard input nice and easy to work with
+ */
 function Control() {
 	this.keyboard = 			{};
 	this.keyboard.space = 		false;
@@ -263,6 +272,10 @@ function mouse_scroll(event) {
 	// delta now holds the amount that the wheel was scrolled
 }
 
+/* page_load
+ * Ignore this, runs on page load to set up events, mousewheel
+ */
+
 function page_load() {
 	var mousewheelevt=(/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel";
 	if (document.attachEvent){
@@ -273,6 +286,11 @@ function page_load() {
 	begin_game();
 }
 
+
+/* Begin_game
+ * Set up the game, create beginning objects
+ * Create player, controller, game, set up canvas, add buttons, then go to the caller
+ */
 function begin_game() {
 
 	var canvas = document.getElementById("draw_canvas");
@@ -288,36 +306,45 @@ function begin_game() {
 	caller();
 }
 
+/* Caller
+ * Makes sure the physics and drawing loops get called over and over at the correct time
+ */
 function caller(){
-
 	physInterval = setInterval(physics, physExecuteMs);
 	draw_world();
 }
 
 function physics(){
 
+	// check to see if reset button was pressed
 	if(ResetButton.clicked()){
 		clearInterval(physInterval);
 		JavascriptGame.resetGame();
 	}
 
+	// Go to the player's update method. Used to update player based on keyboard and other criteria
 	CurrentPlayer.update();
 
 }
 
 
-
+/* draw_world
+ * Draw everything in the game
+ * Most things have their own draw method, and we just call that
+ */
 function draw_world() { 
 
-	JavascriptGame.clearScreen();
-	CurrentPlayer.draw();
-	ResetButton.draw();
+	JavascriptGame.clearScreen();	// blank out the screen with light blue
+
+	CurrentPlayer.draw();			// draw player
+	ResetButton.draw();				// draw reset button
 	
+	/* This line makes sure the game is drawn about 60 times per second */
 	animId = window.requestAnimationFrame(draw_world);
 
 }
 
-
+/* Event handlers to make keyboard and mouse input work nicely, ignore these */
 window.addEventListener('keydown',key_event,true);
 window.addEventListener('keyup',key_event_up,true);
 window.addEventListener('mouseup', mouse_up, false);
