@@ -631,7 +631,7 @@ function collisionAction(movable, stationary){
 	} else if (movable instanceof Player && stationary instanceof Enemy){
 
 		
-		if(depthY<0 && movable.vel.y >= 0.4){
+		if(depthY<0 && movable.vel.y >= 0.4*BuckyGame.physCorrect){
 
 			movable.position.y += depthY;
 			if(Controller.space){
@@ -642,7 +642,7 @@ function collisionAction(movable, stationary){
 			
 			stationary.state = DEAD;
 
-		} else if(depthY<0 && movable.vel.y < 0.4){
+		} else if(depthY<0 && movable.vel.y < 0.4*BuckyGame.physCorrect){
 			movable.state = DEAD;
 		}
 
