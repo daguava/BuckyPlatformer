@@ -155,7 +155,7 @@ function Player(x_pos, y_pos, curr_game) {
 			}
 
 		    /********************************************************************
-			 Set x velocity to zero if it is decenly close to it
+			 Set x velocity to zero if it is decently close to it
 			 ********************************************************************/
 
 			if(Math.abs(this.vel.x) < 0.001){

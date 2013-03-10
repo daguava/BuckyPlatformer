@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <script>
 var start, end, time;
 
+var blockSize = 25;
 
 var platforms = new Array();
 var num_collisions = 0;
@@ -10,8 +12,8 @@ var num_collisions = 0;
 var blocksWidth		= parseInt(prompt("Enter how many blocks wide", ""));
 var blocksHeight	= parseInt(prompt("Enter how many blocks tall", ""));
 
-var gameWidth = blocksWidth * 25;
-var gameHeight = blocksHeight * 25;
+var gameWidth = window.innerWidth * .9;
+var gameHeight = window.innerHeight * .9;
 
 var blockChoice = 0;
 
@@ -69,15 +71,17 @@ function Control() {
 	this.mouse_left = false;
 	this.mouse_right = false;
 	this.mouse_middle = false;
+	this.alt = false;
+	this.ctr = false;
 }
 
 function Platform(x, y) {
 	this.x = x;
 	this.y = y;
 	this.image = new Image();
-	this.image.src = "grass_tile.gif";
-	this.width = 25;
-	this.height = 25;
+	this.image.src = "images/grass_tileset/grass_top_single.png";
+	this.width = blockSize;
+	this.height = blockSize;
 }
 
 function Game(ctx, x_boundary, y_boundary, frame_delay){
@@ -141,6 +145,8 @@ function key_event(event) {
 		case 37: case 65:		Controller.left = true;		break;		// left
 		case 38: case 87:		Controller.up = true; 		break;		// up
 		case 40: case 83:		Controller.down = true;		break;		// down
+		case 189: 				Controller.ctr = true;		break;
+		case 187: 				Controller.alt = true;		break;
 	}
 }
 
@@ -158,6 +164,8 @@ function key_event_up(event) {
 		case 37: case 65:		Controller.left = false;	break;		// left
 		case 38: case 87:		Controller.up = false; 		break;		// up
 		case 40: case 83:		Controller.down = false;	break;		// down
+		case 189: 				Controller.ctr = false;		break;
+		case 187: 				Controller.alt = false;		break;
 	}
 }
 
@@ -244,36 +252,57 @@ function frame(){
 
 
 	if(Controller.mouse_left){
-		x_tile = Math.floor(x/25);
-		y_tile = Math.floor(y/25);
+		x_tile = Math.floor(x/blockSize);
+		y_tile = Math.floor(y/blockSize);
 		if(y_tile < blocksHeight && x_tile < blocksWidth)
 		map[y_tile][x_tile] = blockChoice;
 	}
 	if(Controller.mouse_right){
-		x_tile = Math.floor(x/25);
-		y_tile = Math.floor(y/25);
+		x_tile = Math.floor(x/blockSize);
+		y_tile = Math.floor(y/blockSize);
 		if(y_tile < blocksHeight && x_tile < blocksWidth && y_tile > 0 && x_tile > 0)
 		map[y_tile][x_tile] = 0;
 	}
 
 
 	if(Controller.shift){
-		var output_string = "map = [<br />";
+		var output_string = "map = [&#10;";
 		for(i = 0; i<map.length; i++){
 			for(k = 0; k<map[0].length; k++){
 				if(k == 0){
 					output_string += "[" + map[i][k] + ", ";
 				} else if(k==map[0].length-1 && i != map.length-1){
-					output_string += map[i][k] + "],<br />";
+					output_string += map[i][k] + "],&#10;";
 				} else if(i == map.length-1 && k == map[0].length-1){
-					output_string += map[i][k] + "]<br />];";
+					output_string += map[i][k] + "]&#10;];";
 				}	else {
 					output_string += map[i][k] + ", ";
 				}
 			}
 		}
-		document.write(output_string);
+		document.getElementById("mapcode").innerHTML=output_string;
 	}
+
+	if(Controller.alt){
+		blockSize+=1;
+		width = blockSize * blocksWidth;
+		height = blockSize * blocksHeight;
+		if(width > 32000) width = 32000;
+		if(height > 32000) height = 32000;
+		document.getElementById("draw_canvas").width = width;
+		document.getElementById("draw_canvas").height = height;
+	}
+	if(Controller.ctr){
+		blockSize-=1;
+		if(blockSize < 1) blockSize = 1;
+		width = blockSize * blocksWidth;
+		height = blockSize * blocksHeight;
+		if(width > 32000) width = 32000;
+		if(height > 32000) height = 32000;
+		document.getElementById("draw_canvas").width = width;
+		document.getElementById("draw_canvas").height = height;
+	}
+
 	var start = new Date().getTime();
 
 	BuckyGame.clearColor = "rgb(255,255,255)";
@@ -312,46 +341,46 @@ function draw_world() {
 		Beer.image  = new Image();
 		Enemy.image = new Image();
 
-		Grass.image.src = "grass_tile.png";
-		Block.image.src = "platform.png";
-		Spike.image.src = "spike_pit.png";
-		Beer.image.src 	= "beer_mug.png";
-		Enemy.image.src = "generic_enemy_placeholder.gif";
+		Grass.image.src = "images/grass_tileset/grass_top_single.png";
+		Block.image.src = "images/rock_tileset/platform.png";
+		Spike.image.src = "images/spike_tileset/spike_pit.png";
+		Beer.image.src 	= "images/items/beer_mug.png";
+		Enemy.image.src = "images/enemy/generic_enemy_placeholder.gif";
 
 		// draw out the map
 		
 		for(var i = 0; i<map.length; i++){
 			for(var k = 0; k<map[i].length; k++){
 				if(map[i][k]==1){
-					ctx.drawImage(Grass.image, k*25, i*25);
+					ctx.drawImage(Grass.image, k*blockSize, i*blockSize, blockSize, blockSize);
 				}
 				if(map[i][k]==2){
-					ctx.drawImage(Block.image, k*25, i*25);
+					ctx.drawImage(Block.image, k*blockSize, i*blockSize, blockSize, blockSize);
 				}
 				if(map[i][k]==3){
-					ctx.drawImage(Beer.image, k*25, i*25);
+					ctx.drawImage(Beer.image, k*blockSize, i*blockSize, blockSize, blockSize);
 				}
 				if(map[i][k]==4){
-					ctx.drawImage(Spike.image, k*25, i*25);
+					ctx.drawImage(Spike.image, k*blockSize, i*blockSize, blockSize, blockSize);
 				}
 				if(map[i][k]==5){
-					ctx.drawImage(Enemy.image, k*25, i*25);
+					ctx.drawImage(Enemy.image, k*blockSize, i*blockSize, blockSize, blockSize);
 				}
 			}
 		}
 		
 		ctx.stokeStyle = "rgb(0,0,0)";
-		for(var i = 0; i*25<=blocksWidth*25; i++){
+		for(var i = 0; i*blockSize<=blocksWidth*blockSize; i++){
 			ctx.stokeStyle = "rgb(0,0,0)";
 			ctx.beginPath();
-  			ctx.moveTo(0,i*25);
-  			ctx.lineTo(blocksWidth*25,i*25);
+  			ctx.moveTo(0,i*blockSize);
+  			ctx.lineTo(blocksWidth*blockSize,i*blockSize);
   			ctx.stroke();
 
   			ctx.stokeStyle = "rgb(0,0,0)";
   			ctx.beginPath();
-  			ctx.moveTo(i*25,0);
-  			ctx.lineTo(i*25,blocksHeight*25);
+  			ctx.moveTo(i*blockSize,0);
+  			ctx.lineTo(i*blockSize,blocksHeight*blockSize);
   			ctx.stroke();
 
   			ctx.stokeStyle = "rgb(0,0,0)";
@@ -389,16 +418,17 @@ window.addEventListener('mousedown', mouse_down, false);
 </head>
 <body  onload="page_load()">
 
-<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas"  oncontextmenu="return false;" width="100%"></canvas>
+<canvas style="border: 1px solid black;" onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas"  oncontextmenu="return false;" width="100%"></canvas>
 
-<div style="position: fixed; bottom: 100px; left: 50px; width: 400px; background-color: #FFFFFF; height: 100px; border: 1px solid black;">
-	<img src="grass_tile.png" width="50" 				onclick="updateBlockChoice(1);" />
-	<img src="platform.png" width="50"  				onclick="updateBlockChoice(2);" />
-	<img src="beer_mug.png" width="50"					onclick="updateBlockChoice(3);" />
-	<img src="spike_pit.png" width="50"  				onclick="updateBlockChoice(4);" />
-	<img src="generic_enemy_placeholder.gif" width="50" onclick="updateBlockChoice(5);" />
+<div style="position: fixed; bottom: 0px; left: 0px; width: 400px; background-color: #FFFFFF; height: 100px; border: 1px solid black;">
+	<img src="images/grass_tileset/grass_top_single.png" height="blockSize" 	onclick="updateBlockChoice(1);" />
+	<img src="images/rock_tileset/platform.png" height="blockSize"  			onclick="updateBlockChoice(2);" />
+	<img src="images/items/beer_mug.png" height="blockSize"						onclick="updateBlockChoice(3);" />
+	<img src="images/spike_tileset/spike_pit.png" height="blockSize"  			onclick="updateBlockChoice(4);" />
+	<img src="images/enemy/generic_enemy_placeholder.gif" height="blockSize" 	onclick="updateBlockChoice(5);" />
 </div>
-
+<textarea id="mapcode" style="position: fixed; bottom: 0px; right: 0px; width: 400px; height: 50px; border: 1px solid black;">
+</textarea>
 
 <script type="text/javascript">
 	gameCanvas = document.getElementById("draw_canvas");
