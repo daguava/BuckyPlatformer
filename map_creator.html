@@ -12,8 +12,8 @@ var num_collisions = 0;
 var blocksWidth		= parseInt(prompt("Enter how many blocks wide", ""));
 var blocksHeight	= parseInt(prompt("Enter how many blocks tall", ""));
 
-var gameWidth = window.innerWidth * .9;
-var gameHeight = window.innerHeight * .9;
+var gameWidth = blocksWidth * blockSize;
+var gameHeight = blocksHeight * blockSize;
 
 var blockChoice = 0;
 
@@ -139,7 +139,7 @@ function mouse_press(event) {
 
 function key_event(event) {
 	switch(event.keyCode){
-		case 32:				Controller.space = true;	break;		// space
+		case 32:				Controller.space = true; Controller.ctr;	break;		// space
 		case 16:				Controller.shift = true;	break;		// shift
 		case 39: case 68:		Controller.right = true;	break;		// right
 		case 37: case 65:		Controller.left = true;		break;		// left
@@ -147,6 +147,8 @@ function key_event(event) {
 		case 40: case 83:		Controller.down = true;		break;		// down
 		case 189: 				Controller.ctr = true;		break;
 		case 187: 				Controller.alt = true;		break;
+		case 17: 				Controller.ctr = true;		break;
+		case 18: 				Controller.alt = true;		break;
 	}
 }
 
@@ -159,13 +161,15 @@ function key_event_up(event) {
 		// uparrow     38 87
 		// downarrow   40 83
 		case 32:				Controller.space = false;	break;		// space
-		case 16:				Controller.shift = false;	break;		// shift
+		case 16:				Controller.shift = false; 	break;		// shift
 		case 39: case 68:		Controller.right = false;	break;		// right
 		case 37: case 65:		Controller.left = false;	break;		// left
 		case 38: case 87:		Controller.up = false; 		break;		// up
 		case 40: case 83:		Controller.down = false;	break;		// down
 		case 189: 				Controller.ctr = false;		break;
 		case 187: 				Controller.alt = false;		break;
+		case 17: 				Controller.ctr = false;		break;
+		case 18: 				Controller.alt = false;		break;
 	}
 }
 
