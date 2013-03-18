@@ -1,3 +1,19 @@
+function enemyProfile(walk_array, attack_array, jump_array){
+	// walk 	{do-i-walk?, speed, avoid-falls}
+	// attack 	{do-i-attack?}
+	// jump 	{do-i-jump?, speed, time-delay}
+	this.walk = 					{};
+	this.walk.enabled = 			walk_array[0];
+	this.walk.speed = 				walk_array[1];
+	this.walk.avoidFalls = 			walk_array[2];
+	this.attack = 					{};
+	this.attack.enabled = 			attack_array[0];
+	this.jump = 					{};
+	this.jump.enabled = 			jump_array[0];
+	this.jump.speed = 				jump_array[1];
+	this.jump.delay = 				jump_array[2];
+}
+
 function Enemy(x_pos, y_pos, curr_game) {
 
 	var parent = 					this;
@@ -33,9 +49,10 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.collision.height_offset = 	10;
 	this.collided = 				false;
 	this.collided_last_frame = 		false;
+	this.profile = 					new enemyProfile([true, 20, false], [false], [false, 0, 0]);
 	
 	this.draw = function() {
-		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y), this.width, this.height);
+		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
    	}
 
    	this.update = function(x_change){
@@ -44,45 +61,44 @@ function Enemy(x_pos, y_pos, curr_game) {
 
 	this.physics = function() {
 
-		if(this.collided && this.collided_last_frame){
-			this.vel.dir.x *= -1;
-			this.collided = false;;
+		if(this.profile.walk.enabled){
+			if(this.collided && this.collided_last_frame){
+				this.vel.dir.x *= -1;
+				this.collided = false;;
+			}
+
+			this.collided_last_frame = this.collided;
+			this.collided = false;
+
+			if(this.vel.dir.x == 1){
+
+					this.vel.accel.x = 0.8;
+
+			} else if(this.vel.dir.x == -1){
+
+					this.vel.accel.x = -0.8;
+
+			}
+
+			this.vel.x += this.vel.accel.x * this.vel.dir.x;
+			this.vel.y += this.vel.accel.y;
+
+			if( Math.abs(this.vel.x) > this.profile.walk.speed ){
+				this.vel.x = (this.vel.x > 0) ? this.profile.walk.speed : -this.profile.walk.speed;
+			}
+
+		    /********************************************************************
+			 Set x velocity to zero if it is decently close to it
+			 ********************************************************************/
+
+			if(Math.abs(this.vel.x) < 0.001){
+				this.vel.x = 0;
+			}
+
+			this.position.x += this.vel.x * this.vel.dir.x * curr_game.physCorrect;
+			this.position.y += this.vel.y;
 		}
-
-		this.collided_last_frame = this.collided;
-		this.collided = false;
-
-
-
-		if(this.vel.dir.x == 1){
-
-				this.vel.accel.x = 0.8;
-
-		} else if(this.vel.dir.x == -1){
-
-				this.vel.accel.x = -0.8;
-
-		}
-
-
-		this.vel.x += this.vel.accel.x * this.vel.dir.x;
-		this.vel.y += this.vel.accel.y;
-
-
-		if( Math.abs(this.vel.x) > 1.2 ){
-			this.vel.x = (this.vel.x > 0) ? 1.2 : -1.2;
-		}
-
-	    /********************************************************************
-		 Set x velocity to zero if it is decently close to it
-		 ********************************************************************/
-
-		if(Math.abs(this.vel.x) < 0.001){
-			this.vel.x = 0;
-		}
-
-		this.position.x += this.vel.x * this.vel.dir.x * curr_game.physCorrect;
-		this.position.y += this.vel.y;
+		
 
 		 for(i = 0; i<UpdateManager.length; i++){
 		 	temp = UpdateManager[i];

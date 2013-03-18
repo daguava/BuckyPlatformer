@@ -93,8 +93,11 @@ function Player(x_pos, y_pos, curr_game) {
 				this.draw.image = this.animations[i][0].current();
 			}
 		}
-		ctx.drawImage(this.draw.image, this.position.x, this.position.y, this.width, this.height);
+		ctx.drawImage(this.draw.image, this.position.x, this.position.y+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/blocksize/blocksize*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
    	}
+
+
+   	//+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength
 
 	this.update = function() {
 

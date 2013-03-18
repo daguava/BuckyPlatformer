@@ -155,6 +155,9 @@ function collisionAction(movable, stationary){
 				return true;
 	} else if (movable instanceof Player && stationary instanceof Item){
 				if(depthY != 0 || depthX != 0){
+					if(BuckyGame.drunkStrength <= BuckyGame.drunkStrengthLimit && stationary.visible){
+						BuckyGame.drunkStrength += BuckyGame.drunkStrengthIncrement;
+					}
 					stationary.visible = false;
 					return true;
 				} else {
@@ -271,7 +274,7 @@ function TileSet(imageUrlArray, typeNum, tileType) {
 			} else if( this.aryComp(sur,  [[9,this.num,9],[0,this.num,0],[9,0,9]] ) ){ 					    return this.tileArray[12];
 			} else if( this.aryComp(sur,  [[9,0,9],[this.num,this.num,this.num],[9,0,9]] ) ){ 			    return this.tileArray[13];
 			}  else if( this.aryComp(sur, [[9,this.num,9],[0,this.num,0],[9,this.num,9]] ) ){ 			    return this.tileArray[14];
-			} else {	return this.tileArray[4]; }
+			} else {	return this.tileArray[15]; }
 		} else if(this.type == "dual"){
 			if( 	   this.aryComp(sur, [[9,0,9],[9,this.num,9],[9,this.num,9]])){ return this.tileArray[0];							  // top
 			} else if( this.aryComp(sur, [[9,0,9],[9,this.num,9],[9,0,9]])){ 		return this.tileArray[0];					  		  // bottom

@@ -44,7 +44,7 @@ function Item(x_pos, y_pos, passed_image) {
 	this.draw = function() {
 		if(this.visible){
 			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x){
-				ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+				ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
 			}
 		}
 		if(debugging){
@@ -83,7 +83,7 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 		}
 
 		if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x){
-				ctx.drawImage(this.image, Math.floor(this.position.x), this.position.y);
+				ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
 		}
 
 		if(debugging){

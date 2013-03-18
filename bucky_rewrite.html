@@ -52,9 +52,15 @@ function Game(x_boundary, y_boundary){
 	this.boundary =   {};
 	this.boundary.x = x_boundary;	// x-coord boundary
 	this.boundary.y = y_boundary;	// y-coord boundary
-	this.clearColor = "#7ADAE1";			// initial clear color is null
+	this.clearColor = "#7ADAE1";	// initial clear color is null
 	this.state = null;
 	this.drawOffset = 0;
+	this.drunkTime = 0;
+	this.drunkPeriod = 5;
+	this.drunkTimeIncrement = 0.05;
+	this.drunkStrength = 0;
+	this.drunkStrengthIncrement = 0.5;
+	this.drunkStrengthLimit = 25;
 	this.physCorrect = 1;
 	this.drawCorrect = 1;
 	this.initialized = null;
@@ -89,6 +95,8 @@ function begin_game() {
 
 	statsDiv = document.getElementById("fps");
 
+
+	// Define individual tilesets
 	GrassTileset  = new TileSet(
 		new Array(
 			"images/grass_tileset/grass_top_left.png", 
@@ -105,7 +113,8 @@ function begin_game() {
 			"images/grass_tileset/grass_right_single.png", 
 			"images/grass_tileset/grass_bottom_single.png", 
 			"images/grass_tileset/grass_middle_single_horizontal.png", 
-			"images/grass_tileset/grass_middle_single_vertical.png"
+			"images/grass_tileset/grass_middle_single_vertical.png",
+			"images/grass_tileset/grass_single.png"
 		),
 		1,
 		"full"
@@ -146,13 +155,16 @@ function begin_game() {
 		"single"
 	);
 
+	// define different tile collections
 	collideTypes = new Array(GrassTileset, RockTileset);
 	itemTypes = new Array(BeerTileset);
 	TilesetArrays = new Array(GrassTileset, RockTileset, SpikeTileset);
 
+	// get a reference to the canvas
 	var canvas = document.getElementById("draw_canvas");
 	ctx = canvas.getContext("2d");
 
+	// declare initial objects (Controller, Game, Player, etc)
 	Controller = new Control();
 	BuckyGame = new Game(800, 600);
 	Buckingham = new Player(225, 300, BuckyGame);
@@ -160,17 +172,10 @@ function begin_game() {
 	PlayButton = new Button(500, 450, 100, 30, "#000000", "#CCCCCC", "Play Game");
 	ResetButton = new Button(650, 10, 120, 30, "#000000", "#CCCCCC", "Reset Game");
 
+	// define parallax background
 	Background = new Parallax("images/backgrounds/test_background.jpg", 0.3, BuckyGame);
 
-	// 0 = blank space
-	// 1 = grass
-	// 2 = blue platform
-	// 3 = beer
-	// 4 = spike pit
-	// 5 = enemy
-	
 	// map already included by a separate map.js file
-
 	imageMap = new Array(map.length);
 
 	for(i = 0; i<map.length; i++){
@@ -181,11 +186,14 @@ function begin_game() {
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
 
-			// process tiles for producing an image map
+			/***********************************************
+			 PROCESS MAP FILE FOR EACH TILESET, GENERATING
+			 AN IMAGE MAP ARRAY.
+			 ***********************************************/
 			for(j = 0; j<TilesetArrays.length; j++){
-				var checkArray =   [  [  			0		   , (i-1>=0)?map[i-1][k]:0	 	    ,  			0		   				   ],
-									  [ (k-1>=0)?map[i][k-1]:0 ,          map[i][k] 	      	, (k+1<map[i].length)?(map[i][k+1]):0  ],
-									  [  			0		   , (i+1<map.length)?map[i+1][k]:0 ,  			0		   				   ]  ];
+				var checkArray = [  [  			0		     , (i-1>=0)?map[i-1][k]:0	 	  ,  			0		   				 ],
+									[ (k-1>=0)?map[i][k-1]:0 ,          map[i][k] 	      	  , (k+1<map[i].length)?(map[i][k+1]):0  ],
+									[  			0		     , (i+1<map.length)?map[i+1][k]:0 ,  			0		   				 ]  ];
 				
 				var result = TilesetArrays[j].getTile(checkArray);
 
@@ -221,7 +229,7 @@ function begin_game() {
 	}
 
 	/***********************************
-	 FIRST PASS OF COLLISION BLOCKS
+	 FIRST SCREENING OF COLLISION BLOCKS
 	 ***********************************/
 
 	for(var i = 0; i<map.length; i++){ // map y
@@ -244,7 +252,6 @@ function begin_game() {
 			if(!blockfound && numfound > 0){
 				UpdateManager.push(new Block(start*blocksize, i*blocksize, numfound*blocksize, blocksize));
 				start = k+1;
-
 				numfound = 0;
 			} else if(!blockfound) {
 				start = k+1;
@@ -255,15 +262,18 @@ function begin_game() {
 	}
 
 	/************************************
-	 SECOND PASS OF COLLISION BLOCKS
+	 SECOND SCREENING OF COLLISION BLOCKS
+	 COMBINE SIMILAR GROUPS TO REDUCE THE
+	 NUMBER OF COLLISION SQUARES/RECTANGLES
 	 ************************************/
 
 	 // check each strip of blocks in the UpdateManager to see if they are identical, except
 	 // shifted up or down one row. These we can combine into larger rectangles.
+	 // This step can be considered relatively slow, but it only happens once upon loading
+	 // a map, so it doesn't become a problem.
 
-	 u_length = UpdateManager.length;
-	 for(j = 0; j<5; j++){	// Perform 5 passes of the second pass type.
-	 	console.log("Pass: " + (j+1));
+	 u_length = UpdateManager.length;  // copy the updatemanager length here, as it can change in the loop
+	 for(j = 0; j<5; j++){	// Perform 5 passes of the second screening type.
 		 for(i = 0; i<u_length; i++){
 		 	first = UpdateManager[i];
 		 	if(first instanceof Block){
@@ -273,25 +283,23 @@ function begin_game() {
 		 				if(first.position.x == second.position.x 
 		 					&& first.position.y + first.height == second.position.y
 		 					&& first.width == second.width){
-		 					// we have a match, join them up!
-
+		 					// match was found, combine the rectangles
 		 					new_x = first.position.x;
 		 					new_y = first.position.y;
 		 					new_w = first.width;
 		 					new_h = first.height + second.height;
+		 					// splice in new rectangle, remove the two old rectangles
 		 					UpdateManager.splice(i, 1, new Block(new_x, new_y, new_w, new_h));
-
 		 					UpdateManager.splice(k, 1);
 		 				}
 		 			}
 		 		}
 		 	}
 		}
-		console.log("############## END OF PASS " + (j+1) + " ##############");
 	}
 
 
-	caller();
+	caller();	// start the physics and drawing loops to start game
 }
 
 function caller(){
@@ -337,6 +345,11 @@ function physics(){
 }
 
 function stats() {
+
+	/******************************************
+	 GENERATE SOME STATISTICS FOR SHOWING ONSCREEN
+	 ******************************************/
+
 	statsDiv.innerHTML = 
 		"Physics Delta: " 
 		+ physicsDelta 
@@ -357,6 +370,10 @@ function stats() {
 
 function draw_world() { 
 
+	/******************************************
+	 GRAPHICS TIMER, USED FOR STATS DISPLAY
+	 ******************************************/
+
 	if(graphics_drawTimer == null){
 		graphics_drawTimer = new Date().getTime();
 	} else {
@@ -371,11 +388,13 @@ function draw_world() {
 
 	Background.draw();
 
+	BuckyGame.drunkTime += BuckyGame.drunkTimeIncrement;
+
 	// draw tile image map
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
 			if( (k+1)*blocksize+BuckyGame.drawOffset > 0 && (k-1)*blocksize+BuckyGame.drawOffset<BuckyGame.boundary.x){
-				if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor(i*blocksize));
+				if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor(i*blocksize)+Math.sin(BuckyGame.drunkTime+(k*BuckyGame.drunkPeriod)/blocksize)*BuckyGame.drunkStrength);
 			}
 		}
 	}
