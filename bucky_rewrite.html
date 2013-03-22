@@ -394,7 +394,7 @@ function draw_world() {
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
 			if( (k+1)*blocksize+BuckyGame.drawOffset > 0 && (k-1)*blocksize+BuckyGame.drawOffset<BuckyGame.boundary.x){
-				if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor(i*blocksize)+Math.sin(BuckyGame.drunkTime+(k*BuckyGame.drunkPeriod)/blocksize)*BuckyGame.drunkStrength);
+				if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor((i*blocksize)+Math.sin(BuckyGame.drunkTime+(k*BuckyGame.drunkPeriod)/blocksize)*BuckyGame.drunkStrength));
 			}
 		}
 	}

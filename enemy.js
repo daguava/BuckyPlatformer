@@ -49,7 +49,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.collision.height_offset = 	10;
 	this.collided = 				false;
 	this.collided_last_frame = 		false;
-	this.profile = 					new enemyProfile([true, 20, false], [false], [false, 0, 0]);
+	this.profile = 					new enemyProfile([true, 1.2, false], [false], [false, 0, 0]);
 	
 	this.draw = function() {
 		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
