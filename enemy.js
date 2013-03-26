@@ -64,7 +64,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 		if(this.profile.walk.enabled){
 			if(this.collided && this.collided_last_frame){
 				this.vel.dir.x *= -1;
-				this.collided = false;;
+				this.collided = false;
 			}
 
 			this.collided_last_frame = this.collided;
@@ -110,6 +110,10 @@ function Enemy(x_pos, y_pos, curr_game) {
 		 			collisionAction(this,temp);
 		 		}
 		 	}
+		}
+
+		if(this.position.y > BuckyGame.height){
+			this.state = DEAD;
 		}
 	}
 }

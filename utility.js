@@ -187,9 +187,9 @@ function collisionAction(movable, stationary){
 				}
 				return true;
 	} else if (movable instanceof Player && stationary instanceof Enemy){
-				if(depthY<0 && movable.vel.y >= 0.4*BuckyGame.physCorrect){
+				if(Math.abs(depthY)<20 && movable.vel.y >= 0){
 
-					movable.position.y += depthY;
+					movable.position.y -= Math.abs(movable.position.y + movable.height - stationary.position.y) * 1.1;
 					if(Controller.space){
 						movable.vel.y = -8;
 					} else {
@@ -198,7 +198,7 @@ function collisionAction(movable, stationary){
 					
 					stationary.state = DEAD;
 
-				} else if(depthY<0 && movable.vel.y < 0.4*BuckyGame.physCorrect){
+				} else {
 					movable.state = DEAD;
 				}
 	}

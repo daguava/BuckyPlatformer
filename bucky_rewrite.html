@@ -95,6 +95,13 @@ function begin_game() {
 
 	statsDiv = document.getElementById("fps");
 
+	// reset timing variables to prevent odd behavior upon reset
+	physicsDelta = 		null;
+	drawTimer = 		null;
+	graphics_drawTimer= null;
+	drawDelta = 		null;
+	drawFps =			60;
+
 
 	// Define individual tilesets
 	GrassTileset  = new TileSet(
@@ -168,6 +175,9 @@ function begin_game() {
 	Controller = new Control();
 	BuckyGame = new Game(800, 600);
 	Buckingham = new Player(225, 300, BuckyGame);
+
+	TestInfo = new InfoBox(400, 150, "This is a test message. I hope this works out. This is a test message. I hope this works out. This is a test message.");
+	UpdateManager.push(TestInfo);
 
 	PlayButton = new Button(500, 450, 100, 30, "#000000", "#CCCCCC", "Play Game");
 	ResetButton = new Button(650, 10, 120, 30, "#000000", "#CCCCCC", "Reset Game");
@@ -409,7 +419,8 @@ function draw_world() {
 		if(temp instanceof Block 
 			|| temp instanceof ItemBlock 
 			|| temp instanceof Item
-			|| temp instanceof Enemy){
+			|| temp instanceof Enemy
+			|| temp instanceof InfoBox){
 			temp.draw();
 		} else if (temp instanceof Timer){
 			temp.update();

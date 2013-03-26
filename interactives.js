@@ -100,6 +100,79 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 	}
 }
 
+function InfoBox(x_center, y_pos, arg_message) {
+	this.width = 					300;
+	this.height = 					null;
+	this.font = 					"12pt Courier";
+	this.pixels = 					{};
+	this.pixels.height = 			16;
+	this.pixels.width = 			12;
+	this.position = 				{};
+	this.position.x = 				x_center-this.width/2+blocksize/2;
+	this.position.y = 				y_pos;
+	this.message = 					arg_message;
+	this.wordArray = 				this.message.split(" ");
+	this.lineArray = 				Array();
+	this.charsPerLine = 			this.width / this.pixels.width;
+	this.stroke = 					"#000000";
+	this.fill = 					"rgba(150, 255, 150, 0.5)";
+	this.padding = 					7;
+
+	// split message up into an array of lines
+	var wordPos = 0;
+	var linePos = 0;
+	this.lineArray[0] = "";
+	while(wordPos < this.wordArray.length){
+		if( String(this.lineArray[linePos]).length + this.wordArray[wordPos].length <= this.charsPerLine ){
+			this.lineArray[linePos] += this.wordArray[wordPos] + " ";
+			wordPos++;
+		} else {
+			linePos++;
+			this.lineArray[linePos] = "";
+		}
+		
+	}
+
+	this.update = function(x_change){
+   		this.position.x += x_change;
+   	}
+
+	this.draw = function() {
+    	ctx.strokeStyle = this.stroke;
+    	ctx.fillStyle = this.fill;
+
+		ctx.lineWidth   = 1;
+		ctx.font = this.font;
+
+		var textWidth = ctx.measureText(this.message).width;
+		this.height = Math.ceil(textWidth / this.width) * this.pixels*2;
+
+    	ctx.fillStyle = this.fill;
+    	ctx.strokeStyle = this.stroke;
+
+    	ctx.fillRect(this.position.x, this.position.y, this.width, this.lineArray.length * this.pixels.height * 1.1 + this.padding);
+    	ctx.strokeRect(this.position.x, this.position.y, this.width, this.lineArray.length * this.pixels.height * 1.1 + this.padding);
+
+    	if(this.clicked()){
+    		ctx.fillStyle = "#FF0000";
+    	} else {
+    		ctx.fillStyle = this.stroke;
+    	}
+
+    	for(i = 0; i < this.lineArray.length; i++){
+    		ctx.fillText(this.lineArray[i], this.position.x + this.padding, this.position.y + this.pixels.height + i * this.pixels.height * 1.1);
+    	}
+    	
+    	
+   
+   	}
+
+	this.clicked = function(){
+		return Controller.mouse.click.y <= this.position.y+this.height && Controller.mouse.click.y >= this.position.y
+		&& Controller.mouse.click.x <= this.position.x+this.width && Controller.mouse.click.x >=this.position.x && Controller.mouse.click.left;
+	}
+}
+
 function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text) {
 	this.position = 				{};
 	this.position.x = 				x_pos;

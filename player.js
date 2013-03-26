@@ -234,7 +234,8 @@ function Player(x_pos, y_pos, curr_game) {
 					if(temp instanceof Block 
 						|| temp instanceof ItemBlock 
 						|| temp instanceof Item
-						|| temp instanceof Enemy){
+						|| temp instanceof Enemy
+						|| temp instanceof InfoBox){
 
 						temp.update(-x_change);
 
@@ -264,6 +265,6 @@ function Player(x_pos, y_pos, curr_game) {
 					collisionAction(this,temp);
 				}
 			}
-		}
+		} 
 	}
 }
