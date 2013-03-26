@@ -106,7 +106,7 @@ function InfoBox(x_center, y_pos, arg_message) {
 	this.font = 					"12pt Courier";
 	this.pixels = 					{};
 	this.pixels.height = 			16;
-	this.pixels.width = 			12;
+	this.pixels.width = 			11;
 	this.position = 				{};
 	this.position.x = 				x_center-this.width/2+blocksize/2;
 	this.position.y = 				y_pos;
@@ -138,17 +138,14 @@ function InfoBox(x_center, y_pos, arg_message) {
    	}
 
 	this.draw = function() {
-    	ctx.strokeStyle = this.stroke;
-    	ctx.fillStyle = this.fill;
+    	ctx.strokeStyle = 		this.stroke;
+    	ctx.fillStyle = 		this.fill;
 
-		ctx.lineWidth   = 1;
-		ctx.font = this.font;
+		ctx.lineWidth = 		1;
+		ctx.font = 				this.font;
 
-		var textWidth = ctx.measureText(this.message).width;
-		this.height = Math.ceil(textWidth / this.width) * this.pixels*2;
-
-    	ctx.fillStyle = this.fill;
-    	ctx.strokeStyle = this.stroke;
+    	ctx.fillStyle = 		this.fill;
+    	ctx.strokeStyle = 		this.stroke;
 
     	ctx.fillRect(this.position.x, this.position.y, this.width, this.lineArray.length * this.pixels.height * 1.1 + this.padding);
     	ctx.strokeRect(this.position.x, this.position.y, this.width, this.lineArray.length * this.pixels.height * 1.1 + this.padding);
