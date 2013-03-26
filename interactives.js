@@ -101,7 +101,7 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 }
 
 function InfoBox(x_center, y_pos, arg_message) {
-	this.width = 					300;
+	this.width = 					250;
 	this.height = 					null;
 	this.font = 					"12pt Courier";
 	this.pixels = 					{};
@@ -115,7 +115,7 @@ function InfoBox(x_center, y_pos, arg_message) {
 	this.lineArray = 				Array();
 	this.charsPerLine = 			this.width / this.pixels.width;
 	this.stroke = 					"#000000";
-	this.fill = 					"rgba(150, 255, 150, 0.5)";
+	this.fill = 					"rgba(150, 150, 255, 0.7)";
 	this.padding = 					7;
 
 	// split message up into an array of lines
@@ -147,8 +147,8 @@ function InfoBox(x_center, y_pos, arg_message) {
     	ctx.fillStyle = 		this.fill;
     	ctx.strokeStyle = 		this.stroke;
 
-    	ctx.fillRect(this.position.x, this.position.y, this.width, this.lineArray.length * this.pixels.height * 1.1 + this.padding);
-    	ctx.strokeRect(this.position.x, this.position.y, this.width, this.lineArray.length * this.pixels.height * 1.1 + this.padding);
+    	ctx.fillRect(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.width), Math.floor(this.lineArray.length * this.pixels.height * 1.1 + this.padding));
+    	ctx.strokeRect(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.width), Math.floor(this.lineArray.length * this.pixels.height * 1.1 + this.padding));
 
     	if(this.clicked()){
     		ctx.fillStyle = "#FF0000";
