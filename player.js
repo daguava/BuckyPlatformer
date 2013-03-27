@@ -88,16 +88,25 @@ function Player(x_pos, y_pos, curr_game) {
 	);
 	
 	this.draw = function() {
+
 		for(i = 0; i<this.animations.length; i++){
 			if(this.state == this.animations[i][1] && (this.vel.dir.last == this.animations[i][2] || this.animations[i][2] == null)){
 				this.draw.image = this.animations[i][0].current();
 			}
 		}
+
 		ctx.drawImage(this.draw.image, this.position.x, this.position.y+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/blocksize/blocksize*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
+   		
+   		if(debugging){
+			ctx.strokeStyle = "#999999";
+			ctx.fillStyle = 'rgba(100,100,100, 0.25)';
+			ctx.lineWidth = 1;
+			ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+			ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+			ctx.strokeStyle = "#FF0000";
+			ctx.strokeRect(this.position.x+this.collision.width_offset/2, this.position.y+this.collision.height_offset/2, this.width-this.collision.width_offset, this.height-this.collision.height_offset);
+		}
    	}
-
-
-   	//+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength
 
 	this.update = function() {
 
@@ -231,11 +240,12 @@ function Player(x_pos, y_pos, curr_game) {
 				// move platforms
 				for(i = 0; i<UpdateManager.length; i++){
 					temp = UpdateManager[i];
-					if(temp instanceof Block 
+					if(    temp instanceof Block 
 						|| temp instanceof ItemBlock 
 						|| temp instanceof Item
 						|| temp instanceof Enemy
-						|| temp instanceof InfoBox){
+						|| temp instanceof InfoBox
+						|| temp instanceof HurtBlock){
 
 						temp.update(-x_change);
 
@@ -251,6 +261,10 @@ function Player(x_pos, y_pos, curr_game) {
 
 			this.position.y += y_change;
 
+			// quick death check for y position
+
+			if(this.position.y > BuckyGame.boundary.x) this.state = DEAD;
+
 			/********************************************************************
 			 Perform Collision Actions with types: Item, ItemBlock, Block
 			 *********************************************************************/
@@ -260,7 +274,8 @@ function Player(x_pos, y_pos, curr_game) {
 				if(temp instanceof Item 
 					|| temp instanceof ItemBlock 
 					|| temp instanceof Block
-					|| temp instanceof Enemy){
+					|| temp instanceof Enemy
+					|| temp instanceof HurtBlock){
 
 					collisionAction(this,temp);
 				}

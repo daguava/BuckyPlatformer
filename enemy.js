@@ -52,6 +52,13 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.profile = 					new enemyProfile([true, 1.2, false], [false], [false, 0, 0]);
 	
 	this.draw = function() {
+		if(debugging){
+			ctx.strokeStyle = "#FF3333";
+			ctx.fillStyle = 'rgba(255,33,33, 0.25)';
+			ctx.lineWidth = 1;
+			ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+			ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+		}
 		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
    	}
 

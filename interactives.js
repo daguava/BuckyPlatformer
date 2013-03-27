@@ -29,6 +29,37 @@ function Block(x_pos, y_pos, arg_width, arg_height) {
 	}
 }
 
+function HurtBlock(x_pos, y_pos, arg_width, arg_height) {
+	this.position = 				{};
+	this.position.x = 				x_pos;
+	this.position.y = 				y_pos;
+	this.width = 					arg_width;
+	this.height = 					arg_height;
+	this.image = 					new Image();
+	this.visible = 					true;
+	this.collision = 				{};
+	this.collision.width_offset = 	0;
+	this.collision.height_offset = 	0;
+
+	this.draw = function() {
+		if(debugging){
+			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x)
+			{
+				ctx.strokeStyle = "#FFFF00";
+				ctx.fillStyle = 'rgba(255,255,0, 0.25)';
+				ctx.lineWidth = 1;
+				ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+				ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+			}
+		}
+	}
+
+	this.update = function(x_change) {
+		// update x and y position
+		this.position.x += x_change;
+	}
+}
+
 function Item(x_pos, y_pos, passed_image) {
 	this.position = 				{};
 	this.position.x = 				x_pos;
@@ -110,6 +141,9 @@ function InfoBox(x_center, y_pos, arg_message) {
 	this.position = 				{};
 	this.position.x = 				x_center-this.width/2+blocksize/2;
 	this.position.y = 				y_pos;
+	this.title = 					{};
+	this.title.height = 			25;
+	this.title.text = 				"Game Hint:"
 	this.message = 					arg_message;
 	this.wordArray = 				this.message.split(" ");
 	this.lineArray = 				Array();
@@ -147,8 +181,16 @@ function InfoBox(x_center, y_pos, arg_message) {
     	ctx.fillStyle = 		this.fill;
     	ctx.strokeStyle = 		this.stroke;
 
-    	ctx.fillRect(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.width), Math.floor(this.lineArray.length * this.pixels.height * 1.1 + this.padding));
-    	ctx.strokeRect(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.width), Math.floor(this.lineArray.length * this.pixels.height * 1.1 + this.padding));
+    	ctx.fillRect(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.width), Math.floor(this.lineArray.length * this.pixels.height * 1.1 + this.padding + this.title.height));
+    	ctx.strokeRect(Math.floor(this.position.x), Math.floor(this.position.y), Math.floor(this.width), Math.floor(this.lineArray.length * this.pixels.height * 1.1 + this.padding + this.title.height));
+
+
+    	// draw dividier line
+
+    	ctx.beginPath();
+		ctx.moveTo(this.position.x, this.position.y + this.title.height - (this.title.height - this.pixels.height)/2);
+		ctx.lineTo(this.position.x + this.width, this.position.y + this.title.height);
+		ctx.stroke();
 
     	if(this.clicked()){
     		ctx.fillStyle = "#FF0000";
@@ -156,8 +198,12 @@ function InfoBox(x_center, y_pos, arg_message) {
     		ctx.fillStyle = this.stroke;
     	}
 
+    	// draw title
+    	ctx.fillText(this.title.text, this.position.x + this.padding, this.position.y + this.pixels.height);
+
+    	// draw message
     	for(i = 0; i < this.lineArray.length; i++){
-    		ctx.fillText(this.lineArray[i], this.position.x + this.padding, this.position.y + this.pixels.height + i * this.pixels.height * 1.1);
+    		ctx.fillText(this.lineArray[i], this.position.x + this.padding, this.position.y + this.pixels.height + i * this.pixels.height * 1.1 + this.title.height);
     	}
     	
     	

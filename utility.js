@@ -201,6 +201,11 @@ function collisionAction(movable, stationary){
 				} else {
 					movable.state = DEAD;
 				}
+	} else if (movable instanceof Player && stationary instanceof HurtBlock){
+				if(depthY != 0 || depthX != 0){
+					movable.state = DEAD;
+				}
+				return true;
 	}
 }
 

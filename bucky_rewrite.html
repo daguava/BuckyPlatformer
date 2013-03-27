@@ -31,7 +31,7 @@ var LEFT = 				1;
 var RIGHT = 			2;
 
 var ctx;
-var debugging = 		false;
+var debugging = 		true;
 var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
@@ -183,7 +183,7 @@ function begin_game() {
 	ResetButton = new Button(650, 10, 120, 30, "#000000", "#CCCCCC", "Reset Game");
 
 	// define parallax background
-	Background = new Parallax("images/backgrounds/test_background.jpg", 0.3, BuckyGame);
+	Background = new Parallax("images/backgrounds/parallax_test_2.png", 0.3, BuckyGame);
 
 	// map already included by a separate map.js file
 	imageMap = new Array(map.length);
@@ -211,6 +211,7 @@ function begin_game() {
 					imageMap[i][k] = result;
 				}
 			}
+
 			if(imageMap[i][k] == undefined) imageMap[i][k] = null;
 
 
@@ -228,10 +229,17 @@ function begin_game() {
 			 PROCESS INDIVIDUAL TILE ITEMS THAT AREN'T IN
 			 A COLLECTION
 			 ************************************************/
+			 // Item block
 			 if(map[i][k] == ItemBlockTileset.num){
 			 	UpdateManager.push(new ItemBlock(k*blocksize, i*blocksize, 3, ItemBlockTileset.tileArray[0], ItemBlockTileset.tileArray[1]));
 			 }
 
+			 // Spike block
+			 if(map[i][k] == 4){
+			 	UpdateManager.push(new HurtBlock(k*blocksize, i*blocksize, blocksize, blocksize) );
+			 }
+
+			 // Enemy
 			 if(map[i][k] == 5){
 			 	UpdateManager.push(new Enemy(k*blocksize, i*blocksize, BuckyGame) );
 			 }
@@ -420,7 +428,8 @@ function draw_world() {
 			|| temp instanceof ItemBlock 
 			|| temp instanceof Item
 			|| temp instanceof Enemy
-			|| temp instanceof InfoBox){
+			|| temp instanceof InfoBox
+			|| temp instanceof HurtBlock){
 			temp.draw();
 		} else if (temp instanceof Timer){
 			temp.update();
