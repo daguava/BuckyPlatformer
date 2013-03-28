@@ -9,6 +9,14 @@
 
 <script type = "text/javascript">
 
+	levelMusic = new Audio('music/canopy.ogg'); 
+	levelMusic.volume = 0.5;
+	levelMusic.addEventListener('ended', function() {
+	    this.currentTime = 0;
+	    this.play();
+	}, false);
+	levelMusic.play();
+
 // Global Variables
 var	IN_ACTION = 		10;
 var	DONE = 				11;
@@ -90,6 +98,8 @@ function page_load() {
 }
 
 function begin_game() {
+
+	// play muzak
 
 	UpdateManager = new Array();
 

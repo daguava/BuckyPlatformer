@@ -31,6 +31,10 @@ function Player(x_pos, y_pos, curr_game) {
 	this.collision = 				{};
 	this.collision.width_offset = 	10;
 	this.collision.height_offset = 	10;
+	this.sounds = 					{};
+	this.sounds.jump = 				new Audio("sounds/jump.wav");
+	this.sounds.splat = 			new Audio("sounds/splat.wav");
+	this.sounds.boom = 				new Audio("sounds/boom.ogg");
 
 	this.test_tween = 				new MotionTween(300, 300, 600, 400, 240, this.game);
 
@@ -181,6 +185,8 @@ function Player(x_pos, y_pos, curr_game) {
 			if(Controller.space && this.jump.toggle){
 				this.vel.y = -8.0;
 				this.jump.toggle = !this.jump.toggle;
+				this.sounds.jump.currentTime = 0;
+				this.sounds.jump.play();
 			}
 
 			if(!this.jump.toggle && !Controller.space && this.vel.y < 0 && !this.jump.release){

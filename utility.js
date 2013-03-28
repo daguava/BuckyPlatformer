@@ -197,13 +197,21 @@ function collisionAction(movable, stationary){
 					}
 					
 					stationary.state = DEAD;
+					movable.sounds.splat.currentTime = 0;
+					movable.sounds.splat.play();
 
 				} else {
 					movable.state = DEAD;
+					movable.sounds.boom.currentTime = 0;
+					movable.sounds.boom.play();
+					console.log("Sound start.");
 				}
 	} else if (movable instanceof Player && stationary instanceof HurtBlock){
 				if(depthY != 0 || depthX != 0){
 					movable.state = DEAD;
+					movable.sounds.boom.currentTime = 0;
+					movable.sounds.boom.play();
+					console.log("Sound start.");
 				}
 				return true;
 	}

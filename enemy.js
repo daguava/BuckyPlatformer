@@ -102,6 +102,16 @@ function Enemy(x_pos, y_pos, curr_game) {
 				this.vel.x = 0;
 			}
 
+			// sanity check
+			if(this.vel.x > 200){
+				console.log("Tripped Sanity Check (x velocity): It was " + this.vel.x);
+				this.vel.x = 0;
+			}
+			if(this.vel.y > 200){
+				console.log("Tripped Sanity Check (y velocity): It was " + this.vel.y);
+				this.vel.y = 0;
+			}
+
 			this.position.x += this.vel.x * this.vel.dir.x * curr_game.physCorrect;
 			this.position.y += this.vel.y;
 		}
