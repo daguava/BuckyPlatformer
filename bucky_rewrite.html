@@ -15,7 +15,8 @@
 */
 
 // debugging
-var debugging = 		true;
+var debugging = 		false;
+var debugging_text = 	true;
 var music = 			false;
 
 	levelMusic = new Audio('music/canopy.ogg'); 
@@ -57,6 +58,8 @@ var imageMap;
 var GRAVITY = 			0.2;
 var UpdateManager = 	new Array();
 
+var statsBox = 			null;
+var framecount = 		0;
 var physicsTimer = 		null;
 var physExecuteMs = 	7;
 var drawExecuteMs = 	16.667;
@@ -404,38 +407,7 @@ function stats() {
 	/******************************************
 	 GENERATE SOME STATISTICS FOR SHOWING ONSCREEN
 	 ******************************************/
-
-	// statsDiv.innerHTML = 
-	// 	"Physics Delta: " 
-	// 	+ physicsDelta 
-	// 	+ "<br />PhysCorrect: " 
-	// 	+ ((BuckyGame.physCorrect>=2) ? "<span style='color: red;'>":"")
-	// 	+ BuckyGame.physCorrect.toFixed(2) 
-	// 	+ ((BuckyGame.physCorrect>=2) ? "</span>":"")
-	// 	+ "<br />drawCorrect: "
-	// 	+ BuckyGame.drawCorrect.toFixed(2)
-	// 	+ "<br />drawFPS: " 
-	// 	+ drawFps.toFixed(2)
-	// 	+ "<br />BuckyVel : "
-	// 	+ Buckingham.vel.x
-	// 	+ "<br />UpdateManager: "
-	// 	+ UpdateManager.length;
-
-	statsDiv.innerHTML = 
-		"Physics Delta: " 
-		+ physicsDelta 
-		+ " PhysCorrect: " 
-		+ ((BuckyGame.physCorrect>=2) ? "<span style='color: red;'>":"")
-		+ BuckyGame.physCorrect.toFixed(2) 
-		+ ((BuckyGame.physCorrect>=2) ? "</span>":"")
-		+ " drawCorrect: "
-		+ BuckyGame.drawCorrect.toFixed(2)
-		+ " drawFPS: " 
-		+ drawFps.toFixed(2)
-		+ " BuckyVel : "
-		+ Buckingham.vel.x
-		+ " UpdateManager: "
-		+ UpdateManager.length;
+	 // currently unused, replaced by canvas infobox.
 }
 
 
@@ -498,6 +470,32 @@ function draw_world() {
 
 	Buckingham.draw();
 	ResetButton.draw();
+
+	// draw out stats container
+	if(debugging_text || debugging){
+		if(framecount == 0){
+			console.log("happened");
+			statsBox = new InfoBox(BuckyGame.boundary.x-260, 10, 		 
+			  String(
+			  	  "PhysDelta:     " 
+			+ physicsDelta 
+			+ " \n PhysCorrect:   " 
+			+ BuckyGame.physCorrect.toFixed(2) 
+			+ " \n DrawCorrect:   "
+			+ BuckyGame.drawCorrect.toFixed(2)
+			+ " \n drawFPS:       " 
+			+ drawFps.toFixed(2)
+			+ " \n BuckyVelX :    "
+			+ Buckingham.vel.x.toFixed(2)
+			+ " \n UpdateManager: "
+			+ UpdateManager.length));
+			framecount = 6;
+		}
+		framecount--;
+		statsBox.draw();
+		
+	}
+	
 
 	animId = window.requestAnimationFrame(draw_world);
 

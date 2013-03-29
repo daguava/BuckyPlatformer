@@ -148,8 +148,15 @@ function InfoBox(x_center, y_pos, arg_message) {
 	this.lineArray[0] = "";
 	while(wordPos < this.wordArray.length){
 		if( String(this.lineArray[linePos]).length + this.wordArray[wordPos].length <= this.charsPerLine ){
-			this.lineArray[linePos] += this.wordArray[wordPos] + " ";
-			wordPos++;
+			if(this.wordArray[wordPos] != "\n"){
+				this.lineArray[linePos] += this.wordArray[wordPos] + " ";
+				wordPos++;
+			} else {
+				wordPos++;
+				linePos++;
+				this.lineArray[linePos] = "";
+			}
+			
 		} else {
 			linePos++;
 			this.lineArray[linePos] = "";
