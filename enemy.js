@@ -25,9 +25,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.jump = 					{};
 	this.jump.toggle = 				false;
 	this.jump.release = 			true;
-	this.position = 				{};
-	this.position.x = 	 			x_pos;  // x pos
-	this.position.y = 	  			y_pos;	// y pos
+	this.position = 				new Position(x_pos, y_pos);
 	this.vel = 						{};
 	this.vel.x =					1.2;	// x speed
 	this.vel.y =					1;		// y speed

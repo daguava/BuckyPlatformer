@@ -9,13 +9,25 @@
 
 <script type = "text/javascript">
 
+/* BugList {Come back to, maybe? :(  }
+-- Timer's automatic removal can cause items first in UpdateManager to not draw for a frame
+*/
+
+// debugging
+var debugging = 		true;
+var music = 			false;
+
 	levelMusic = new Audio('music/canopy.ogg'); 
 	levelMusic.volume = 0.5;
 	levelMusic.addEventListener('ended', function() {
 	    this.currentTime = 0;
-	    this.play();
+	    if(music) this.play();
 	}, false);
-	levelMusic.play();
+	if(music) levelMusic.play();
+
+
+
+
 
 // Global Variables
 var	IN_ACTION = 		10;
@@ -39,7 +51,6 @@ var LEFT = 				1;
 var RIGHT = 			2;
 
 var ctx;
-var debugging = 		true;
 var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
@@ -67,8 +78,8 @@ function Game(x_boundary, y_boundary){
 	this.drunkPeriod = 5;
 	this.drunkTimeIncrement = 0.05;
 	this.drunkStrength = 0;
-	this.drunkStrengthIncrement = 0.5;
-	this.drunkStrengthLimit = 25;
+	this.drunkStrengthIncrement = 1;
+	this.drunkStrengthLimit = 50;
 	this.physCorrect = 1;
 	this.drawCorrect = 1;
 	this.initialized = null;
@@ -83,8 +94,6 @@ function Game(x_boundary, y_boundary){
 		ctx.fillRect(0, 0, this.boundary.x, this.boundary.y);
 	}
 }
-
-
 
 
 function page_load() {
@@ -183,14 +192,35 @@ function begin_game() {
 
 	// declare initial objects (Controller, Game, Player, etc)
 	Controller = new Control();
-	BuckyGame = new Game(800, 600);
+	BuckyGame = new Game(1200, 600);
 	Buckingham = new Player(225, 300, BuckyGame);
 
 	TestInfo = new InfoBox(500, 100, "Bacon ipsum dolor sit amet brisket pork belly short loin, sausage ham hock kielbasa swine pork.");
 	UpdateManager.push(TestInfo);
 
 	PlayButton = new Button(500, 450, 100, 30, "#000000", "#CCCCCC", "Play Game");
-	ResetButton = new Button(650, 10, 120, 30, "#000000", "#CCCCCC", "Reset Game");
+	ResetButton = new Button(650, 10, 120, 30, "#000000", "#CCCCCC", "Reset Game", 
+		function(){ 
+			clearInterval(statsInterval);
+			clearInterval(physInterval);
+			BuckyGame.resetGame();
+		}
+	);
+
+	UpdateManager.push(ResetButton);
+
+	// PLACEABLE ANIMATION TEST
+	TestPlaceableAnimation = new PlaceableAnimation(
+		250, 
+		-25, 
+		new Array("images/animations/explosion/explosion1.gif", "images/animations/explosion/explosion2.gif", "images/animations/explosion/explosion3.gif", "images/animations/explosion/explosion4.gif", "images/animations/explosion/explosion5.gif", "images/animations/explosion/explosion6.gif", "images/animations/explosion/explosion7.gif", "images/animations/explosion/explosion8.gif", "images/animations/explosion/explosion9.gif", "images/animations/explosion/explosion10.gif", "images/animations/explosion/explosion11.gif", "images/animations/explosion/explosion12.gif", "images/animations/explosion/explosion13.gif", "images/animations/explosion/explosion14.gif", "images/animations/explosion/explosion15.gif", "images/animations/explosion/explosion16.gif", "images/animations/explosion/explosion17.gif", "images/animations/explosion/explosion18.gif", "images/animations/explosion/explosion19.gif", "images/animations/explosion/explosion20.gif", "images/animations/explosion/explosion21.gif", "images/animations/explosion/explosion22.gif", "images/animations/explosion/explosion23.gif", "images/animations/explosion/explosion24.gif"
+		),
+		60, 
+		true, 
+		BuckyGame
+	);
+
+	UpdateManager.push(TestPlaceableAnimation);
 
 	// define parallax background
 	Background = new Parallax("images/backgrounds/parallax_test_2.png", 0.3, BuckyGame);
@@ -340,12 +370,6 @@ function caller(){
 
 function physics(){
 
-	if(ResetButton.clicked()){
-		clearInterval(statsInterval);
-		clearInterval(physInterval);
-		BuckyGame.resetGame();
-	}
-
 	/******************************************
 	 PHYSICS TIMER, USED FOR ACCURATE MOVEMENT
 	 ******************************************/
@@ -367,6 +391,8 @@ function physics(){
 			if(UpdateManager[i].state == DEAD){
 				UpdateManager.splice(i, 1);
 			}
+		} else if(UpdateManager[i] instanceof Button){
+			UpdateManager[i].clicked();
 		}
 	}
 
@@ -378,20 +404,36 @@ function stats() {
 	 GENERATE SOME STATISTICS FOR SHOWING ONSCREEN
 	 ******************************************/
 
+	// statsDiv.innerHTML = 
+	// 	"Physics Delta: " 
+	// 	+ physicsDelta 
+	// 	+ "<br />PhysCorrect: " 
+	// 	+ ((BuckyGame.physCorrect>=2) ? "<span style='color: red;'>":"")
+	// 	+ BuckyGame.physCorrect.toFixed(2) 
+	// 	+ ((BuckyGame.physCorrect>=2) ? "</span>":"")
+	// 	+ "<br />drawCorrect: "
+	// 	+ BuckyGame.drawCorrect.toFixed(2)
+	// 	+ "<br />drawFPS: " 
+	// 	+ drawFps.toFixed(2)
+	// 	+ "<br />BuckyVel : "
+	// 	+ Buckingham.vel.x
+	// 	+ "<br />UpdateManager: "
+	// 	+ UpdateManager.length;
+
 	statsDiv.innerHTML = 
 		"Physics Delta: " 
 		+ physicsDelta 
-		+ "<br />PhysCorrect: " 
+		+ " PhysCorrect: " 
 		+ ((BuckyGame.physCorrect>=2) ? "<span style='color: red;'>":"")
 		+ BuckyGame.physCorrect.toFixed(2) 
 		+ ((BuckyGame.physCorrect>=2) ? "</span>":"")
-		+ "<br />drawCorrect: "
+		+ " drawCorrect: "
 		+ BuckyGame.drawCorrect.toFixed(2)
-		+ "<br />drawFPS: " 
+		+ " drawFPS: " 
 		+ drawFps.toFixed(2)
-		+ "<br />BuckyVel : "
+		+ " BuckyVel : "
 		+ Buckingham.vel.x
-		+ "<br />UpdateManager: "
+		+ " UpdateManager: "
 		+ UpdateManager.length;
 }
 
@@ -408,6 +450,7 @@ function draw_world() {
 		drawDelta = new Date().getTime()-graphics_drawTimer;
 		graphics_drawTimer = new Date().getTime(); 
 		drawFps = drawFps * (49/50) + 1000/drawDelta * 1/50;
+		if(drawFps > 1000) drawFps = 60; // sanity check (check for infinity)
 		BuckyGame.drawCorrect = BuckyGame.drawCorrect * (4/5) + drawDelta/drawExecuteMs * (1/5);
 		if(BuckyGame.drawCorrect > 2) BuckyGame.drawCorrect = 2;
 	}
@@ -439,7 +482,8 @@ function draw_world() {
 			|| temp instanceof Item
 			|| temp instanceof Enemy
 			|| temp instanceof InfoBox
-			|| temp instanceof HurtBlock){
+			|| temp instanceof HurtBlock
+			|| temp instanceof PlaceableAnimation){
 			temp.draw();
 		} else if (temp instanceof Timer){
 			temp.update();
@@ -463,9 +507,9 @@ window.addEventListener('mousedown', mouse_down, false);
 </head>
 <body style="overflow: hidden;"  onload="page_load()">
 
-<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="800" height="600" tabindex="1"></canvas>
+<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="1200" height="600" tabindex="1"></canvas>
 
-<div id="fps" style="width: 400px; display: inline-block; vertical-align: top;"></div>
+<div id="fps" style="width: 800px; display: inline-block; vertical-align: top;"></div>
 
 <script type="text/javascript">
 	gameCanvas = document.getElementById("draw_canvas");

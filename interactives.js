@@ -1,7 +1,5 @@
 function Block(x_pos, y_pos, arg_width, arg_height) {
-	this.position = 				{};
-	this.position.x = 				x_pos;
-	this.position.y = 				y_pos;
+	this.position = 				new Position(x_pos, y_pos);
 	this.width = 					arg_width;
 	this.height = 					arg_height;
 	this.image = 					new Image();
@@ -30,9 +28,7 @@ function Block(x_pos, y_pos, arg_width, arg_height) {
 }
 
 function HurtBlock(x_pos, y_pos, arg_width, arg_height) {
-	this.position = 				{};
-	this.position.x = 				x_pos;
-	this.position.y = 				y_pos;
+	this.position = 				new Position(x_pos, y_pos);
 	this.width = 					arg_width;
 	this.height = 					arg_height;
 	this.image = 					new Image();
@@ -61,9 +57,7 @@ function HurtBlock(x_pos, y_pos, arg_width, arg_height) {
 }
 
 function Item(x_pos, y_pos, passed_image) {
-	this.position = 				{};
-	this.position.x = 				x_pos;
-	this.position.y = 				y_pos;
+	this.position = 				new Position(x_pos, y_pos);
 	this.image = 					passed_image;
 	this.width  = 					25;
 	this.height = 					25;
@@ -95,9 +89,7 @@ function Item(x_pos, y_pos, passed_image) {
 
 function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second) {
 	this.contains = 				item_number;
-	this.position = 				{};
-	this.position.x = 				x_pos;
-	this.position.y = 				y_pos;
+	this.position = 				new Position(x_pos, y_pos);
 	this.image = 					passed_image;
 	this.width  = 					25;
 	this.height = 					25;
@@ -138,9 +130,7 @@ function InfoBox(x_center, y_pos, arg_message) {
 	this.pixels = 					{};
 	this.pixels.height = 			16;
 	this.pixels.width = 			11;
-	this.position = 				{};
-	this.position.x = 				x_center-this.width/2+blocksize/2;
-	this.position.y = 				y_pos;
+	this.position = 				new Position(x_center, y_pos);
 	this.title = 					{};
 	this.title.height = 			25;
 	this.title.text = 				"Game Hint:"
@@ -216,48 +206,51 @@ function InfoBox(x_center, y_pos, arg_message) {
 	}
 }
 
-function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text) {
-	this.position = 				{};
-	this.position.x = 				x_pos;
-	this.position.y = 				y_pos;
+function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text, callback) {
+	this.visible = 					true;
+	this.position = 				new Position(x_pos, y_pos);
 	this.width = 					b_width;
 	this.height = 					b_height;
 	this.text = 					b_text;
 	this.stroke = 					b_stroke;
 	this.fill = 					b_fill;
+	this.callback = 				callback;
 
 	this.draw = function() {
-    	ctx.strokeStyle = this.stroke;
-    	ctx.fillStyle = this.fill;
 
-		ctx.lineWidth   = 1;
-		ctx.font = '20px Calibri';
+		if(this.visible){
+			ctx.strokeStyle = this.stroke;
+	    	ctx.fillStyle = this.fill;
 
-		var textWidth = ctx.measureText(this.text).width;
-		var textHeight = ctx.measureText(this.text).height;
-		var textX = this.position.x + this.width/2 - textWidth/2;
+			ctx.lineWidth   = 1;
+			ctx.font = '20px Calibri';
+
+			var textWidth = ctx.measureText(this.text).width;
+			var textHeight = ctx.measureText(this.text).height;
+			var textX = this.position.x + this.width/2 - textWidth/2;
 
 
-		var lingrad = ctx.createLinearGradient(0,0,0,150);
-	    lingrad.addColorStop(0, '#00ABEB');
-	    lingrad.addColorStop(0.5, '#fff');
-	    lingrad.addColorStop(0.5, '#66CC00');
-	    lingrad.addColorStop(1, '#fff');
+			var lingrad = ctx.createLinearGradient(0,0,0,150);
+		    lingrad.addColorStop(0, '#00ABEB');
+		    lingrad.addColorStop(0.5, '#fff');
+		    lingrad.addColorStop(0.5, '#66CC00');
+		    lingrad.addColorStop(1, '#fff');
 
-    	ctx.fillStyle = lingrad;
+	    	ctx.fillStyle = lingrad;
 
-    	ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
-    	ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+	    	ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+	    	ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
 
-    	if(this.clicked()){
-    		ctx.fillStyle = "#FF0000";
-    	} else if(this.hover()){
-    		ctx.fillStyle = "#00FF00";
-    	} else {
-    		ctx.fillStyle = this.stroke;
-    	}
+	    	if(this.hover()){
+	    		ctx.fillStyle = "#00FF00";
+	    	} else {
+	    		ctx.fillStyle = this.stroke;
+	    	}
+	    	
+	    	ctx.fillText(this.text, textX, this.position.y + this.height/2 + 7);
+
+		}
     	
-    	ctx.fillText(this.text, textX, this.position.y + this.height/2 + 7);
    
    	}
 
@@ -267,7 +260,13 @@ function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text) {
 	}
 
 	this.clicked = function(){
-		return Controller.mouse.click.y <= this.position.y+this.height && Controller.mouse.click.y >= this.position.y
-		&& Controller.mouse.click.x <= this.position.x+this.width && Controller.mouse.click.x >=this.position.x && Controller.mouse.click.left;
+		if(Controller.mouse.click.y <= this.position.y+this.height && Controller.mouse.click.y >= this.position.y
+			&& Controller.mouse.click.x <= this.position.x+this.width && Controller.mouse.click.x >=this.position.x && Controller.mouse.click.left){
+
+			if(this.callback){
+				this.callback();
+			}
+		}
+		
 	}
 }

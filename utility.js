@@ -23,16 +23,21 @@
         };
 }());
 
-function Timer(end_time, repeat, curr_game) {
-	IN_ACTION = 10;
-	DONE = 		11;
+function Position(x_pos, y_pos){
+	this.x = 	 			x_pos;  // x pos
+	this.y = 	  			y_pos;	// y pos
+}
 
-	this.loop = repeat;
-	this.game = curr_game;
-	this.time = {};
-	this.time.current = 0;
-	this.time.end = end_time;
-	this.status = IN_ACTION;
+function Timer(end_time, repeat, curr_game) {
+	IN_ACTION = 			10;
+	DONE = 					11;
+
+	this.loop = 			repeat;
+	this.game = 			curr_game;
+	this.time = 			{};
+	this.time.current = 	0;
+	this.time.end = 		end_time;
+	this.status = 			IN_ACTION;
 
 	UpdateManager.push(this);
 
@@ -59,23 +64,60 @@ function Timer(end_time, repeat, curr_game) {
 }
 
 function Animation(imageUrlArray, duration, repeat, curr_game){
-	this.game = curr_game;
-	this.status = IN_ACTION;
-	this.imageArray = new Array(imageUrlArray.length-1);
-	parent = this;
+	IN_ACTION = 10;
+	DONE = 		11;
+
+	this.duration = 	duration;
+	this.repeat = 		repeat;
+	this.game = 		curr_game;
+	this.status = 		IN_ACTION;
+	this.timer = 		null;
+	this.imageArray = 	new Array(imageUrlArray.length-1);
+	parent = 			this;
 
 	for(var i = 0; i<imageUrlArray.length; i++){
 		this.imageArray[i] = new Image();
 		this.imageArray[i].src = imageUrlArray[i];
 	}
 
-	this.timer = new Timer(duration, repeat, this.game);
-
-	this.frame = {};
+	this.frame = 		{};
 
 	this.current = function(){
+		if(this.timer == null){
+			this.timer = new Timer(this.duration, this.repeat, this.game);	// if a timer doesn't exist for animation, create it
+		}
 		this.status = this.timer.status;
 		return this.imageArray[ Math.round( (this.timer.time.current / this.timer.time.end) * (this.imageArray.length-1) ) ];
+	}
+}
+
+function PlaceableAnimation(x_pos, y_pos, imageUrlArray, duration, repeat, curr_game){
+	IN_ACTION = 		10;
+	DONE = 				11;
+
+	this.animation = 	new Animation(imageUrlArray, duration, repeat, curr_game);
+	this.position = 	new Position(x_pos, y_pos);
+
+	this.update = function(x_change){
+   		this.position.x += x_change;
+
+   		// if the timer's status is DONE, remove this animation from the update manager.
+   		// (never happens if the animation loops)
+   		if(this.animation.timer.status == DONE){
+   			for(i = 0; i<UpdateManager.length; i++){
+				if(this == UpdateManager[i]){
+					UpdateManager.splice(i, 1);
+				}
+			}
+   		}
+   	}
+
+   	this.current = function(){
+		return this.animation.current();
+	}
+
+	this.draw = function(){
+		ctx.drawImage(this.current(), Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength);
 	}
 }
 
@@ -198,19 +240,19 @@ function collisionAction(movable, stationary){
 					
 					stationary.state = DEAD;
 					movable.sounds.splat.currentTime = 0;
-					movable.sounds.splat.play();
+					if(music) movable.sounds.splat.play();
 
 				} else {
 					movable.state = DEAD;
 					movable.sounds.boom.currentTime = 0;
-					movable.sounds.boom.play();
+					if(music) movable.sounds.boom.play();
 					console.log("Sound start.");
 				}
 	} else if (movable instanceof Player && stationary instanceof HurtBlock){
 				if(depthY != 0 || depthX != 0){
 					movable.state = DEAD;
 					movable.sounds.boom.currentTime = 0;
-					movable.sounds.boom.play();
+					if(music) movable.sounds.boom.play();
 					console.log("Sound start.");
 				}
 				return true;

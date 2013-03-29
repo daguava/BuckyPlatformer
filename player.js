@@ -9,9 +9,7 @@ function Player(x_pos, y_pos, curr_game) {
 	this.jump = 					{};
 	this.jump.toggle = 				false;
 	this.jump.release = 			true;
-	this.position = 				{};
-	this.position.x = 	 			x_pos;  // x pos
-	this.position.y = 	  			y_pos;	// y pos
+	this.position = 				new Position(x_pos, y_pos);
 	this.vel = 						{};
 	this.vel.x =					0;		// x speed
 	this.vel.y =					0;		// y speed
@@ -35,6 +33,7 @@ function Player(x_pos, y_pos, curr_game) {
 	this.sounds.jump = 				new Audio("sounds/jump.wav");
 	this.sounds.splat = 			new Audio("sounds/splat.wav");
 	this.sounds.boom = 				new Audio("sounds/boom.ogg");
+	this.sounds.boom.volume = 		0.2;
 
 	this.test_tween = 				new MotionTween(300, 300, 600, 400, 240, this.game);
 
@@ -42,35 +41,38 @@ function Player(x_pos, y_pos, curr_game) {
 	this.alcohol.drunk = 			false;
 	this.alcohol.effect_start = 	5;
 	this.alcohol.effect_end = 		5;
+
 	this.anim = 					{};
+	this.anim.status = 				null;
+
 	this.animations = new Array(
 		new Array(
-			new Animation(new Array("images/bucky/bucky_right.gif"), 1, false, this.game),
+			new Animation(new Array("images/bucky/bucky_right.gif"), 1, true, this.game),
 			STILL,
 			RIGHT
 		),
 		new Array(
-			new Animation( new Array("images/bucky/bucky_left.gif"), 1, false, this.game ),
+			new Animation( new Array("images/bucky/bucky_left.gif"), 1, true, this.game ),
 			STILL,
 			LEFT
 		),
 		new Array(
-			new Animation( new Array("images/bucky/bucky_right_jump.gif"), 1, false, this.game ),
+			new Animation( new Array("images/bucky/bucky_right_jump.gif"), 1, true, this.game ),
 			JUMPING,
 			RIGHT
 		),
 		new Array(
-			new Animation( new Array("images/bucky/bucky_left_jump.gif"), 1, false, this.game ),
+			new Animation( new Array("images/bucky/bucky_left_jump.gif"), 1, true, this.game ),
 			JUMPING,
 			LEFT
 		),
 		new Array(
-			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, false, this.game ),
+			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, true, this.game ),
 			ATTACKING,
 			RIGHT
 		),
 		new Array(
-			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, false, this.game ),
+			new Animation( new Array("images/bucky/bucky_left.gif", "images/bucky/bucky_normal.gif"), 30, true, this.game ),
 			ATTACKING,
 			LEFT
 		),
@@ -85,7 +87,7 @@ function Player(x_pos, y_pos, curr_game) {
 			LEFT
 		),
 		new Array(
-			new Animation( new Array("images/bucky/bucky_dead1.gif", "images/bucky/bucky_dead2.gif"), 9, true, this.game ),
+			new Animation( new Array("images/animations/explosion/explosion1.gif", "images/animations/explosion/explosion2.gif", "images/animations/explosion/explosion3.gif", "images/animations/explosion/explosion4.gif", "images/animations/explosion/explosion5.gif", "images/animations/explosion/explosion6.gif", "images/animations/explosion/explosion7.gif", "images/animations/explosion/explosion8.gif", "images/animations/explosion/explosion9.gif", "images/animations/explosion/explosion10.gif", "images/animations/explosion/explosion11.gif", "images/animations/explosion/explosion12.gif", "images/animations/explosion/explosion13.gif", "images/animations/explosion/explosion14.gif", "images/animations/explosion/explosion15.gif", "images/animations/explosion/explosion16.gif", "images/animations/explosion/explosion17.gif", "images/animations/explosion/explosion18.gif", "images/animations/explosion/explosion19.gif", "images/animations/explosion/explosion20.gif", "images/animations/explosion/explosion21.gif", "images/animations/explosion/explosion22.gif", "images/animations/explosion/explosion23.gif", "images/animations/explosion/explosion24.gif"), 60, false, this.game ),
 			DEAD,
 			null
 		)
@@ -96,11 +98,14 @@ function Player(x_pos, y_pos, curr_game) {
 		for(i = 0; i<this.animations.length; i++){
 			if(this.state == this.animations[i][1] && (this.vel.dir.last == this.animations[i][2] || this.animations[i][2] == null)){
 				this.draw.image = this.animations[i][0].current();
+				this.anim.status = this.animations[i][0].status;
 			}
 		}
 
-		ctx.drawImage(this.draw.image, this.position.x, this.position.y+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/blocksize/blocksize*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
-   		
+		if(this.draw.image && this.anim.status != DONE){
+			ctx.drawImage(this.draw.image, this.position.x, this.position.y+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/blocksize/blocksize*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
+   		}
+		
    		if(debugging){
 			ctx.strokeStyle = "#999999";
 			ctx.fillStyle = 'rgba(100,100,100, 0.25)';
@@ -118,6 +123,7 @@ function Player(x_pos, y_pos, curr_game) {
 		 Based on controller input, determine how to change acceleration
 		 ********************************************************************/
 		if(this.state != DEAD){
+
 			if(Controller.shift){
 				if(Controller.right){
 					if(this.vel.x<0){
@@ -148,11 +154,10 @@ function Player(x_pos, y_pos, curr_game) {
 				}
 			}
 
-
 			if(Controller.left || Controller.right){
 				this.vel.x += this.vel.accel.x
 			} else {
-				this.vel.x *= 0.70;
+				this.vel.x *= 0.80;
 			}
 
 			if(!Controller.shift && ((this.vel.x > 2.5 && Controller.right) || (this.vel.x < -2.5 && Controller.left))){
@@ -186,7 +191,7 @@ function Player(x_pos, y_pos, curr_game) {
 				this.vel.y = -8.0;
 				this.jump.toggle = !this.jump.toggle;
 				this.sounds.jump.currentTime = 0;
-				this.sounds.jump.play();
+				if(music) this.sounds.jump.play();
 			}
 
 			if(!this.jump.toggle && !Controller.space && this.vel.y < 0 && !this.jump.release){
@@ -235,7 +240,6 @@ function Player(x_pos, y_pos, curr_game) {
 			x_change = this.vel.x * this.vel.dir.x * curr_game.physCorrect;
 			y_change = this.vel.y * this.vel.dir.y * curr_game.physCorrect;
 
-
 			/********************************************************************
 			 Update X Position
 			 Determine whether to move Player or Camera, then do it
@@ -251,7 +255,8 @@ function Player(x_pos, y_pos, curr_game) {
 						|| temp instanceof Item
 						|| temp instanceof Enemy
 						|| temp instanceof InfoBox
-						|| temp instanceof HurtBlock){
+						|| temp instanceof HurtBlock
+						|| temp instanceof PlaceableAnimation){
 
 						temp.update(-x_change);
 
