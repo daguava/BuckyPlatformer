@@ -11,6 +11,7 @@
 
 /* BugList {Come back to, maybe? :(  }
 -- Timer's automatic removal can cause items first in UpdateManager to not draw for a frame
+---- this same bug can cause some element's positions to not get updated.
 */
 
 // debugging
@@ -485,7 +486,12 @@ function draw_world() {
 			|| temp instanceof HurtBlock
 			|| temp instanceof PlaceableAnimation){
 			temp.draw();
-		} else if (temp instanceof Timer){
+		}
+	}
+
+	for(var i = 0; i<UpdateManager.length; i++){
+		temp = UpdateManager[i];
+		if (temp instanceof Timer){
 			temp.update();
 		}
 	}
