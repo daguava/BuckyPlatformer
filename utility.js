@@ -43,7 +43,7 @@ function Timer(end_time, repeat, curr_game) {
 
 	this.physics = function() {
 		if(this.status == IN_ACTION){
-			this.time.current += curr_game.drawCorrect;
+			this.time.current += curr_game.physCorrect * physExecuteMs / 16.667;
 		}
 		if(this.time.current >= this.time.end){
 			if(!this.loop){

@@ -72,7 +72,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 
 		this.position.x += BuckyGame.camera.offset;
 
-		if(this.profile.walk.enabled && Math.abs(this.position.x - Buckingham.position.x) < BuckyGame.boundary.x * 1.1 & this.state != DEAD){
+		if(this.profile.walk.enabled && Math.abs(this.position.x - Buckingham.position.x) < BuckyGame.boundary.x * 1.1){
 			if(this.collided && this.collided_last_frame){
 				this.vel.dir.x *= -1;
 				this.collided = false;
