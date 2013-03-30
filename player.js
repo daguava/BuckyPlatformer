@@ -117,7 +117,9 @@ function Player(x_pos, y_pos, curr_game) {
 		}
    	}
 
-	this.update = function() {
+	this.physics = function() {
+
+		this.position.x += this.game.camera.offset;
 
 		/********************************************************************
 		 Based on controller input, determine how to change acceleration
@@ -191,7 +193,7 @@ function Player(x_pos, y_pos, curr_game) {
 				this.vel.y = -8.0;
 				this.jump.toggle = !this.jump.toggle;
 				this.sounds.jump.currentTime = 0;
-				if(music) this.sounds.jump.play();
+				this.sounds.jump.play();
 			}
 
 			if(!this.jump.toggle && !Controller.space && this.vel.y < 0 && !this.jump.release){
@@ -214,9 +216,9 @@ function Player(x_pos, y_pos, curr_game) {
 			}
 
 			if(this.jump.toggle){
-				if(this.vel.x > 0){
+				if(this.vel.x > 0.01){
 					this.state = WALKING;
-				} else if(this.vel.x < 0) {
+				} else if(this.vel.x < -0.01) {
 					this.state = WALKING;
 				} else {
 					this.state = STILL;
@@ -246,29 +248,7 @@ function Player(x_pos, y_pos, curr_game) {
 			 Also apply the change in position to all items that need it
 			 *********************************************************************/
 
-			if( (this.position.x >= 350 && this.vel.x > 0) || (this.position.x <= 200 && this.vel.x < 0) ){
-				// move platforms
-				for(i = 0; i<UpdateManager.length; i++){
-					temp = UpdateManager[i];
-					if(    temp instanceof Block 
-						|| temp instanceof ItemBlock 
-						|| temp instanceof Item
-						|| temp instanceof Enemy
-						|| temp instanceof InfoBox
-						|| temp instanceof HurtBlock
-						|| temp instanceof PlaceableAnimation){
-
-						temp.update(-x_change);
-
-					}
-				}
-
-				curr_game.drawOffset -= x_change;
-
-			} else {
-				this.position.x += x_change;
-			}
-
+			this.position.x += x_change;
 
 			this.position.y += y_change;
 
@@ -291,6 +271,18 @@ function Player(x_pos, y_pos, curr_game) {
 					collisionAction(this,temp);
 				}
 			}
-		} 
+
+			
+		}
+
+		if(this.position.x >= BuckyGame.camera.boundary.right && this.vel.x > 0){
+			BuckyGame.camera.offset = -(this.position.x-BuckyGame.camera.boundary.right);
+		} else if(this.position.x <= BuckyGame.camera.boundary.left && this.vel.x < 0){
+			BuckyGame.camera.offset = BuckyGame.camera.boundary.left-this.position.x;
+		} else {
+			BuckyGame.camera.offset = 0;
+		}
+
+		BuckyGame.drawOffset += BuckyGame.camera.offset;
 	}
 }

@@ -21,9 +21,9 @@ function Block(x_pos, y_pos, arg_width, arg_height) {
 		}
 	}
 
-	this.update = function(x_change) {
+	this.physics = function(x_change) {
 		// update x and y position
-		this.position.x += x_change;
+		this.position.x += BuckyGame.camera.offset;
 	}
 }
 
@@ -50,9 +50,9 @@ function HurtBlock(x_pos, y_pos, arg_width, arg_height) {
 		}
 	}
 
-	this.update = function(x_change) {
+	this.physics = function(x_change) {
 		// update x and y position
-		this.position.x += x_change;
+		this.position.x += BuckyGame.camera.offset;
 	}
 }
 
@@ -81,9 +81,9 @@ function Item(x_pos, y_pos, passed_image) {
 		}
    	}
 
-	this.update = function(x_change) {
+	this.physics = function(x_change) {
 		// update x and y position
-		this.position.x += x_change;
+		this.position.x += BuckyGame.camera.offset;
 	}
 }
 
@@ -117,9 +117,9 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 		}
    	}
 
-	this.update = function(x_change) {
+	this.physics = function(x_change) {
 		// update x and y position
-		this.position.x += x_change;
+		this.position.x += BuckyGame.camera.offset;
 	}
 }
 
@@ -164,8 +164,8 @@ function InfoBox(x_center, y_pos, arg_message) {
 		
 	}
 
-	this.update = function(x_change){
-   		this.position.x += x_change;
+	this.physics = function(x_change){
+   		this.position.x += BuckyGame.camera.offset;
    	}
 
 	this.draw = function() {
@@ -222,6 +222,10 @@ function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text, callb
 	this.stroke = 					b_stroke;
 	this.fill = 					b_fill;
 	this.callback = 				callback;
+
+	this.physics = function(){
+		this.clicked();
+	}
 
 	this.draw = function() {
 

@@ -41,7 +41,7 @@ function Timer(end_time, repeat, curr_game) {
 
 	UpdateManager.push(this);
 
-	this.update = function() {
+	this.physics = function() {
 		if(this.status == IN_ACTION){
 			this.time.current += curr_game.drawCorrect;
 		}
@@ -98,7 +98,7 @@ function PlaceableAnimation(x_pos, y_pos, imageUrlArray, duration, repeat, curr_
 	this.animation = 	new Animation(imageUrlArray, duration, repeat, curr_game);
 	this.position = 	new Position(x_pos, y_pos);
 
-	this.update = function(x_change){
+	this.physics = function(x_change){
    		this.position.x += x_change;
 
    		// if the timer's status is DONE, remove this animation from the update manager.
@@ -239,21 +239,23 @@ function collisionAction(movable, stationary){
 					}
 					
 					stationary.state = DEAD;
-					movable.sounds.splat.currentTime = 0;
-					if(music) movable.sounds.splat.play();
+
+					if(movable.sounds.boom.currentTime){
+						movable.sounds.splat.currentTime = 0;
+						movable.sounds.splat.play();
+					}
+					
 
 				} else {
 					movable.state = DEAD;
 					movable.sounds.boom.currentTime = 0;
-					if(music) movable.sounds.boom.play();
-					console.log("Sound start.");
+					movable.sounds.boom.play();
 				}
 	} else if (movable instanceof Player && stationary instanceof HurtBlock){
 				if(depthY != 0 || depthX != 0){
 					movable.state = DEAD;
 					movable.sounds.boom.currentTime = 0;
-					if(music) movable.sounds.boom.play();
-					console.log("Sound start.");
+					movable.sounds.boom.play();
 				}
 				return true;
 	}

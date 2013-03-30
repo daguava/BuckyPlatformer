@@ -73,7 +73,7 @@ function Player(x_pos, y_pos, curr_game) {
 		ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
    	}
 
-	this.update = function() {
+	this.physics = function() {
 
 		if(Controller.right){
 			this.x += 2;
@@ -323,7 +323,7 @@ function physics(){
 	}
 
 	// Go to the player's update method. Used to update player based on keyboard and other criteria
-	CurrentPlayer.update();
+	CurrentPlayer.physics();
 
 }
 

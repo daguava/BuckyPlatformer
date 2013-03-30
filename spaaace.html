@@ -102,7 +102,7 @@ function Timer(end_time, repeat, curr_game) {
 
 	UpdateManager.push(this);
 
-	this.update = function() {
+	this.physics = function() {
 		if(this.status == IN_ACTION){
 			this.time.current += curr_game.drawCorrect;
 		}
@@ -204,7 +204,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y), this.width, this.height);
    	}
 
-   	this.update = function(x_change){
+   	this.physics = function(x_change){
    		this.position.x += x_change;
    	}
 
@@ -311,7 +311,7 @@ function Player(x_pos, y_pos, curr_game) {
 		ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
    	}
 
-	this.update = function() {
+	this.physics = function() {
 
 		/********************************************************************
 		 Based on controller input, determine how to change acceleration
@@ -606,7 +606,7 @@ function Block(x_pos, y_pos, arg_width, arg_height) {
 		}
 	}
 
-	this.update = function(x_change) {
+	this.physics = function(x_change) {
 		// update x and y position
 		this.position.x += x_change;
 	}
@@ -639,7 +639,7 @@ function Item(x_pos, y_pos, passed_image) {
 		}
    	}
 
-	this.update = function(x_change) {
+	this.physics = function(x_change) {
 		// update x and y position
 		this.position.x += x_change;
 	}
@@ -677,7 +677,7 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 		}
    	}
 
-	this.update = function(x_change) {
+	this.physics = function(x_change) {
 		// update x and y position
 		this.position.x += x_change;
 	}
@@ -1250,7 +1250,7 @@ function physics(){
 		if(BuckyGame.physCorrect > 3) BuckyGame.physCorrect = 3;
 	}
 	// print stats out to the screen
-	Buckingham.update();
+	Buckingham.physics();
 
 	for(var i = 0; i<UpdateManager.length; i++){
 		if(UpdateManager[i] instanceof Enemy){
@@ -1337,7 +1337,7 @@ function draw_world() {
 			|| temp instanceof Enemy){
 			temp.draw();
 		} else if (temp instanceof Timer){
-			temp.update();
+			temp.physics();
 		}
 	}
 

@@ -63,7 +63,7 @@ var framecount = 		0;
 var physicsTimer = 		null;
 var physExecuteMs = 	7;
 var drawExecuteMs = 	16.667;
-var physicsDelta = 		null;
+var physicsDelta = 		physExecuteMs;
 var drawTimer = 		null;
 var graphics_drawTimer= null;
 var drawDelta = 		null;
@@ -72,21 +72,32 @@ var statsDiv;
 var itemTypes;
 
 function Game(x_boundary, y_boundary){
-	this.boundary =   {};
-	this.boundary.x = x_boundary;	// x-coord boundary
-	this.boundary.y = y_boundary;	// y-coord boundary
-	this.clearColor = "#7ADAE1";	// initial clear color is null
-	this.state = null;
-	this.drawOffset = 0;
-	this.drunkTime = 0;
-	this.drunkPeriod = 5;
-	this.drunkTimeIncrement = 0.05;
-	this.drunkStrength = 0;
-	this.drunkStrengthIncrement = 1;
-	this.drunkStrengthLimit = 50;
-	this.physCorrect = 1;
-	this.drawCorrect = 1;
-	this.initialized = null;
+	this.boundary =   				{};
+	this.boundary.x = 				x_boundary;	// x-coord boundary
+	this.boundary.y = 				y_boundary;	// y-coord boundary
+	this.clearColor = 				"#7ADAE1";	// initial clear color is null
+	this.state = 					null;
+	this.drawOffset = 				0;
+	this.drunkTime = 				0;
+	this.drunkPeriod = 				5;
+	this.drunkTimeIncrement = 		0.05;
+	this.drunkStrength = 			0;
+	this.drunkStrengthIncrement = 	1;
+	this.drunkStrengthLimit = 		50;
+	this.physCorrect = 				1;
+	this.drawCorrect = 				1;
+	this.initialized = 				null;
+	this.camera = 					{};
+	this.camera.offset = 			0;
+	this.camera.boundary = 			{};
+	this.camera.boundary.left = 	200;
+	this.camera.boundary.right = 	350;
+	this.camera.offset = 			0;
+
+	this.update = function(x_change){
+   		this.camera.offset = x_change;
+   		this.drawOffset += x_change;
+   	}
 
 	this.resetGame = function() {
 		window.cancelAnimationFrame(animId);
@@ -119,7 +130,7 @@ function begin_game() {
 	statsDiv = document.getElementById("fps");
 
 	// reset timing variables to prevent odd behavior upon reset
-	physicsDelta = 		null;
+	physicsDelta = 		physExecuteMs;
 	drawTimer = 		null;
 	graphics_drawTimer= null;
 	drawDelta = 		null;
@@ -227,7 +238,7 @@ function begin_game() {
 	UpdateManager.push(TestPlaceableAnimation);
 
 	// define parallax background
-	Background = new Parallax("images/backgrounds/parallax_test_2.png", 0.3, BuckyGame);
+	Background = new Parallax("images/backgrounds/test_background.jpg", 0.3, BuckyGame);
 
 	// map already included by a separate map.js file
 	imageMap = new Array(map.length);
@@ -387,18 +398,22 @@ function physics(){
 		if(BuckyGame.physCorrect > 3) BuckyGame.physCorrect = 3;
 	}
 	// print stats out to the screen
-	Buckingham.update();
+	Buckingham.physics();
 
 	for(var i = 0; i<UpdateManager.length; i++){
-		if(UpdateManager[i] instanceof Enemy){
-			UpdateManager[i].physics();
-			if(UpdateManager[i].state == DEAD){
-				UpdateManager.splice(i, 1);
-			}
-		} else if(UpdateManager[i] instanceof Button){
-			UpdateManager[i].clicked();
-		}
+		UpdateManager[i].physics(BuckyGame.camera.offset);
 	}
+
+	// for(var i = 0; i<UpdateManager.length; i++){
+	// 	if(UpdateManager[i] instanceof Enemy){
+	// 		UpdateManager[i].physics();
+	// 		if(UpdateManager[i].state == DEAD){
+	// 			UpdateManager.splice(i, 1);
+	// 		}
+	// 	} else if(UpdateManager[i] instanceof Button){
+	// 		UpdateManager[i].clicked();
+	// 	}
+	// }
 
 }
 
@@ -461,12 +476,12 @@ function draw_world() {
 		}
 	}
 
-	for(var i = 0; i<UpdateManager.length; i++){
-		temp = UpdateManager[i];
-		if (temp instanceof Timer){
-			temp.update();
-		}
-	}
+	// for(var i = 0; i<UpdateManager.length; i++){
+	// 	temp = UpdateManager[i];
+	// 	if (temp instanceof Timer){
+	// 		temp.physics(BuckyGame.camera.offset);
+	// 	}
+	// }
 
 	Buckingham.draw();
 	ResetButton.draw();
@@ -474,7 +489,6 @@ function draw_world() {
 	// draw out stats container
 	if(debugging_text || debugging){
 		if(framecount == 0){
-			console.log("happened");
 			statsBox = new InfoBox(BuckyGame.boundary.x-260, 10, 		 
 			  String(
 			  	  "PhysDelta:     " 

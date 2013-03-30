@@ -60,13 +60,19 @@ function Enemy(x_pos, y_pos, curr_game) {
 		ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
    	}
 
-   	this.update = function(x_change){
-   		this.position.x += x_change;
-   	}
+	this.physics = function(x_change) {
 
-	this.physics = function() {
+		if(this.state == DEAD){
+			for(var i = 0; i < UpdateManager.length; i++){
+				if(UpdateManager[i] == this){
+					UpdateManager.splice(i, 1);
+				}
+			}
+		}
 
-		if(this.profile.walk.enabled){
+		this.position.x += BuckyGame.camera.offset;
+
+		if(this.profile.walk.enabled && Math.abs(this.position.x - Buckingham.position.x) < BuckyGame.boundary.x * 1.1 & this.state != DEAD){
 			if(this.collided && this.collided_last_frame){
 				this.vel.dir.x *= -1;
 				this.collided = false;
