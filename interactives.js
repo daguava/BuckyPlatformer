@@ -27,6 +27,45 @@ function Block(x_pos, y_pos, arg_width, arg_height) {
 	}
 }
 
+function TileMenu(){
+	this.drawnLastFrame = false;
+	this.physics = function(){
+		// nothing for now
+	}
+	this.draw = function(){
+		if(Controller.mouse.click.right){
+			ctx.fillRect(Controller.mouse.click.x-1, Controller.mouse.click.y-1, blocksize + 2, EditorTilesetArray.length * blocksize + 2);
+			for(var i = 0; i<EditorTilesetArray.length; i++){
+				ctx.drawImage(EditorTilesetArray[i].tileArray[0], Controller.mouse.click.x, Controller.mouse.click.y + i*blocksize, blocksize, blocksize);
+			}
+			this.drawnLastFrame = true;
+			this.hover();
+		} else if (this.drawnLastFrame){
+			// determine what option user was hovering over at the time
+			this.drawnLastFrame = false;
+			this.select();
+		}
+		
+	}
+
+	this.hover = function(){
+		if(Controller.mouse.move.x > Controller.mouse.click.x 
+			&& Controller.mouse.move.x < Controller.mouse.click.x + blocksize
+			&& Controller.mouse.move.y > Controller.mouse.click.y
+			&& Controller.mouse.move.y < Controller.mouse.click.y + EditorTilesetArray.length * blocksize){
+			ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+			ctx.strokeStyle = "#55FF55";
+			ctx.lineWidth = 2;
+			ctx.fillRect(Controller.mouse.click.x, Controller.mouse.click.y+Math.floor((Controller.mouse.move.y-Controller.mouse.click.y)/blocksize)*blocksize, blocksize, blocksize);
+			ctx.strokeRect(Controller.mouse.click.x, Controller.mouse.click.y+Math.floor((Controller.mouse.move.y-Controller.mouse.click.y)/blocksize)*blocksize, blocksize, blocksize);
+		}
+	}
+
+	this.select = function(){
+		// coming soonish?!?
+	}
+}
+
 function HurtBlock(x_pos, y_pos, arg_width, arg_height) {
 	this.position = 				new Position(x_pos, y_pos);
 	this.width = 					arg_width;
@@ -123,7 +162,7 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 	}
 }
 
-function InfoBox(x_center, y_pos, arg_message) {
+function InfoBox(x_center, y_pos, arg_title, arg_message) {
 	this.width = 					250;
 	this.height = 					null;
 	this.font = 					"12pt Courier";
@@ -133,7 +172,7 @@ function InfoBox(x_center, y_pos, arg_message) {
 	this.position = 				new Position(x_center, y_pos);
 	this.title = 					{};
 	this.title.height = 			25;
-	this.title.text = 				"Game Hint:"
+	this.title.text = 				arg_title;
 	this.message = 					arg_message;
 	this.wordArray = 				this.message.split(" ");
 	this.lineArray = 				Array();
