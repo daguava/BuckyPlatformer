@@ -276,9 +276,9 @@ function Player(x_pos, y_pos, curr_game) {
 		}
 
 		if(this.position.x >= BuckyGame.camera.boundary.right && this.vel.x > 0){
-			BuckyGame.camera.offset = -(this.position.x-BuckyGame.camera.boundary.right);
+			BuckyGame.camera.offset = -(this.position.x-BuckyGame.camera.boundary.right) * BuckyGame.camera.lag;
 		} else if(this.position.x <= BuckyGame.camera.boundary.left && this.vel.x < 0){
-			BuckyGame.camera.offset = BuckyGame.camera.boundary.left-this.position.x;
+			BuckyGame.camera.offset = (BuckyGame.camera.boundary.left-this.position.x) * BuckyGame.camera.lag;
 		} else {
 			BuckyGame.camera.offset = 0;
 		}

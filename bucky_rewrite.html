@@ -93,6 +93,7 @@ function Game(x_boundary, y_boundary){
 	this.camera.boundary.left = 	200;
 	this.camera.boundary.right = 	350;
 	this.camera.offset = 			0;
+	this.camera.lag = 				0.1333;
 
 	this.update = function(x_change){
    		this.camera.offset = x_change;

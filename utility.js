@@ -239,11 +239,9 @@ function collisionAction(movable, stationary){
 					}
 					
 					stationary.state = DEAD;
+					movable.sounds.splat.currentTime = 0;
+					movable.sounds.splat.play();
 
-					if(movable.sounds.boom.currentTime){
-						movable.sounds.splat.currentTime = 0;
-						movable.sounds.splat.play();
-					}
 					
 
 				} else {
