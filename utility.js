@@ -235,7 +235,7 @@ function collisionAction(movable, stationary){
 					if(Controller.space){
 						movable.vel.y = -8;
 					} else {
-						movable.vel.y = -5;
+						movable.vel.y = -4;
 					}
 					
 					stationary.state = DEAD;

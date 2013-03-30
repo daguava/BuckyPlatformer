@@ -9,12 +9,12 @@
 
 <script type = "text/javascript">
 
-/* BugList {Come back to, maybe? :(  }
--- Timer's automatic removal can cause items first in UpdateManager to not draw for a frame
----- this same bug can cause some element's positions to not get updated.
+/* BugList
+-- Timer's automatic removal can cause another single timer to not get updated that tick - low impact
 */
 
 // debugging
+var editor_mode = 		true;
 var debugging = 		false;
 var debugging_text = 	true;
 var music = 			false;
@@ -209,7 +209,7 @@ function begin_game() {
 	// declare initial objects (Controller, Game, Player, etc)
 	Controller = new Control();
 	BuckyGame = new Game(1200, 600);
-	Buckingham = new Player(225, 300, BuckyGame);
+	Buckingham = new Player(225, 0, BuckyGame);
 
 	TestInfo = new InfoBox(500, 100, "Bacon ipsum dolor sit amet brisket pork belly short loin, sausage ham hock kielbasa swine pork.");
 	UpdateManager.push(TestInfo);
@@ -228,7 +228,7 @@ function begin_game() {
 	// PLACEABLE ANIMATION TEST
 	TestPlaceableAnimation = new PlaceableAnimation(
 		250, 
-		-25, 
+		-15, 
 		new Array("images/animations/explosion/explosion1.gif", "images/animations/explosion/explosion2.gif", "images/animations/explosion/explosion3.gif", "images/animations/explosion/explosion4.gif", "images/animations/explosion/explosion5.gif", "images/animations/explosion/explosion6.gif", "images/animations/explosion/explosion7.gif", "images/animations/explosion/explosion8.gif", "images/animations/explosion/explosion9.gif", "images/animations/explosion/explosion10.gif", "images/animations/explosion/explosion11.gif", "images/animations/explosion/explosion12.gif", "images/animations/explosion/explosion13.gif", "images/animations/explosion/explosion14.gif", "images/animations/explosion/explosion15.gif", "images/animations/explosion/explosion16.gif", "images/animations/explosion/explosion17.gif", "images/animations/explosion/explosion18.gif", "images/animations/explosion/explosion19.gif", "images/animations/explosion/explosion20.gif", "images/animations/explosion/explosion21.gif", "images/animations/explosion/explosion22.gif", "images/animations/explosion/explosion23.gif", "images/animations/explosion/explosion24.gif"
 		),
 		60, 
@@ -454,7 +454,7 @@ function draw_world() {
 	for(var i = 0; i<map.length; i++){
 		for(var k = 0; k<map[i].length; k++){
 			if( (k+1)*blocksize+BuckyGame.drawOffset > 0 && (k-1)*blocksize+BuckyGame.drawOffset<BuckyGame.boundary.x){
-				if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor((i*blocksize)+Math.sin(BuckyGame.drunkTime+(k*BuckyGame.drunkPeriod)/blocksize)*BuckyGame.drunkStrength));
+				if(imageMap[i][k] != null) ctx.drawImage(imageMap[i][k], Math.floor(k*blocksize+BuckyGame.drawOffset), Math.floor((i*blocksize)+Math.sin(BuckyGame.drunkTime+(k*BuckyGame.drunkPeriod)/blocksize)*BuckyGame.drunkStrength), blocksize, blocksize);
 			}
 		}
 	}
@@ -486,6 +486,23 @@ function draw_world() {
 
 	Buckingham.draw();
 	ResetButton.draw();
+
+	if(editor_mode){
+		ctx.fillStyle = "#000000";
+		ctx.lineWidth = 1;
+		for(var i = 0; i < Math.floor(BuckyGame.boundary.y/blocksize); i++){
+			ctx.beginPath();
+			ctx.moveTo(0, i*blocksize);
+			ctx.lineTo(BuckyGame.boundary.x, i * blocksize);
+			ctx.stroke();
+		}
+		for(var i = 0; i < Math.floor(BuckyGame.boundary.x/blocksize); i++){
+			ctx.beginPath();
+			ctx.moveTo(i * blocksize+BuckyGame.drawOffset%blocksize, 0);
+			ctx.lineTo(i * blocksize+BuckyGame.drawOffset%blocksize, BuckyGame.boundary.y);
+			ctx.stroke();
+		}
+	}
 
 	// draw out stats container
 	if(debugging_text || debugging){

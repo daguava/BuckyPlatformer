@@ -103,7 +103,7 @@ function Player(x_pos, y_pos, curr_game) {
 		}
 
 		if(this.draw.image && this.anim.status != DONE){
-			ctx.drawImage(this.draw.image, this.position.x, this.position.y+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/blocksize/blocksize*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
+			ctx.drawImage(this.draw.image, Math.round(this.position.x), Math.round(this.position.y+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/blocksize/blocksize*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength), this.width, this.height);
    		}
 		
    		if(debugging){
@@ -114,6 +114,18 @@ function Player(x_pos, y_pos, curr_game) {
 			ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
 			ctx.strokeStyle = "#FF0000";
 			ctx.strokeRect(this.position.x+this.collision.width_offset/2, this.position.y+this.collision.height_offset/2, this.width-this.collision.width_offset, this.height-this.collision.height_offset);
+		}
+
+		if(this.state == DEAD){
+			ctx.font = "100pt Helvetica";
+			ctx.lineWidth = 10;
+			ctx.strokeStyle = "#000000";
+			ctx.fillStyle = "#FFFFFF";
+			ctx.strokeText("YOU DEAD,", 225+Math.random()*4, 250+Math.random()*4);
+			ctx.strokeText("    BRO? ", 225+Math.random()*4, 375+Math.random()*4);
+			ctx.fillText("YOU DEAD,", 225+Math.random()*4, 250+Math.random()*4);
+			ctx.fillText("    BRO? ", 225+Math.random()*4, 375+Math.random()*4);
+
 		}
    	}
 

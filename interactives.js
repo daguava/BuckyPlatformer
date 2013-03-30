@@ -186,7 +186,7 @@ function InfoBox(x_center, y_pos, arg_message) {
 
     	ctx.beginPath();
 		ctx.moveTo(this.position.x, this.position.y + this.title.height - (this.title.height - this.pixels.height)/2);
-		ctx.lineTo(this.position.x + this.width, this.position.y + this.title.height);
+		ctx.lineTo(this.position.x + this.width, this.position.y + this.title.height - (this.title.height - this.pixels.height)/2);
 		ctx.stroke();
 
     	if(this.clicked()){
