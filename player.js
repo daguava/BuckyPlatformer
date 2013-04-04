@@ -121,10 +121,10 @@ function Player(x_pos, y_pos, curr_game) {
 			ctx.lineWidth = 10;
 			ctx.strokeStyle = "#000000";
 			ctx.fillStyle = "#FFFFFF";
-			ctx.strokeText("YOU DEAD,", 225+Math.random()*4, 250+Math.random()*4);
-			ctx.strokeText("    BRO? ", 225+Math.random()*4, 375+Math.random()*4);
-			ctx.fillText("YOU DEAD,", 225+Math.random()*4, 250+Math.random()*4);
-			ctx.fillText("    BRO? ", 225+Math.random()*4, 375+Math.random()*4);
+			ctx.strokeText("YOU DEAD,", 125+Math.random()*4, 265+Math.random()*4);
+			ctx.strokeText("    BRO? ", 125+Math.random()*4, 390+Math.random()*4);
+			ctx.fillText("YOU DEAD,", 125+Math.random()*4, 265+Math.random()*4);
+			ctx.fillText("    BRO? ", 125+Math.random()*4, 390+Math.random()*4);
 
 		}
    	}

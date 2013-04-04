@@ -218,14 +218,14 @@ function begin_game() {
 
 	// declare initial objects (Controller, Game, Player, etc)
 	Controller = new Control();
-	BuckyGame = new Game(1200, 600);
+	BuckyGame = new Game(1000, 600);
 	Buckingham = new Player(225, 0, BuckyGame);
 
 	TestInfo = new InfoBox(500, 100, "Test Info Box:", "Bacon ipsum dolor sit amet brisket pork belly short loin, sausage ham hock kielbasa swine pork.");
 	UpdateManager.push(TestInfo);
 
 	PlayButton = new Button(500, 450, 100, 30, "#000000", "#CCCCCC", "Play Game");
-	ResetButton = new Button(650, 10, 120, 30, "#000000", "#CCCCCC", "Reset Game", 
+	ResetButton = new Button(10, 10, 120, 30, "#000000", "#CCCCCC", "Reset Game", 
 		function(){ 
 			clearInterval(statsInterval);
 			clearInterval(physInterval);
@@ -500,7 +500,7 @@ function draw_world() {
 
 	if(editor_mode){
 		ctx.fillStyle = "#000000";
-		ctx.lineWidth = 1;
+		ctx.lineWidth = 0.3;
 		for(var i = 0; i < Math.floor(BuckyGame.boundary.y/blocksize); i++){
 			ctx.beginPath();
 			ctx.moveTo(0, i*blocksize);
@@ -556,7 +556,7 @@ window.addEventListener('mousedown', mouse_down, false);
 </head>
 <body style="overflow: hidden;"  onload="page_load()" oncontextmenu="return false;">
 
-<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="1200" height="600" tabindex="1"></canvas>
+<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="1000" height="600" tabindex="1"></canvas>
 
 <div id="fps" style="width: 800px; display: inline-block; vertical-align: top;"></div>
 
