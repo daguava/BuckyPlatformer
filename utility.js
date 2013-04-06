@@ -175,7 +175,8 @@ function collisionAction(movable, stationary){
 		depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
 	}
 
-	if( (movable instanceof Player || movable instanceof Enemy) && stationary instanceof Block){
+	if( (movable instanceof Player || movable instanceof Enemy) && stationary instanceof Block ||
+		 (movable instanceof Enemy && stationary instanceof ItemBlock )){
 				if(Math.abs(depthY) < Math.abs(depthX)){ // resolve y first if true
 					movable.position.y += depthY;
 					if(depthY<0){

@@ -123,8 +123,8 @@ function Player(x_pos, y_pos, curr_game) {
 			ctx.fillStyle = "#FFFFFF";
 			ctx.strokeText("YOU DEAD,", 125+Math.random()*4, 265+Math.random()*4);
 			ctx.strokeText("    BRO? ", 125+Math.random()*4, 390+Math.random()*4);
-			ctx.fillText("YOU DEAD,", 125+Math.random()*4, 265+Math.random()*4);
-			ctx.fillText("    BRO? ", 125+Math.random()*4, 390+Math.random()*4);
+			ctx.fillText("YOU DEAD,",   125+Math.random()*4, 265+Math.random()*4);
+			ctx.fillText("    BRO? ",   125+Math.random()*4, 390+Math.random()*4);
 
 		}
    	}
@@ -283,18 +283,6 @@ function Player(x_pos, y_pos, curr_game) {
 					collisionAction(this,temp);
 				}
 			}
-
-			
 		}
-
-		if(this.position.x >= BuckyGame.camera.boundary.right && this.vel.x > 0){
-			BuckyGame.camera.offset = -(this.position.x-BuckyGame.camera.boundary.right) * BuckyGame.camera.lag;
-		} else if(this.position.x <= BuckyGame.camera.boundary.left && this.vel.x < 0){
-			BuckyGame.camera.offset = (BuckyGame.camera.boundary.left-this.position.x) * BuckyGame.camera.lag;
-		} else {
-			BuckyGame.camera.offset = 0;
-		}
-
-		BuckyGame.drawOffset += BuckyGame.camera.offset;
 	}
 }

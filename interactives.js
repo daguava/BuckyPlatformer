@@ -62,7 +62,10 @@ function TileMenu(){
 	}
 
 	this.select = function(){
-		// coming soonish?!?
+		var selected = Math.floor((Controller.mouse.move.y-Controller.mouse.click.y)/blocksize);
+		selected = (0 <= selected && selected < EditorTilesetArray.length) ? selected : null;
+		console.log("Selected is " + selected);
+		BuckyGame.editor.selected = EditorTilesetArray[selected];
 	}
 }
 

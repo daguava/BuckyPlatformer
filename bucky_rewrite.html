@@ -15,8 +15,9 @@
 
 // debugging
 var editor_mode = 		true;
-var debugging = 		false;
+var debugging = 		true;
 var debugging_text = 	true;
+var debugging_camera =  false;
 var music = 			false;
 
 	levelMusic = new Audio('music/canopy.ogg'); 
@@ -26,10 +27,6 @@ var music = 			false;
 	    if(music) this.play();
 	}, false);
 	if(music) levelMusic.play();
-
-
-
-
 
 // Global Variables
 var	IN_ACTION = 		10;
@@ -49,8 +46,8 @@ var ATTACKING =			3;
 var JUMPING =			4;
 var STILL =  			6;
 
-var LEFT = 				1;
-var RIGHT = 			2;
+var LEFT = 				-1;
+var RIGHT = 			1;
 
 var ctx;
 var blocksize = 		25;
@@ -90,15 +87,18 @@ function Game(x_boundary, y_boundary){
 	this.camera = 					{};
 	this.camera.offset = 			0;
 	this.camera.boundary = 			{};
-	this.camera.boundary.left = 	200;
-	this.camera.boundary.right = 	350;
+	this.camera.boundary.left = 	250;
+	this.camera.boundary.right = 	400;
 	this.camera.offset = 			0;
-	this.camera.lag = 				0.1333;
+	this.camera.lag = 				0.00000000000000000000001;
+	this.camera.maxSpeed = 			7;
+	this.editor = 					{};
+	this.editor.selected = 			null;
 
-	this.update = function(x_change){
-   		this.camera.offset = x_change;
-   		this.drawOffset += x_change;
-   	}
+	// this.update = function(x_change){
+ //   		this.camera.offset = x_change;
+ //   		this.drawOffset += x_change;
+ //   	}
 
 	this.resetGame = function() {
 		window.cancelAnimationFrame(animId);
@@ -219,7 +219,7 @@ function begin_game() {
 	// declare initial objects (Controller, Game, Player, etc)
 	Controller = new Control();
 	BuckyGame = new Game(1000, 600);
-	Buckingham = new Player(225, 0, BuckyGame);
+	Buckingham = new Player(300, 0, BuckyGame);
 
 	TestInfo = new InfoBox(500, 100, "Test Info Box:", "Bacon ipsum dolor sit amet brisket pork belly short loin, sausage ham hock kielbasa swine pork.");
 	UpdateManager.push(TestInfo);
@@ -388,7 +388,7 @@ function begin_game() {
 
 function caller(){
 	physInterval = setInterval(physics, physExecuteMs);
-	if(debugging || true){
+	if(debugging || debugging_text){
 		statsInterval = setInterval(stats, 200);
 	}
 	draw_world();
@@ -411,21 +411,44 @@ function physics(){
 	// print stats out to the screen
 	Buckingham.physics();
 
+	// camera physics
+	if( !(Buckingham.position.x + Buckingham.width <= BuckyGame.camera.boundary.right && Buckingham.position.x >= BuckyGame.camera.boundary.left) ) {
+		// drop it like it's hot.
+		if(Buckingham.vel.x != 0){
+			if(Buckingham.position.x + Buckingham.width > BuckyGame.camera.boundary.right){
+				BuckyGame.camera.offset = -(Buckingham.position.x + Buckingham.width - BuckyGame.camera.boundary.right);
+			} else {
+				BuckyGame.camera.offset = BuckyGame.camera.boundary.left - Buckingham.position.x;
+			}
+		} else {
+			if(Buckingham.position.x + Buckingham.width > BuckyGame.camera.boundary.right){
+				BuckyGame.camera.offset = -(Buckingham.position.x + Buckingham.width - BuckyGame.camera.boundary.right) * BuckyGame.camera.lag;
+			} else {
+				BuckyGame.camera.offset = BuckyGame.camera.boundary.left - Buckingham.position.x * BuckyGame.camera.lag;
+			}
+		}
+	} else {
+		BuckyGame.camera.offset = 0;
+	}
+
+	BuckyGame.drawOffset += BuckyGame.camera.offset;
+
 	for(var i = 0; i<UpdateManager.length; i++){
 		UpdateManager[i].physics(BuckyGame.camera.offset);
 	}
 
-	// for(var i = 0; i<UpdateManager.length; i++){
-	// 	if(UpdateManager[i] instanceof Enemy){
-	// 		UpdateManager[i].physics();
-	// 		if(UpdateManager[i].state == DEAD){
-	// 			UpdateManager.splice(i, 1);
-	// 		}
-	// 	} else if(UpdateManager[i] instanceof Button){
-	// 		UpdateManager[i].clicked();
-	// 	}
-	// }
 
+	if(Controller.mouse.click.left && editor_mode){
+		x_tile = Math.floor( (Controller.mouse.move.x+BuckyGame.camera.offset+BuckyGame.drawOffset%blocksize)/blocksize);
+		y_tile = Math.floor(Controller.mouse.move.y/blocksize);
+
+		x_tile = Math.floor( (Controller.mouse.move.x - BuckyGame.drawOffset)/blocksize );
+			if(BuckyGame.editor.selected != null){
+				map[y_tile][x_tile] = BuckyGame.editor.selected.num;
+				imageMap[y_tile][x_tile] = BuckyGame.editor.selected.tileArray[0];
+			}
+
+	}
 }
 
 function stats() {
@@ -522,15 +545,15 @@ function draw_world() {
 			"Debugging Panel: ",
 			"PhysDelta:     " 
 			+ physicsDelta 
-			+ " \n PhysCorrect:   " 
+			+ "\n PhysCorrect:   " 
 			+ BuckyGame.physCorrect.toFixed(2) 
-			+ " \n DrawCorrect:   "
+			+ "\n DrawCorrect:   "
 			+ BuckyGame.drawCorrect.toFixed(2)
-			+ " \n drawFPS:       " 
+			+ "\n drawFPS:       " 
 			+ drawFps.toFixed(2)
-			+ " \n BuckyVelX :    "
+			+ "\n BuckyVelX :    "
 			+ Buckingham.vel.x.toFixed(2)
-			+ " \n UpdateManager: "
+			+ "\n UpdateManager: "
 			+ UpdateManager.length);
 			framecount = 6;
 		}
@@ -539,6 +562,11 @@ function draw_world() {
 		ctx.fillStyle = "#DDFFDD";
 		RightClickMenu.draw();
 		
+	}
+	if(debugging_camera){
+		ctx.strokeStyle = "#FF2222";
+		ctx.lineWidth = 2;
+		ctx.strokeRect(BuckyGame.camera.boundary.left, 0, BuckyGame.camera.boundary.right-BuckyGame.camera.boundary.left, 600);
 	}
 	
 
