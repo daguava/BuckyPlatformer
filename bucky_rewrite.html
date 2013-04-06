@@ -54,6 +54,7 @@ var blocksize = 		25;
 var imageMap;
 var GRAVITY = 			0.2;
 var UpdateManager = 	new Array();
+var clickLastFrame = 	false;
 
 var statsBox = 			null;
 var framecount = 		0;
@@ -210,6 +211,8 @@ function begin_game() {
 		(new TileSet(new Array("images/enemy/generic_enemy_placeholder.gif"), 5, "single"))
 	);
 
+
+
 	RightClickMenu = new TileMenu();
 
 	// get a reference to the canvas
@@ -220,6 +223,9 @@ function begin_game() {
 	Controller = new Control();
 	BuckyGame = new Game(1000, 600);
 	Buckingham = new Player(300, 0, BuckyGame);
+
+	// CALL MAPGEN BEFORE ANYTHING ENTERS THE UPDATE MANAGER (or it will be cleared)
+	mapGen();
 
 	TestInfo = new InfoBox(500, 100, "Test Info Box:", "Bacon ipsum dolor sit amet brisket pork belly short loin, sausage ham hock kielbasa swine pork.");
 	UpdateManager.push(TestInfo);
@@ -251,136 +257,8 @@ function begin_game() {
 	// define parallax background
 	Background = new Parallax("images/backgrounds/test_background.jpg", 0.3, BuckyGame);
 
-	// map already included by a separate map.js file
-	imageMap = new Array(map.length);
 
-	for(i = 0; i<map.length; i++){
-		imageMap[i] = new Array(map[0].length);
-	}
-
-	// process map file for use in drawing, and logic segments
-	for(var i = 0; i<map.length; i++){
-		for(var k = 0; k<map[i].length; k++){
-
-			/***********************************************
-			 PROCESS MAP FILE FOR EACH TILESET, GENERATING
-			 AN IMAGE MAP ARRAY.
-			 ***********************************************/
-			for(j = 0; j<TilesetArrays.length; j++){
-				var checkArray = [  [  			0		     , (i-1>=0)?map[i-1][k]:0	 	  ,  			0		   				 ],
-									[ (k-1>=0)?map[i][k-1]:0 ,          map[i][k] 	      	  , (k+1<map[i].length)?(map[i][k+1]):0  ],
-									[  			0		     , (i+1<map.length)?map[i+1][k]:0 ,  			0		   				 ]  ];
-				
-				var result = TilesetArrays[j].getTile(checkArray);
-
-				if(result){
-					imageMap[i][k] = result;
-				}
-			}
-
-			if(imageMap[i][k] == undefined) imageMap[i][k] = null;
-
-
-			/***********************************************
-			 PROCESS MAP FILE FOR ITEMS
-			 ***********************************************/
-			
-			for(j = 0; j<itemTypes.length; j++){
-				if(map[i][k] == itemTypes[j].num){
-					UpdateManager.push(new Item(k*blocksize, i*blocksize, itemTypes[j].getTile()));
-				}
-			}
-
-			/************************************************
-			 PROCESS INDIVIDUAL TILE ITEMS THAT AREN'T IN
-			 A COLLECTION
-			 ************************************************/
-			 // Item block
-			 if(map[i][k] == ItemBlockTileset.num){
-			 	UpdateManager.push(new ItemBlock(k*blocksize, i*blocksize, 3, ItemBlockTileset.tileArray[0], ItemBlockTileset.tileArray[1]));
-			 }
-
-			 // Spike block
-			 if(map[i][k] == 4){
-			 	UpdateManager.push(new HurtBlock(k*blocksize, i*blocksize, blocksize, blocksize) );
-			 }
-
-			 // Enemy
-			 if(map[i][k] == 5){
-			 	UpdateManager.push(new Enemy(k*blocksize, i*blocksize, BuckyGame) );
-			 }
-		}	
-	}
-
-	/***********************************
-	 FIRST SCREENING OF COLLISION BLOCKS
-	 ***********************************/
-
-	for(var i = 0; i<map.length; i++){ // map y
-		var start = 0;
-		var numfound = 0;
-		for(var k = 0; k<map[i].length; k++){ // map x
-			var blockfound = false;
-			// scan along the map file horizontally looking for block strips. When found,
-			// continue until you don't find one. If it's at least one block, create the
-			// new large block.
-
-			for(j = 0; j<collideTypes.length; j++){
-				if(map[i][k] == collideTypes[j].num){
-					blockfound = true;
-					numfound ++;
-					//UpdateManager.push(new Block(k*blocksize, i*blocksize, blocksize, blocksize));
-				}
-			}
-
-			if(!blockfound && numfound > 0){
-				UpdateManager.push(new Block(start*blocksize, i*blocksize, numfound*blocksize, blocksize));
-				start = k+1;
-				numfound = 0;
-			} else if(!blockfound) {
-				start = k+1;
-				numfound = 0;
-			}
-
-		}
-	}
-
-	/************************************
-	 SECOND SCREENING OF COLLISION BLOCKS
-	 COMBINE SIMILAR GROUPS TO REDUCE THE
-	 NUMBER OF COLLISION SQUARES/RECTANGLES
-	 ************************************/
-
-	 // check each strip of blocks in the UpdateManager to see if they are identical, except
-	 // shifted up or down one row. These we can combine into larger rectangles.
-	 // This step can be considered relatively slow, but it only happens once upon loading
-	 // a map, so it doesn't become a problem.
-
-	 u_length = UpdateManager.length;  // copy the updatemanager length here, as it can change in the loop
-	 for(j = 0; j<5; j++){	// Perform 5 passes of the second screening type.
-		 for(i = 0; i<u_length; i++){
-		 	first = UpdateManager[i];
-		 	if(first instanceof Block){
-		 		for(k = i; k<u_length; k++){
-		 			second = UpdateManager[k];
-		 			if(second instanceof Block && i != k){
-		 				if(first.position.x == second.position.x 
-		 					&& first.position.y + first.height == second.position.y
-		 					&& first.width == second.width){
-		 					// match was found, combine the rectangles
-		 					new_x = first.position.x;
-		 					new_y = first.position.y;
-		 					new_w = first.width;
-		 					new_h = first.height + second.height;
-		 					// splice in new rectangle, remove the two old rectangles
-		 					UpdateManager.splice(i, 1, new Block(new_x, new_y, new_w, new_h));
-		 					UpdateManager.splice(k, 1);
-		 				}
-		 			}
-		 		}
-		 	}
-		}
-	}
+	
 
 
 	caller();	// start the physics and drawing loops to start game
@@ -438,16 +316,22 @@ function physics(){
 	}
 
 
-	if(Controller.mouse.click.left && editor_mode){
-		x_tile = Math.floor( (Controller.mouse.move.x+BuckyGame.camera.offset+BuckyGame.drawOffset%blocksize)/blocksize);
+	if(Controller.mouse.click.left && editor_mode && BuckyGame.editor.selected){
+		clickLastFrame = true;
 		y_tile = Math.floor(Controller.mouse.move.y/blocksize);
-
 		x_tile = Math.floor( (Controller.mouse.move.x - BuckyGame.drawOffset)/blocksize );
 			if(BuckyGame.editor.selected != null){
 				map[y_tile][x_tile] = BuckyGame.editor.selected.num;
 				imageMap[y_tile][x_tile] = BuckyGame.editor.selected.tileArray[0];
 			}
 
+	}
+
+	if(!Controller.mouse.click.left && clickLastFrame){
+		if(BuckyGame.editor.selected != null){
+			mapGen();
+		}
+		clickLastFrame = false;
 	}
 }
 
