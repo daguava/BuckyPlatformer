@@ -371,7 +371,7 @@ function mapGen(){
 	imageMap = new Array(map.length);
 
 	for(i = 0; i<map.length; i++){
-		imageMap[i] = new Array(map[0].length);
+		imageMap[i] = new Array(map[i].length);
 	}
 
 	// process map file for use in drawing, and logic segments
@@ -445,7 +445,6 @@ function mapGen(){
 				if(map[i][k] == collideTypes[j].num){
 					blockfound = true;
 					numfound ++;
-					//UpdateManager.push(new Block(k*blocksize, i*blocksize, blocksize, blocksize));
 				}
 			}
 
@@ -458,6 +457,12 @@ function mapGen(){
 				numfound = 0;
 			}
 
+		}
+
+		if(numfound > 0){
+				UpdateManager.push(new Block(start*blocksize+BuckyGame.drawOffset, i*blocksize, numfound*blocksize, blocksize));
+				//start = k+1;
+				//numfound = 0;
 		}
 	}
 
@@ -472,9 +477,9 @@ function mapGen(){
 	 // This step can be considered relatively slow, but it only happens once upon loading
 	 // a map, so it doesn't become a problem.
 
-	 u_length = UpdateManager.length;  // copy the updatemanager length here, as it can change in the loop
-	 for(j = 0; j<5; j++){	// Perform 5 passes of the second screening type.
-		 for(i = 0; i<u_length; i++){
+	u_length = UpdateManager.length;  // copy the updatemanager length here, as it can change in the loop
+	for(j = 0; j<5; j++){	// Perform 5 passes of the second screening type.
+		for(i = 0; i<u_length; i++){
 		 	first = UpdateManager[i];
 		 	if(first instanceof Block){
 		 		for(k = i; k<u_length; k++){

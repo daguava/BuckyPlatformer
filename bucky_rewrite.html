@@ -73,7 +73,7 @@ function Game(x_boundary, y_boundary){
 	this.boundary =   				{};
 	this.boundary.x = 				x_boundary;	// x-coord boundary
 	this.boundary.y = 				y_boundary;	// y-coord boundary
-	this.clearColor = 				"#7ADAE1";	// initial clear color is null
+	this.clearColor = 				"#7ADAE1";	// initial clear color is sky blue
 	this.state = 					null;
 	this.drawOffset = 				0;
 	this.drunkTime = 				0;
@@ -405,7 +405,7 @@ function draw_world() {
 	Buckingham.draw();
 	ResetButton.draw();
 
-	if(editor_mode){
+	if(editor_mode && BuckyGame.editor.selected != null){
 		ctx.fillStyle = "#000000";
 		ctx.lineWidth = 0.3;
 		for(var i = 0; i < Math.floor(BuckyGame.boundary.y/blocksize); i++){
