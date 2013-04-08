@@ -283,10 +283,10 @@ function physics(){
 	 ******************************************/
 
 	if(physicsTimer == null){
-		physicsTimer = new Date().getTime();
+		physicsTimer = performance.now();
 	} else {
-		physicsDelta = new Date().getTime()-physicsTimer;
-		physicsTimer = new Date().getTime();
+		physicsDelta = performance.now()-physicsTimer;
+		physicsTimer = performance.now();
 		BuckyGame.physCorrect = BuckyGame.physCorrect * (4/5) + physicsDelta/physExecuteMs * (1/5);
 		if(BuckyGame.physCorrect > 3) BuckyGame.physCorrect = 3;
 	}
@@ -355,10 +355,10 @@ function draw_world() {
 	 ******************************************/
 
 	if(graphics_drawTimer == null){
-		graphics_drawTimer = new Date().getTime();
+		graphics_drawTimer = performance.now();
 	} else {
-		drawDelta = new Date().getTime()-graphics_drawTimer;
-		graphics_drawTimer = new Date().getTime(); 
+		drawDelta = performance.now()-graphics_drawTimer;
+		graphics_drawTimer = performance.now(); 
 		drawFps = drawFps * (49/50) + 1000/drawDelta * 1/50;
 		if(drawFps > 1000) drawFps = 60; // sanity check (check for infinity)
 		BuckyGame.drawCorrect = BuckyGame.drawCorrect * (4/5) + drawDelta/drawExecuteMs * (1/5);
@@ -432,7 +432,7 @@ function draw_world() {
 			statsBox = new InfoBox(BuckyGame.boundary.x-260, 10, 	
 			"Debugging Panel: ",
 			"PhysDelta:     " 
-			+ physicsDelta 
+			+ physicsDelta.toFixed(3) 
 			+ "\n PhysCorrect:   " 
 			+ BuckyGame.physCorrect.toFixed(2) 
 			+ "\n DrawCorrect:   "

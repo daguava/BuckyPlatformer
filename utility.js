@@ -1,3 +1,6 @@
+
+/////////// requestAnimationFrame shim
+
 (function() {
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
@@ -22,6 +25,23 @@
             clearTimeout(id);
         };
 }());
+
+/////////// performance.now() shim
+
+window.performance = window.performance || {};
+performance.now = (function() {
+  return performance.now       ||
+         performance.mozNow    ||
+         performance.msNow     ||
+         performance.oNow      ||
+         performance.webkitNow ||
+         function() { return new Date().getTime(); };
+})();
+
+
+
+
+
 
 function Position(x_pos, y_pos){
 	this.x = 	 			x_pos;  // x pos
