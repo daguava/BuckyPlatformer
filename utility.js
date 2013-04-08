@@ -175,8 +175,10 @@ function collisionAction(movable, stationary){
 		depthY = distanceY > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
 	}
 
+	collisionChecks ++;
+
 	if( (movable instanceof Player || movable instanceof Enemy) && stationary instanceof Block ||
-		 (movable instanceof Enemy && stationary instanceof ItemBlock )){
+		 (movable instanceof Enemy && stationary instanceof ItemBlock ) || (movable instanceof Enemy && stationary instanceof Enemy)){
 				if(Math.abs(depthY) < Math.abs(depthX)){ // resolve y first if true
 					movable.position.y += depthY;
 					if(depthY<0){
@@ -367,7 +369,21 @@ function Parallax(imageSrc, percentMovementSpeed, currGame){
 
 function mapGen(){
 	// map already included by a separate map.js file
+	tmpArray = new Array();
+	if(UpdateManager.length != 0){
+		tmpArray = UpdateManager.slice(0);
+	}
 	UpdateManager = new Array();
+
+	for(i = 0; i < tmpArray.length; i++){
+		if(tmpArray[i] instanceof InfoBox
+			|| tmpArray[i] instanceof Button
+			|| tmpArray[i] instanceof PlaceableAnimation
+			|| tmpArray[i] instanceof Timer){
+			UpdateManager.push(tmpArray[i]);
+		}
+	}
+
 	imageMap = new Array(map.length);
 
 	for(i = 0; i<map.length; i++){

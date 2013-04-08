@@ -43,11 +43,11 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.height = 					this.image.height;
 	this.visible =  				true;
 	this.collision = 				{};
-	this.collision.width_offset = 	10;
-	this.collision.height_offset = 	10;
+	this.collision.width_offset = 	8;
+	this.collision.height_offset = 	8;
 	this.collided = 				false;
 	this.collided_last_frame = 		false;
-	this.profile = 					new enemyProfile([true, 1.2, false], [false], [false, 0, 0]);
+	this.profile = 					new enemyProfile([true, 1.2+Math.random()*0.2, false], [false], [false, 0, 0]);
 	
 	this.draw = function() {
 		if(debugging){
@@ -106,6 +106,10 @@ function Enemy(x_pos, y_pos, curr_game) {
 				this.vel.x = 0;
 			}
 
+			// quick death check for y position
+
+			if(this.position.y > BuckyGame.boundary.x) this.state = DEAD;
+
 			// sanity check
 			if(this.vel.x > 200){
 				console.log("Tripped Sanity Check (x velocity): It was " + this.vel.x);
@@ -123,7 +127,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 
 		 for(i = 0; i<UpdateManager.length; i++){
 		 	temp = UpdateManager[i];
-		 	if(temp instanceof Block){
+		 	if(temp instanceof Block || (temp instanceof Enemy && temp != this)){
 		 		if(    this.position.x < temp.position.x + temp.width 
 		 			&& this.position.x + this.width >= temp.position.x
 		 			&& this.position.y < temp.position.y + temp.height

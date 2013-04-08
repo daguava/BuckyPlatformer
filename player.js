@@ -28,7 +28,7 @@ function Player(x_pos, y_pos, curr_game) {
 	this.visible =  				true;
 	this.collision = 				{};
 	this.collision.width_offset = 	10;
-	this.collision.height_offset = 	10;
+	this.collision.height_offset = 	6;
 	this.sounds = 					{};
 	this.sounds.jump = 				new Audio("sounds/jump.wav");
 	this.sounds.splat = 			new Audio("sounds/splat.wav");

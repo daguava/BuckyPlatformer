@@ -68,6 +68,7 @@ var drawDelta = 		null;
 var drawFps =			60;
 var statsDiv;
 var itemTypes;
+var collisionChecks = 	0;
 
 function Game(x_boundary, y_boundary){
 	this.boundary =   				{};
@@ -203,6 +204,7 @@ function begin_game() {
 	itemTypes = new Array(BeerTileset);
 	TilesetArrays = new Array(GrassTileset, RockTileset, SpikeTileset);
 	EditorTilesetArray = new Array(
+		(new TileSet(new Array("images/blank.png"), 0, "single")),
 		GrassTileset, 
 		RockTileset, 
 		SpikeTileset, 
@@ -273,6 +275,8 @@ function caller(){
 }
 
 function physics(){
+
+	collisionChecks = 0;
 
 	/******************************************
 	 PHYSICS TIMER, USED FOR ACCURATE MOVEMENT
@@ -438,7 +442,10 @@ function draw_world() {
 			+ "\n BuckyVelX :    "
 			+ Buckingham.vel.x.toFixed(2)
 			+ "\n UpdateManager: "
-			+ UpdateManager.length);
+			+ UpdateManager.length
+			+ "\n CollisionChecks: "
+			+ collisionChecks);
+			
 			framecount = 6;
 		}
 		framecount--;
