@@ -258,7 +258,7 @@ function collisionAction(movable, stationary){
 				}
 				return true;
 	} else if (movable instanceof Player && stationary instanceof Enemy){
-				if(Math.abs(depthY)<20 && movable.vel.y >= 0 && movable.position.y < stationary.position.y){
+				if(Math.abs(depthY)<20 && movable.vel.y > stationary.vel.y && movable.position.y < stationary.position.y){
 
 					movable.position.y -= Math.abs(movable.position.y + movable.height - stationary.position.y) * 1.1;
 					if(Controller.space){
