@@ -53,7 +53,7 @@ function Timer(end_time, repeat, curr_game) {
 	DONE = 					11;
 
 	this.loop = 			repeat;
-	this.game = 			curr_game;
+	this.game = 			BuckyGame;
 	this.time = 			{};
 	this.time.current = 	0;
 	this.time.end = 		end_time;
@@ -97,7 +97,7 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 	this.repeat = 		repeat;
 	this.game = 		curr_game;
 	this.status = 		IN_ACTION;
-	this.timer = 		null;
+	this.timer = 		new Timer(this.duration, this.repeat, BuckyGame);
 	this.imageArray = 	new Array(imageUrlArray.length-1);
 	parent = 			this;
 
@@ -109,8 +109,8 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 	this.frame = 		{};
 
 	this.current = function(){
-		if(this.timer == null){
-			this.timer = new Timer(this.duration, this.repeat, this.game);	// if a timer doesn't exist for animation, create it
+		if(this.timer == null || this.timer == undefined){
+			this.timer = new Timer(this.duration, this.repeat, BuckyGame);	// if a timer doesn't exist for animation, create it
 		}
 		this.status = this.timer.status;
 		return this.imageArray[ Math.round( (this.timer.time.current / this.timer.time.end) * (this.imageArray.length-1) ) ];
@@ -125,6 +125,7 @@ function PlaceableAnimation(x_pos, y_pos, imageUrlArray, duration, repeat, curr_
 	this.position = 	new Position(x_pos, y_pos);
 
 	this.physics = function(x_change){
+
    		this.position.x += x_change;
 
    		// if the timer's status is DONE, remove this animation from the update manager.
@@ -404,8 +405,7 @@ function mapGen(){
 	for(i = 0; i < tmpArray.length; i++){
 		if(tmpArray[i] instanceof InfoBox
 			|| tmpArray[i] instanceof Button
-			|| tmpArray[i] instanceof PlaceableAnimation
-			|| tmpArray[i] instanceof Timer){
+			|| tmpArray[i] instanceof PlaceableAnimation){
 			UpdateManager.push(tmpArray[i]);
 		}
 	}
