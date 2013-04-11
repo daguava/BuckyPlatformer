@@ -290,25 +290,20 @@ function physics(){
 		BuckyGame.physCorrect = BuckyGame.physCorrect * (4/5) + physicsDelta/physExecuteMs * (1/5);
 		if(BuckyGame.physCorrect > 3) BuckyGame.physCorrect = 3;
 	}
-	// print stats out to the screen
+
+	// perform player's physics
 	Buckingham.physics();
 
 	// camera physics
 	if( !(Buckingham.position.x + Buckingham.width <= BuckyGame.camera.boundary.right && Buckingham.position.x >= BuckyGame.camera.boundary.left) ) {
 		// drop it like it's hot.
-		if(Buckingham.vel.x != 0){
-			if(Buckingham.position.x + Buckingham.width > BuckyGame.camera.boundary.right){
-				BuckyGame.camera.offset = -(Buckingham.position.x + Buckingham.width - BuckyGame.camera.boundary.right);
-			} else {
-				BuckyGame.camera.offset = BuckyGame.camera.boundary.left - Buckingham.position.x;
-			}
+
+		if(Buckingham.position.x + Buckingham.width > BuckyGame.camera.boundary.right){
+			BuckyGame.camera.offset = -(Buckingham.position.x + Buckingham.width - BuckyGame.camera.boundary.right);
 		} else {
-			if(Buckingham.position.x + Buckingham.width > BuckyGame.camera.boundary.right){
-				BuckyGame.camera.offset = -(Buckingham.position.x + Buckingham.width - BuckyGame.camera.boundary.right) * BuckyGame.camera.lag;
-			} else {
-				BuckyGame.camera.offset = BuckyGame.camera.boundary.left - Buckingham.position.x * BuckyGame.camera.lag;
-			}
+			BuckyGame.camera.offset = BuckyGame.camera.boundary.left - Buckingham.position.x;
 		}
+
 	} else {
 		BuckyGame.camera.offset = 0;
 	}
@@ -443,7 +438,7 @@ function draw_world() {
 			+ Buckingham.vel.x.toFixed(2)
 			+ "\n UpdateManager: "
 			+ UpdateManager.length
-			+ "\n CollisionChecks: "
+			+ "\n Collisions: "
 			+ collisionChecks);
 			
 			framecount = 6;

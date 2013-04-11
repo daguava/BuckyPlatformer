@@ -58,6 +58,7 @@ function Timer(end_time, repeat, curr_game) {
 	this.time.current = 	0;
 	this.time.end = 		end_time;
 	this.status = 			IN_ACTION;
+	this.actionFlag = 		false;
 
 	UpdateManager.push(this);
 
@@ -66,6 +67,7 @@ function Timer(end_time, repeat, curr_game) {
 			this.time.current += curr_game.physCorrect * physExecuteMs / 16.667;
 		}
 		if(this.time.current >= this.time.end){
+			this.actionFlag = true;
 			if(!this.loop){
 				this.status = DONE;
 			}
@@ -80,6 +82,10 @@ function Timer(end_time, repeat, curr_game) {
 				}
 			}
 		}
+	}
+
+	this.resetFlag = function(){
+		this.actionFlag = false;
 	}
 }
 
@@ -197,8 +203,8 @@ function collisionAction(movable, stationary){
 
 	collisionChecks ++;
 
-	if( (movable instanceof Player || movable instanceof Enemy) && stationary instanceof Block ||
-		 (movable instanceof Enemy && stationary instanceof ItemBlock ) || (movable instanceof Enemy && stationary instanceof Enemy)){
+	if( ( (movable instanceof Player || movable instanceof Enemy) && (stationary instanceof Block || stationary instanceof ItemBlock ) ) ||
+		 (movable instanceof Enemy && stationary instanceof Enemy) ){
 				if(Math.abs(depthY) < Math.abs(depthX)){ // resolve y first if true
 					movable.position.y += depthY;
 					if(depthY<0){
@@ -211,7 +217,7 @@ function collisionAction(movable, stationary){
 				} else { // resolve x first if the first statement was false
 					movable.position.x += depthX;
 
-					if(movable instanceof Enemy && depthX != 0){
+					if(movable instanceof Enemy && Math.abs(depthX) != 0){
 						movable.collided = true;
 					}
 
@@ -252,7 +258,7 @@ function collisionAction(movable, stationary){
 				}
 				return true;
 	} else if (movable instanceof Player && stationary instanceof Enemy){
-				if(Math.abs(depthY)<20 && movable.vel.y >= 0){
+				if(Math.abs(depthY)<20 && movable.vel.y >= 0 && movable.position.y < stationary.position.y){
 
 					movable.position.y -= Math.abs(movable.position.y + movable.height - stationary.position.y) * 1.1;
 					if(Controller.space){

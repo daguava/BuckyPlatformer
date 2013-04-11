@@ -11,7 +11,11 @@ function enemyProfile(walk_array, attack_array, jump_array){
 	this.jump = 					{};
 	this.jump.enabled = 			jump_array[0];
 	this.jump.speed = 				jump_array[1];
-	this.jump.delay = 				jump_array[2];
+	this.jump.delay = 				jump_array[2];   // delay between executing actions (in ms)
+	this.jump.timer = 				null;
+	if(this.jump.enabled){
+		this.jump.timer = new Timer(this.jump.delay/16.667, true, BuckyGame);
+	}
 }
 
 function Enemy(x_pos, y_pos, curr_game) {
@@ -47,7 +51,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.collision.height_offset = 	8;
 	this.collided = 				false;
 	this.collided_last_frame = 		false;
-	this.profile = 					new enemyProfile([true, 1.2+Math.random()*0.2, false], [false], [false, 0, 0]);
+	this.profile = 					new enemyProfile([true, 0.8, false], [false], [true, 0, 2500]);
 	
 	this.draw = function() {
 		if(debugging){
@@ -72,7 +76,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 
 		this.position.x += BuckyGame.camera.offset;
 
-		if(this.profile.walk.enabled && Math.abs(this.position.x - Buckingham.position.x) < BuckyGame.boundary.x * 1.1){
+		if(this.profile.walk.enabled && Math.abs(this.position.x - Buckingham.position.x)  < BuckyGame.boundary.x * 1.1){
 			if(this.collided && this.collided_last_frame){
 				this.vel.dir.x *= -1;
 				this.collided = false;
@@ -90,6 +94,13 @@ function Enemy(x_pos, y_pos, curr_game) {
 					this.vel.accel.x = -0.8;
 
 			}
+
+			if(this.profile.jump.enabled && this.profile.jump.timer.actionFlag){
+				this.vel.y = -6.0;
+				this.profile.jump.timer.resetFlag();
+			}
+
+
 
 			this.vel.x += this.vel.accel.x * this.vel.dir.x;
 			this.vel.y += this.vel.accel.y;
