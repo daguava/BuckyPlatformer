@@ -15,7 +15,7 @@
 
 // debugging
 var editor_mode = 		true;
-var debugging = 		true;
+var debugging = 		false;
 var debugging_text = 	true;
 var debugging_camera =  false;
 var music = 			false;
@@ -92,7 +92,7 @@ function Game(x_boundary, y_boundary){
 	this.camera.boundary.left = 	250;
 	this.camera.boundary.right = 	400;
 	this.camera.offset = 			0;
-	this.camera.lag = 				0.00000000000000000000001;
+	this.camera.lag = 				0.1;
 	this.camera.maxSpeed = 			7;
 	this.editor = 					{};
 	this.editor.selected = 			null;
@@ -212,8 +212,6 @@ function begin_game() {
 		ItemBlockTileset,
 		(new TileSet(new Array("images/enemy/generic_enemy_placeholder.gif"), 5, "single"))
 	);
-
-
 
 	RightClickMenu = new TileMenu();
 

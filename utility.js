@@ -203,8 +203,8 @@ function collisionAction(movable, stationary){
 
 	collisionChecks ++;
 
-	if( ( (movable instanceof Player || movable instanceof Enemy) && (stationary instanceof Block || stationary instanceof ItemBlock ) ) ||
-		 (movable instanceof Enemy && stationary instanceof Enemy) ){
+	if( ( (movable instanceof Player || movable instanceof Enemy) && (stationary instanceof Block) ) ||
+		 (movable instanceof Enemy && stationary instanceof Enemy) || (movable instanceof Enemy && stationary instanceof ItemBlock) ){
 				if(Math.abs(depthY) < Math.abs(depthX)){ // resolve y first if true
 					movable.position.y += depthY;
 					if(depthY<0){

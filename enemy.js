@@ -51,7 +51,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.collision.height_offset = 	8;
 	this.collided = 				false;
 	this.collided_last_frame = 		false;
-	this.profile = 					new enemyProfile([true, 0.8, false], [false], [true, 0, 2500]);
+	this.profile = 					new enemyProfile([true, 0.8+0.2*Math.random(), false], [false], [true, 0, 250+100*Math.random()]);
 	
 	this.draw = function() {
 		if(debugging){
@@ -95,12 +95,15 @@ function Enemy(x_pos, y_pos, curr_game) {
 
 			}
 
-			if(this.profile.jump.enabled && this.profile.jump.timer.actionFlag){
-				this.vel.y = -6.0;
+			if(this.profile.jump.enabled && this.profile.jump.timer.actionFlag && this.jump.toggle){
+				this.vel.y = -3.0;
 				this.profile.jump.timer.resetFlag();
+				this.jump.toggle = !this.jump.toggle;
 			}
 
-
+			if(this.vel.y > 0){
+				this.jump.toggle = false;
+			}
 
 			this.vel.x += this.vel.accel.x * this.vel.dir.x;
 			this.vel.y += this.vel.accel.y;
