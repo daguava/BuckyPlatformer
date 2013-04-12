@@ -109,9 +109,7 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 	this.frame = 		{};
 
 	this.current = function(){
-		if(this.timer == null || this.timer == undefined){
-			this.timer = new Timer(this.duration, this.repeat, BuckyGame);	// if a timer doesn't exist for animation, create it
-		}
+		
 		this.status = this.timer.status;
 		return this.imageArray[ Math.round( (this.timer.time.current / this.timer.time.end) * (this.imageArray.length-1) ) ];
 	}
@@ -280,10 +278,12 @@ function collisionAction(movable, stationary){
 					movable.sounds.boom.play();
 				}
 	} else if (movable instanceof Player && stationary instanceof HurtBlock){
-				if(depthY != 0 || depthX != 0){
+				if(Math.abs(depthX) < Math.abs(depthY)){
 					movable.state = DEAD;
 					movable.sounds.boom.currentTime = 0;
 					movable.sounds.boom.play();
+				} else {
+
 				}
 				return true;
 	}
