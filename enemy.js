@@ -96,7 +96,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 			}
 
 			if(this.profile.jump.enabled && this.profile.jump.timer.actionFlag && this.jump.toggle){
-				this.vel.y = -3.0;
+				this.vel.y = -3.0 / Math.sqrt(curr_game.physCorrect);
 				this.profile.jump.timer.resetFlag();
 				this.jump.toggle = !this.jump.toggle;
 			}
@@ -135,7 +135,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 			}
 
 			this.position.x += this.vel.x * this.vel.dir.x * curr_game.physCorrect;
-			this.position.y += this.vel.y;
+			this.position.y += this.vel.y * curr_game.physCorrect;
 		}
 		
 

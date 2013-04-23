@@ -5,6 +5,7 @@
 <script src="interactives.js"></script>
 <script src="player.js"></script>
 <script src="utility.js"></script>
+<script src="loadmap.js"></script>
 <script src="maps.js"></script>
 
 <script type = "text/javascript">
@@ -218,7 +219,7 @@ function begin_game() {
 	Controller = new Control();
 	BuckyGame = new Game(1000, 600);
 	// CALL MAPGEN BEFORE ANYTHING ENTERS THE UPDATE MANAGER (or it will be cleared)
-	
+
 	mapGen();
 
 	Buckingham = new Player(300, 0, BuckyGame);
@@ -342,6 +343,17 @@ function draw_world() {
 	/******************************************
 	 GRAPHICS TIMER, USED FOR STATS DISPLAY
 	 ******************************************/
+
+	if(Controller.minus){
+		physExecuteMs += (4/60);
+		console.log("physExecuteMs is now " + physExecuteMs);
+	} else if (Controller.plus){
+		physExecuteMs -= (4/60);
+		if(physExecuteMs <= 0){
+			physExecuteMs = (4/60);
+		}
+		console.log("physExecuteMs is now " + physExecuteMs);
+	}
 
 	if(graphics_drawTimer == null){
 		graphics_drawTimer = performance.now();

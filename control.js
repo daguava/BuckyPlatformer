@@ -1,11 +1,13 @@
 function Control() {
-	this.keyboard = 			{};
-	this.keyboard.space = 		false;
-	this.keyboard.shift = 		false;
-	this.keyboard.left = 		false;
-	this.keyboard.right = 		false;
-	this.keyboard.up = 			false;
-	this.keyboard.down = 		false;
+	this.controller = 			{};
+	this.controller.space = 	false;
+	this.controller.shift = 	false;
+	this.controller.left = 		false;
+	this.controller.right = 	false;
+	this.controller.up = 		false;
+	this.controller.down = 		false;
+	this.controller.plus = 		false;
+	this.controller.minus = 	false;
 	this.mouse = 				{};
 	this.mouse.click = 			{};
 	this.mouse.click.left = 	false;
@@ -35,9 +37,11 @@ function key_event(event) {
 		case 32:				Controller.space = true;	break;		// space
 		case 16:				Controller.shift = true;	break;		// shift
 		case 39: case 68:		Controller.right = true;	break;		// right
-		case 37: case 65:		Controller.left = true;		break;		// left
-		case 38: case 87:		Controller.up = true; 		break;		// up
-		case 40: case 83:		Controller.down = true;		break;		// down
+		case 37: case 65:		Controller.left =  true;	break;		// left
+		case 38: case 87:		Controller.up =    true; 	break;		// up
+		case 40: case 83:		Controller.down =  true;	break;		// down
+		case 189:  				Controller.plus =  true;	break;
+		case 187: 				Controller.minus = true;	break;
 	}
 }
 
@@ -46,9 +50,11 @@ function key_event_up(event) {
 		case 32:				Controller.space = false;	break;		// space
 		case 16:				Controller.shift = false;	break;		// shift
 		case 39: case 68:		Controller.right = false;	break;		// right
-		case 37: case 65:		Controller.left = false;	break;		// left
-		case 38: case 87:		Controller.up = false; 		break;		// up
-		case 40: case 83:		Controller.down = false;	break;		// down
+		case 37: case 65:		Controller.left =  false;	break;		// left
+		case 38: case 87:		Controller.up =    false; 	break;		// up
+		case 40: case 83:		Controller.down =  false;	break;		// down
+		case 189:  				Controller.plus =  false;	break;
+		case 187: 				Controller.minus = false;	break;
 	}
 }
 
