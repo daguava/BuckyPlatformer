@@ -15,7 +15,7 @@
 
 // debugging
 var editor_mode = 		true;
-var debugging = 		true;
+var debugging = 		false;
 var debugging_text = 	true;
 var debugging_camera =  false;
 var music = 			false;
@@ -217,10 +217,11 @@ function begin_game() {
 	// declare initial objects (Controller, Game, Player, etc)
 	Controller = new Control();
 	BuckyGame = new Game(1000, 600);
-	Buckingham = new Player(300, 0, BuckyGame);
-
 	// CALL MAPGEN BEFORE ANYTHING ENTERS THE UPDATE MANAGER (or it will be cleared)
+	
 	mapGen();
+
+	Buckingham = new Player(300, 0, BuckyGame);
 
 	TestInfo = new InfoBox(500, 100, "Test Info Box:", "Bacon ipsum dolor sit amet brisket pork belly short loin, sausage ham hock kielbasa swine pork.");
 	UpdateManager.push(TestInfo);
@@ -447,7 +448,6 @@ function draw_world() {
 		ctx.lineWidth = 2;
 		ctx.strokeRect(BuckyGame.camera.boundary.left, 0, BuckyGame.camera.boundary.right-BuckyGame.camera.boundary.left, 600);
 	}
-	
 
 	animId = window.requestAnimationFrame(draw_world);
 

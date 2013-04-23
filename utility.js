@@ -97,7 +97,7 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 	this.repeat = 		repeat;
 	this.game = 		curr_game;
 	this.status = 		IN_ACTION;
-	this.timer = 		new Timer(this.duration, this.repeat, BuckyGame);
+	this.timer = 		null;
 	this.imageArray = 	new Array(imageUrlArray.length-1);
 	parent = 			this;
 
@@ -109,7 +109,12 @@ function Animation(imageUrlArray, duration, repeat, curr_game){
 	this.frame = 		{};
 
 	this.current = function(){
-		
+
+		// check if timer has been created yet, if not, create it.
+		// this prevents 'one-time' animations from starting prematurely
+		if(this.timer == null){
+			this.timer = new Timer(this.duration, this.repeat, BuckyGame);
+		}
 		this.status = this.timer.status;
 		return this.imageArray[ Math.round( (this.timer.time.current / this.timer.time.end) * (this.imageArray.length-1) ) ];
 	}
