@@ -239,17 +239,17 @@ function begin_game() {
 	UpdateManager.push(ResetButton);
 
 	// PLACEABLE ANIMATION TEST
-	TestPlaceableAnimation = new PlaceableAnimation(
-		250, 
-		-15, 
-		new Array("images/animations/explosion/explosion1.gif", "images/animations/explosion/explosion2.gif", "images/animations/explosion/explosion3.gif", "images/animations/explosion/explosion4.gif", "images/animations/explosion/explosion5.gif", "images/animations/explosion/explosion6.gif", "images/animations/explosion/explosion7.gif", "images/animations/explosion/explosion8.gif", "images/animations/explosion/explosion9.gif", "images/animations/explosion/explosion10.gif", "images/animations/explosion/explosion11.gif", "images/animations/explosion/explosion12.gif", "images/animations/explosion/explosion13.gif", "images/animations/explosion/explosion14.gif", "images/animations/explosion/explosion15.gif", "images/animations/explosion/explosion16.gif", "images/animations/explosion/explosion17.gif", "images/animations/explosion/explosion18.gif", "images/animations/explosion/explosion19.gif", "images/animations/explosion/explosion20.gif", "images/animations/explosion/explosion21.gif", "images/animations/explosion/explosion22.gif", "images/animations/explosion/explosion23.gif", "images/animations/explosion/explosion24.gif"
-		),
-		60, 
-		true, 
-		BuckyGame
-	);
+	// TestPlaceableAnimation = new PlaceableAnimation(
+	// 	250, 
+	// 	-15, 
+	// 	new Array("images/animations/explosion/explosion1.gif", "images/animations/explosion/explosion2.gif", "images/animations/explosion/explosion3.gif", "images/animations/explosion/explosion4.gif", "images/animations/explosion/explosion5.gif", "images/animations/explosion/explosion6.gif", "images/animations/explosion/explosion7.gif", "images/animations/explosion/explosion8.gif", "images/animations/explosion/explosion9.gif", "images/animations/explosion/explosion10.gif", "images/animations/explosion/explosion11.gif", "images/animations/explosion/explosion12.gif", "images/animations/explosion/explosion13.gif", "images/animations/explosion/explosion14.gif", "images/animations/explosion/explosion15.gif", "images/animations/explosion/explosion16.gif", "images/animations/explosion/explosion17.gif", "images/animations/explosion/explosion18.gif", "images/animations/explosion/explosion19.gif", "images/animations/explosion/explosion20.gif", "images/animations/explosion/explosion21.gif", "images/animations/explosion/explosion22.gif", "images/animations/explosion/explosion23.gif", "images/animations/explosion/explosion24.gif"
+	// 	),
+	// 	60, 
+	// 	true, 
+	// 	BuckyGame
+	// );
 
-	UpdateManager.push(TestPlaceableAnimation);
+	//UpdateManager.push(TestPlaceableAnimation);
 
 	// define parallax background
 	Background = new Parallax("images/backgrounds/test_background.jpg", 0.3, BuckyGame);
@@ -285,6 +285,34 @@ function physics(){
 		BuckyGame.physCorrect = BuckyGame.physCorrect * (4/5) + physicsDelta/physExecuteMs * (1/5);
 		if(BuckyGame.physCorrect > 3) BuckyGame.physCorrect = 3;
 	}
+
+
+
+
+
+
+	if(Controller.control){
+		var output_string = "map = [\n";
+		for(i = 0; i<map.length; i++){
+			for(k = 0; k<map[0].length; k++){
+				if(k == 0){
+					output_string += "[" + map[i][k] + ", ";
+				} else if(k==map[0].length-1 && i != map.length-1){
+					output_string += map[i][k] + "],\n";
+				} else if(i == map.length-1 && k == map[0].length-1){
+					output_string += map[i][k] + "]\n];";
+				}	else {
+					output_string += map[i][k] + ", ";
+				}
+			}
+		}
+		document.getElementById('MapOutput').innerHTML=output_string;
+	}
+
+
+
+
+
 
 	// perform player's physics
 	Buckingham.physics();
@@ -477,7 +505,7 @@ window.addEventListener('mousedown', mouse_down, false);
 
 <canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="1000" height="600" tabindex="1"></canvas>
 
-<div id="fps" style="width: 800px; display: inline-block; vertical-align: top;"></div>
+<textarea id="MapOutput" style="width: 400px; height: 150px;">Map Output</textarea>
 
 <script type="text/javascript">
 	gameCanvas = document.getElementById("draw_canvas");

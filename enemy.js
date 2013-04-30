@@ -138,7 +138,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 			this.position.y += this.vel.y * curr_game.physCorrect;
 		}
 		
-
+		for(k = 0; k < 5; k++){
 		 for(i = 0; i<UpdateManager.length; i++){
 		 	temp = UpdateManager[i];
 		 	if(temp instanceof Block || (temp instanceof Enemy && temp != this)){
@@ -150,6 +150,7 @@ function Enemy(x_pos, y_pos, curr_game) {
 		 		}
 		 	}
 		}
+	}
 
 		if(this.position.y > BuckyGame.height){
 			this.state = DEAD;

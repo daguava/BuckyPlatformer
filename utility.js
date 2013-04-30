@@ -262,7 +262,7 @@ function collisionAction(movable, stationary){
 				}
 				return true;
 	} else if (movable instanceof Player && stationary instanceof Enemy){
-				if(Math.abs(depthY)<20 && movable.vel.y > stationary.vel.y && movable.position.y < stationary.position.y){
+				if(Math.abs(depthY)<25 && movable.vel.y > stationary.vel.y && movable.position.y < stationary.position.y){
 
 					movable.position.y -= Math.abs(movable.position.y + movable.height - stationary.position.y) * 1.1;
 					if(Controller.space){
@@ -289,6 +289,28 @@ function collisionAction(movable, stationary){
 					movable.sounds.boom.play();
 				} else {
 
+				}
+				return true;
+	} else if (movable instanceof Enemy && stationary instanceof ItemBlock){
+				if(Math.abs(depthY) < Math.abs(depthX)){ // resolve y first if true
+					movable.position.y += depthY;
+					if(depthY<0){
+						movable.jump.toggle = true;
+						movable.jump.release = false;
+						movable.vel.y = 0;
+					} else {
+						movable.vel.y = 0;
+						if(stationary.state != HIT){
+							for(i = 0; i<itemTypes.length; i++){
+								if(itemTypes[i].num == stationary.contains){
+									UpdateManager.push( new Item(stationary.position.x, stationary.position.y-blocksize, itemTypes[i].getTile()));
+								}
+							}
+						}
+					}
+				} else { // resolve x first if the first statement was false
+					movable.position.x += depthX;
+					//this.x_speed = 0;
 				}
 				return true;
 	}

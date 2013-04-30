@@ -8,6 +8,7 @@ function Control() {
 	this.controller.down = 		false;
 	this.controller.plus = 		false;
 	this.controller.minus = 	false;
+	this.controller.control = 	false;
 	this.mouse = 				{};
 	this.mouse.click = 			{};
 	this.mouse.click.left = 	false;
@@ -42,6 +43,7 @@ function key_event(event) {
 		case 40: case 83:		Controller.down =  true;	break;		// down
 		case 189:  				Controller.plus =  true;	break;
 		case 187: 				Controller.minus = true;	break;
+		case 17:  				Controller.control=true; 	break;
 	}
 }
 
@@ -55,6 +57,7 @@ function key_event_up(event) {
 		case 40: case 83:		Controller.down =  false;	break;		// down
 		case 189:  				Controller.plus =  false;	break;
 		case 187: 				Controller.minus = false;	break;
+		case 17:  				Controller.control=false;   break;
 	}
 }
 
