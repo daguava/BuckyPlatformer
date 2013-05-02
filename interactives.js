@@ -7,6 +7,8 @@ function Block(x_pos, y_pos, arg_width, arg_height) {
 	this.collision = 				{};
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
+	this.collides = 				true;
+	this.draws = 					true;
 
 	this.draw = function() {
 		if(debugging){
@@ -69,6 +71,37 @@ function TileMenu(){
 	}
 }
 
+function WinBlock(x_pos, y_pos, arg_width, arg_height) {
+	this.position = 				new Position(x_pos, y_pos);
+	this.width = 					arg_width;
+	this.height = 					arg_height;
+	this.image = 					new Image();
+	this.visible = 					true;
+	this.collision = 				{};
+	this.collision.width_offset = 	0;
+	this.collision.height_offset = 	0;
+	this.collides = 				true;
+	this.draws = 					true;
+
+	this.draw = function() {
+		if(debugging){
+			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x)
+			{
+				ctx.strokeStyle = "#FFFFFF";
+				ctx.fillStyle = 'rgba(255,255,255, 0.25)';
+				ctx.lineWidth = 1;
+				ctx.strokeRect(this.position.x, this.position.y, this.width, this.height);
+				ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+			}
+		}
+	}
+
+	this.physics = function(x_change) {
+		// update x and y position
+		this.position.x += BuckyGame.camera.offset;
+	}
+}
+
 function HurtBlock(x_pos, y_pos, arg_width, arg_height) {
 	this.position = 				new Position(x_pos, y_pos);
 	this.width = 					arg_width;
@@ -78,6 +111,8 @@ function HurtBlock(x_pos, y_pos, arg_width, arg_height) {
 	this.collision = 				{};
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
+	this.collides = 				true;
+	this.draws = 					true;
 
 	this.draw = function() {
 		if(debugging){
@@ -107,6 +142,8 @@ function Item(x_pos, y_pos, passed_image) {
 	this.collision = 				{};
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
+	this.collides = 				true;
+	this.draws = 					true;
 
 	this.draw = function() {
 		if(this.visible){
@@ -141,6 +178,8 @@ function ItemBlock(x_pos, y_pos, item_number, passed_image, passed_image_second)
 	this.collision = 				{};
 	this.collision.width_offset = 	0;
 	this.collision.height_offset = 	0;
+	this.collides = 				true;
+	this.draws = 					true;
 
 	this.draw = function() {
 		if(this.state == HIT){
@@ -183,6 +222,8 @@ function InfoBox(x_center, y_pos, arg_title, arg_message) {
 	this.stroke = 					"#000000";
 	this.fill = 					"rgba(150, 150, 255, 0.7)";
 	this.padding = 					7;
+	this.draws = 					true;
+
 
 	// split message up into an array of lines
 	var wordPos = 0;
@@ -264,6 +305,7 @@ function Button(x_pos, y_pos, b_width, b_height, b_stroke, b_fill, b_text, callb
 	this.stroke = 					b_stroke;
 	this.fill = 					b_fill;
 	this.callback = 				callback;
+	this.draws = 					true;
 
 	this.physics = function(){
 		this.clicked();

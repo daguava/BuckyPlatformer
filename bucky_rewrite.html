@@ -16,7 +16,7 @@
 
 // debugging
 var editor_mode = 		true;
-var debugging = 		false;
+var debugging = 		true;
 var debugging_text = 	true;
 var debugging_camera =  false;
 var music = 			false;
@@ -97,6 +97,7 @@ function Game(x_boundary, y_boundary){
 	this.camera.maxSpeed = 			7;
 	this.editor = 					{};
 	this.editor.selected = 			null;
+	this.wonLevel = 				false;
 
 	this.resetGame = function() {
 		window.cancelAnimationFrame(animId);
@@ -106,6 +107,19 @@ function Game(x_boundary, y_boundary){
 	this.clearScreen = function() { 
 		ctx.fillStyle = this.clearColor;
 		ctx.fillRect(0, 0, this.boundary.x, this.boundary.y);
+	}
+
+	this.draw = function() {
+		if(this.wonLevel){
+			ctx.font = "100pt Helvetica";
+			ctx.lineWidth = 10;
+			ctx.strokeStyle = "#000000";
+			ctx.fillStyle = "#FFFFFF";
+			ctx.strokeText("A WINRAR,", 125+Math.random()*20, 265+Math.random()*20);
+			ctx.strokeText("  IS YOU!", 125+Math.random()*20, 390+Math.random()*20);
+			ctx.fillText("A WINRAR,",   125+Math.random()*20, 265+Math.random()*20);
+			ctx.fillText("  IS YOU!",   125+Math.random()*20, 390+Math.random()*20);
+		}
 	}
 }
 
@@ -416,14 +430,7 @@ function draw_world() {
 
 	for(var i = 0; i<UpdateManager.length; i++){
 		temp = UpdateManager[i];
-		if(temp instanceof Block 
-			|| temp instanceof ItemBlock 
-			|| temp instanceof Item
-			|| temp instanceof Enemy
-			|| temp instanceof InfoBox
-			|| temp instanceof HurtBlock
-			|| temp instanceof PlaceableAnimation
-			|| temp instanceof TileMenu){
+		if(temp.draws){
 			temp.draw();
 		}
 	}
@@ -436,6 +443,9 @@ function draw_world() {
 	// }
 
 	Buckingham.draw();
+
+	BuckyGame.draw();
+
 	ResetButton.draw();
 
 	if(editor_mode && BuckyGame.editor.selected != null){

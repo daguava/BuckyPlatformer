@@ -71,6 +71,10 @@ function mapGen(){
 			 if(map[i][k] == 5){
 			 	UpdateManager.push(new Enemy(k*blocksize+BuckyGame.drawOffset, i*blocksize, BuckyGame) );
 			 }
+
+			 if(map[i][k] == 7){
+			 	UpdateManager.push(new WinBlock(k*blocksize+BuckyGame.drawOffset, i*blocksize, blocksize, blocksize) );
+			 }
 		}	
 	}
 

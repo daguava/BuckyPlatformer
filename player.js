@@ -273,14 +273,8 @@ function Player(x_pos, y_pos, curr_game) {
 			 *********************************************************************/
 
 			for(i = 0; i<UpdateManager.length; i++){
-				temp = UpdateManager[i];
-				if(temp instanceof Item 
-					|| temp instanceof ItemBlock 
-					|| temp instanceof Block
-					|| temp instanceof Enemy
-					|| temp instanceof HurtBlock){
-
-					collisionAction(this,temp);
+				if(UpdateManager[i].collides){
+					collisionAction(this,UpdateManager[i]);
 				}
 			}
 		}

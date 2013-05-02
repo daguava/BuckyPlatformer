@@ -13,6 +13,7 @@ function enemyProfile(walk_array, attack_array, jump_array){
 	this.jump.speed = 				jump_array[1];
 	this.jump.delay = 				jump_array[2];   // delay between executing actions (in ms)
 	this.jump.timer = 				null;
+
 	if(this.jump.enabled){
 		this.jump.timer = new Timer(this.jump.delay/16.667, true, BuckyGame);
 	}
@@ -52,7 +53,9 @@ function Enemy(x_pos, y_pos, curr_game) {
 	this.collided = 				false;
 	this.collided_last_frame = 		false;
 	this.profile = 					new enemyProfile([true, 0.8+0.2*Math.random(), false], [false], [true, 0, 250+100*Math.random()]);
-	
+	this.collides = 				true;
+	this.draws = 					true;
+
 	this.draw = function() {
 		if(debugging){
 			ctx.strokeStyle = "#FF3333";
@@ -124,33 +127,17 @@ function Enemy(x_pos, y_pos, curr_game) {
 
 			if(this.position.y > BuckyGame.boundary.x) this.state = DEAD;
 
-			// sanity check
-			if(this.vel.x > 200){
-				console.log("Tripped Sanity Check (x velocity): It was " + this.vel.x);
-				this.vel.x = 0;
-			}
-			if(this.vel.y > 200){
-				console.log("Tripped Sanity Check (y velocity): It was " + this.vel.y);
-				this.vel.y = 0;
-			}
-
 			this.position.x += this.vel.x * this.vel.dir.x * curr_game.physCorrect;
 			this.position.y += this.vel.y * curr_game.physCorrect;
 		}
 		
-		for(k = 0; k < 5; k++){
-		 for(i = 0; i<UpdateManager.length; i++){
+
+		for(i = 0; i<UpdateManager.length; i++){
 		 	temp = UpdateManager[i];
-		 	if(temp instanceof Block || (temp instanceof Enemy && temp != this)){
-		 		if(    this.position.x < temp.position.x + temp.width 
-		 			&& this.position.x + this.width >= temp.position.x
-		 			&& this.position.y < temp.position.y + temp.height
-		 			&& this.position.y + this.height >= temp.position.y){
-		 			collisionAction(this,temp);
-		 		}
+		 	if(temp.collides && temp != this){
+		 		collisionAction(this,temp);
 		 	}
 		}
-	}
 
 		if(this.position.y > BuckyGame.height){
 			this.state = DEAD;

@@ -313,7 +313,12 @@ function collisionAction(movable, stationary){
 					//this.x_speed = 0;
 				}
 				return true;
-	}
+	} else if (movable instanceof Player && stationary instanceof WinBlock){
+				if(depthY != 0 || depthX != 0){ // resolve y first if true
+					BuckyGame.wonLevel = true;
+				}
+				return true;
+	} 
 }
 
 // tile collection, used for sets of random-use tiles
