@@ -71,10 +71,10 @@ function TileMenu(){
 	}
 }
 
-function WinBlock(x_pos, y_pos, arg_width, arg_height) {
+function WinBlock(x_pos, y_pos, passed_image) {
 	this.position = 				new Position(x_pos, y_pos);
-	this.width = 					arg_width;
-	this.height = 					arg_height;
+	this.width = 					blocksize;
+	this.height = 					blocksize;
 	this.image = 					new Image();
 	this.visible = 					true;
 	this.collision = 				{};
@@ -82,8 +82,14 @@ function WinBlock(x_pos, y_pos, arg_width, arg_height) {
 	this.collision.height_offset = 	0;
 	this.collides = 				true;
 	this.draws = 					true;
+	this.image.src = 				"images/winblock/winblock.png";
 
 	this.draw = function() {
+
+		if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x){
+				ctx.drawImage(this.image, Math.floor(this.position.x), Math.floor(this.position.y)+Math.sin(BuckyGame.drunkTime+(this.position.x-BuckyGame.drawOffset)/Math.pow(blocksize, 2)*BuckyGame.drunkPeriod)*BuckyGame.drunkStrength, this.width, this.height);
+		}
+
 		if(debugging){
 			if(this.position.x + this.width >= 0 && this.position.x <= BuckyGame.boundary.x)
 			{

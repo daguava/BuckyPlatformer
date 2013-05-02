@@ -73,7 +73,7 @@ function mapGen(){
 			 }
 
 			 if(map[i][k] == 7){
-			 	UpdateManager.push(new WinBlock(k*blocksize+BuckyGame.drawOffset, i*blocksize, blocksize, blocksize) );
+			 	UpdateManager.push(new WinBlock(k*blocksize+BuckyGame.drawOffset, i*blocksize) );
 			 }
 		}	
 	}
