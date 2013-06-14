@@ -6,6 +6,7 @@
 <script src="player.js"></script>
 <script src="utility.js"></script>
 <script src="loadmap.js"></script>
+<script src="assets.js"></script>
 <script src="maps.js"></script>
 
 <script type = "text/javascript">
@@ -16,7 +17,7 @@
 
 // debugging
 var editor_mode = 		true;
-var debugging = 		true;
+var debugging = 		false;
 var debugging_text = 	true;
 var debugging_camera =  false;
 var music = 			false;
@@ -70,6 +71,9 @@ var drawFps =			60;
 var statsDiv;
 var itemTypes;
 var collisionChecks = 	0;
+
+var assets_loaded = 0;
+var image_preload_array = new Array();
 
 function Game(x_boundary, y_boundary){
 	this.boundary =   				{};
@@ -131,7 +135,8 @@ function page_load() {
 	}else if (document.addEventListener){
 		document.addEventListener(mousewheelevt, function(e) {mouse_scroll(e)}, false);
 	}
-	begin_game();
+	preload(); // preloader will call begin game when ready
+	//begin_game();
 }
 
 function begin_game() {
