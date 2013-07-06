@@ -22,17 +22,32 @@ var layer = (function(){
 		},
 
 		draw: function(){
-			// to come later
+			this.each(function(){
+				this.draw();
+			});
 		},
 
 		remove: function(objectToRemove) {
-			for(var i = 0; i < this.elements.length; i++){
-				if(this.elements[i] === objectToRemove){
-					this.elements.splice(i, 1);
-					return true;
+			// if an object is passed in, use it to find the matching object, and terminate it
+			if(objectToRemove !== null && typeof objectToRemove === 'object'){
+				for(var i = 0; i < this.elements.length; i++){
+					if(this.elements[i] === objectToRemove){
+						this.elements.splice(i, 1);
+						return true;
+					}
+				}
+			// otherwise, if an integer was passed in, find its index and splice it out
+			} else {
+				if(objectToRemove <= this.elements.length){
+					for(var i = 0; i < this.elements.length; i++){
+						this.elements.splice(i, 1);
+						return true;
+					}
 				}
 			}
+			// unable to remove object, return false
 			return false;
+			
 		},
 
 		each: function(funcToCall){

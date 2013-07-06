@@ -1,15 +1,11 @@
 var scene = (function(layer){
 	var parallax 		= [];
-
 	var background 		= [];
-
 	var foreground 		= [];	
-
 	var npc				= [];
 
 	var main;					// only one main layer
 	var characterObject;
-
 	var blocking;				// only one block-mask layer
 
 	var layersArray = {
@@ -23,7 +19,22 @@ var scene = (function(layer){
 	};
 
 	var scene = function(map) {
-		// construct scene from map file
+
+		for(var currentLayer = 0; currentLayer < map.length; currentLayer++){
+
+			var newLayer = new layer(map[currentLayer].priority);
+
+			for(var currentElement = 0; currentElement < map[currentLayer].elements.length; currentElement++){
+				// incomplete, need types of blocks, items, etc yet
+				// placeholder line adds the type text as the object, for now.
+				newLayer.add(map[currentLayer].elements[currentElement].type);
+
+			}
+
+			this.addLayer(newLayer, map[currentLayer].layer);
+
+		}
+
 	};
 
 	scene.prototype = {
@@ -115,4 +126,4 @@ var scene = (function(layer){
 
 	return scene;
 
-})();
+})(layer);
