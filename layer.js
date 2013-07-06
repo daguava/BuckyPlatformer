@@ -2,22 +2,27 @@ var layer = (function(){
 	
 	// private variables
 	var elements = [];
+	var priorityNumber;
 
 	// constructor
-	var layer = function(){
-
+	var layer = function(initialPriority){
+		this.priority(initialPriority);
 	};
 
-	layer.prototpe = {
+	layer.prototype = {
 
 		constructor: layer,
 
-		get: function(i) {
-			return this.elements[i];
+		get: function(elementNumber) {
+			return this.elements[elementNumber];
 		},
 
 		add: function(newObject){
 			this.elements[this.elements.length] = newObject;
+		},
+
+		draw: function(){
+			// to come later
 		},
 
 		remove: function(objectToRemove) {
@@ -38,6 +43,20 @@ var layer = (function(){
 
 		length: function(){
 			return this.elements.length;
+		},
+
+		priority: function(newPriority){
+			if(typeof newPriority === 'undefined'){
+				return this.priorityNumber;
+			} else {
+				this.priorityNumber = newPriority;
+			}
+		},
+
+		sort: function(){
+			this.sort(function(layer1, layer2){
+	   			return layer1.priority() > layer2.priority();
+	   		});
 		}
 
 	};

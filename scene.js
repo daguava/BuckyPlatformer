@@ -1,24 +1,23 @@
 var scene = (function(layer){
 	var parallax 		= [];
-		parallax[0] 	= new layer();
-		parallax[1] 	= new layer();
 
 	var background 		= [];
-		background[0] 	= new layer();
-		background[1] 	= new layer();
 
 	var foreground 		= [];	
-		foreground[0] 	= new layer();
-		foreground[1] 	= new layer();
 
-	var main 			= new layer();
-	var character		= new layer();	// need to deal with character yet
-	var blocking		= new layer();
+	var npc				= [];
+
+	var main;					// only one main layer
+	var characterObject;
+
+	var blocking;				// only one block-mask layer
 
 	var layersArray = {
 		parallax: 		parallax,
 		background: 	background, 
 		main: 			main, 
+		character:  	character,
+		npc: 			npc,
 		foreground: 	foreground, 
 		blocking: 		blocking
 	};
@@ -27,34 +26,93 @@ var scene = (function(layer){
 		// construct scene from map file
 	};
 
-	scene.prototpe = {
+	scene.prototype = {
 
 		constructor: scene,
 
-		get: function(layerToReturn) {
-			return this.layersArray[layerToReturn];
+		addLayer: function(newLayer, destination){
+			if(this.layersArray[destination] instanceof Array){
+				this.layersArray[destination][this.layersArray[destination].length] = newLayer;
+			} else {
+				this.layersArray[destination] = newLayer;
+			}
+		},
+
+		getLayer: function(layer, arrayPos) {
+			if(typeof arrayPos === 'undefined'){
+				return this.layersArray[layer];
+			} else {
+				return this.layersArray[layer][arrayPos];
+			}
+			
+		},
+
+		eachLayer: function(funcToCall, flags){
+			var defaults = {
+				includeNpcs: true;
+				includeCharacter: true;
+			};
+
+			var options = {};
+
+			if(typeof flags !== 'undefined'){
+				options.includeNpcs = flags.includeNpcs;
+				options.includeCharacter = flags.includeCharacter;
+			} else {
+				options = defaults;
+			}
+
+			for (var i = 0, len = this.layersArray.length; i < len; i++){
+				// execute if we're on char layer and including chars, 
+				// OR we're on npc layer and including npcs
+				// OR we're not on the npc layer and not on the char later at all (what a mouthfull)
+				if(    options.includeCharacters && this.layersArray[i] === character 
+					|| options.includeNpcs 		 && this.layersArray[i] === npc
+					|| (this.layersArray !== character && this.layersArray[i] !== npc) ){
+
+					if(this.layersArray[i] instanceof Array){
+						// if the element is an array of layers instead of a single layer, iterate through
+						for(var k = 0, len2 = this.layersArray[i].length; k < len2; k++){
+							funcToCall.call(this.layersArray[i][k]);
+						}
+					} else {
+						// otherwise deal with single layer
+						funcToCall.call(this.layersArray[i]);
+					}
+				}
+			}
+		},
+
+		addNpc: function(newNpc){
+			this.npc[npc.length] = newNpc;
+		},
+
+		getNpc: function(arrayPos){
+			return this.npc[arrayPos];
+		},
+
+		eachNpc: function(funcToCall){
+			for (var i = 0, len = this.npc.length; i < len; i++){
+				funcToCall.call(this.npc[i]);
+			}
 		},
 
 		draw: function(){
-			this.each(function(){
+			this.eachLayer(function(){
 				this.draw();
 			});
 		},
 
-		each: function(funcToCall){
-			for (var i = 0, len = this.layersArray.length; i < len; i++){
-				if(this.layersArray[i] instanceof Array){
-					// if the element is an array of layers instead of a single layer, iterate through
-					for(var k = 0, len2 = this.layersArray[i].length; k < len2; k++){
-						funcToCall.call(this.layersArray[i][k]);
-					}
-				} else {
-					// otherwise deal with single layer
-					funcToCall.call(this.layersArray[i]);
-				}
+		character: function(newCharacter){
+			if(typeof newCharacter === 'undefined'){
+				return this.characterObject;
+			} else {
+				this.characterObject = newCharacter;
 			}
 		}
 
 	};
 
-})(layer);
+	return scene;
+
+})();
