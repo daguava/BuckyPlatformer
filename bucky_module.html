@@ -1,5 +1,17 @@
 <!DOCTYPE html>
 <head>
+</head>
+<body style="overflow: hidden;"  onload="page_load()" oncontextmenu="return false;">
+
+<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="1000" height="600" tabindex="1"></canvas>
+
+<textarea id="MapOutput" style="width: 400px; height: 150px;">Map Output</textarea>
+
+<script type="text/javascript">
+  	document.getElementById("draw_canvas").focus();
+	Canvas = document.getElementById("draw_canvas").getContext("2d");
+	physExecuteMs = 	7;
+</script>
 
 <script src="setup.js"></script>
 <script src="elements.js"></script>
@@ -30,8 +42,8 @@ function mouse_up(event) {}
 function mouse_down(event) {}
 function mouse_scroll(event) {}
 
-var ctx;
-var physExecuteMs = 	7;
+
+
 
 
 
@@ -48,10 +60,7 @@ function page_load() {
 
 function begin_game() {
 
-	var canvas = document.getElementById("draw_canvas");
-	ctx = canvas.getContext("2d");
-
-	BuckyGame = new Scene(map);
+	BuckyGame = new Scene(map, 25);
 
 	caller();	// start the physics and drawing loops to start game
 }
@@ -80,6 +89,8 @@ function draw_world() {
 	 GRAPHICS TIMER, USED FOR STATS DISPLAY
 	 ******************************************/
 
+	BuckyGame.draw();
+
 	animId = window.requestAnimationFrame(draw_world);
 
 }
@@ -91,17 +102,7 @@ window.addEventListener('mouseup', 	 mouse_up, 		false);
 window.addEventListener('mousedown', mouse_down, 	false);
 
 </script> 
-</head>
-<body style="overflow: hidden;"  onload="page_load()" oncontextmenu="return false;">
 
-<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="1000" height="600" tabindex="1"></canvas>
-
-<textarea id="MapOutput" style="width: 400px; height: 150px;">Map Output</textarea>
-
-<script type="text/javascript">
-	gameCanvas = document.getElementById("draw_canvas");
-  	document.getElementById("draw_canvas").focus();
-</script>
 
 </body>
 </html>

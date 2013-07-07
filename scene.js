@@ -1,4 +1,4 @@
-var Scene = (function(Layer, Materials){
+var Scene = (function(Layer, Materials, Canvas){
 
 	var Scene = function(map, argSize) {
 
@@ -26,10 +26,14 @@ var Scene = (function(Layer, Materials){
 
 		this.layersArray = [ this.parallax, this.background, this.main, this.character, this.npc, this.foreground, this.clipping ];
 
+		this.graphicsPerformance = performance.now();
+		this.drawCorrect = 0;
+		this.drawFps = 0;
+
 		for(var currentLayer = 0; currentLayer < map.length; currentLayer++){
 
-			console.log("Adding new layer \"" + map[currentLayer].layer + "\"");
-			var newLayer = new Layer(map[currentLayer].priority, map[currentLayer].layer);
+			console.log("Adding new layer '" + map[currentLayer].layer + "' with priority " + map[currentLayer].priority);
+			var newLayer = new Layer(map[currentLayer].priority, map[currentLayer].layer, this.blocksize);
 
 			for(var currentElement = 0; currentElement < map[currentLayer].elements.length; currentElement++){
 
@@ -42,7 +46,7 @@ var Scene = (function(Layer, Materials){
 				
 				// incomplete, need types of blocks, items, etc yet
 				// placeholder line adds the type text as the object, for now.
-				newLayer.add( new Materials[ newType ](tempElement.x, tempElement.y, newWidth, newHeight) );
+				newLayer.add( new Materials[ newType ](tempElement.x*this.blocksize, tempElement.y*this.blocksize, newWidth, newHeight) );
 
 			}
 
@@ -85,17 +89,18 @@ var Scene = (function(Layer, Materials){
 			} else {
 				options = defaults;
 			}
-			for (var i = 0; i < this.layersArray.length; i++){
+
+			for (var i = 0, len = this.layersArray.length; i < len; i++){
 				// execute if we're on char layer and including chars, 
 				// OR we're on npc layer and including npcs
-				// OR we're not on the npc layer and not on the char later at all (what a mouthfull)
+				// OR we're not on the npc layer and not on the char later at all (what a mouthful)
 				if(    ( options.includeCharacters && this.layersArray[i] === this.layersObject['character'] )
 					|| ( options.includeNpcs 		 && this.layersArray[i] === this.layersObject['npc'] )
 					|| ( this.layersArray[i] !== this.layersObject['character'] && this.layersArray[i] !== this.layersObject['npc'] ) ){
 
 					if(this.layersArray[i] instanceof Array){
 						// if the element is an array of layers instead of a single layer, iterate through
-						for(var k = 0; k < this.layersArray[i].length; k++){
+						for(var k = 0, len2 = this.layersArray[i].length; k < len2; k++){
 							funcToCall.call(this.layersArray[i][k]);
 						}
 					} else if( this.layersArray[i] !== null ){
@@ -104,6 +109,8 @@ var Scene = (function(Layer, Materials){
 					}
 				}
 			}
+
+			// Now is the time to go back through and process which tile connections and blocking optimizations must be made
 		},
 
 		addNpc: function(newNpc){
@@ -115,15 +122,28 @@ var Scene = (function(Layer, Materials){
 		},
 
 		eachNpc: function(funcToCall){
-			for (var i = 0; i < this.layersObject['npc'].length; i++){
+			for (var i = 0, len = this.layersObject['npc'].length; i < len; i++){
 				funcToCall.call(npc[i]);
 			}
 		},
 
 		draw: function(){
+
+			Canvas.fillStyle = "#7ADAE1";
+			Canvas.fillRect(0, 0, 1000, 600);
+
+			this.drawDelta = performance.now()-this.graphicsPerformance;
+			this.graphicsPerformance = performance.now(); 
+			this.drawFps = this.drawFps * (49/50) + 1000/this.drawDelta * 1/50;
+			if(this.drawFps > 1000) this.drawFps = 60; // sanity check (check for infinity)
+			this.drawCorrect = this.drawCorrect * (4/5) + this.drawDelta/this.drawExecuteMs * (1/5);
+			if(this.drawCorrect > 2) this.drawCorrect = 2;
+
 			this.eachLayer(function(){
 				this.draw();
 			});
+
+			Canvas.fillText(this.drawFps, 100, 100);
 		},
 
 		player: function(newCharacter){
@@ -146,4 +166,4 @@ var Scene = (function(Layer, Materials){
 
 	return Scene;
 
-})(Layer, Materials);
+})(Layer, Materials, Canvas);

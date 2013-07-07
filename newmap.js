@@ -1,7 +1,8 @@
 map = [{
         layer: "background",
 	    priority: 0,
-        elements: [{
+        elements: [
+            {
                 type: "Grass",
                 x: 0,
                 y: 15
@@ -40,7 +41,8 @@ map = [{
     },{
         layer: "background",
         priority: 1,
-        elements: [{
+        elements: [
+            {
                 type: "Grass",
                 x: 0,
                 y: 15
@@ -79,7 +81,8 @@ map = [{
     },{
         layer: "clipping",
         priority: 0,
-        elements: [{
+        elements: [
+            {
                 x: 0,
                 y: 15
             },

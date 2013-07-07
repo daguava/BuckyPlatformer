@@ -38,6 +38,22 @@ function MapElement(x_pos, y_pos, arg_width, arg_height, xOffset, yOffset){
 			this.position.y = newY;
 		}
 	};
+
+	this.w = function(newWidth){
+		if(typeof newWidth === 'undefined'){
+			return this.width;
+		} else {
+			this.width = newWidth;
+		}
+	};
+
+	this.h = function(newHeight){
+		if(typeof newHeight === 'undefined'){
+			return this.height;
+		} else {
+			this.height = newHeight;
+		}
+	};
 }
 
 var Materials = {
@@ -57,6 +73,10 @@ var Materials = {
 			talk: function(){
 				alert("Talking grass, dawg.");
 			},
+			draw: function(){
+				Canvas.fillStyle = "#123456";
+				Canvas.fillRect(this.x(), this.y(), this.w(), this.h());
+			}
 		};
 
 		return Grass;
@@ -79,6 +99,10 @@ var Materials = {
 			talk: function(){
 				alert("Talking Rock, dawg.");
 			},
+			draw: function(){
+				Canvas.fillStyle = "#123456";
+				Canvas.fillRect(this.x(), this.y(), this.w(), this.h());
+			}
 		};
 
 		return Rock;
@@ -102,6 +126,10 @@ var Materials = {
 			talk: function(){
 				alert("Talking Clipping, dawg.");
 			},
+			draw: function(){
+				Canvas.fillStyle = "#123456";
+				Canvas.fillRect(this.x(), this.y(), this.w(), this.h());
+			}
 		};
 
 		return Clipping;

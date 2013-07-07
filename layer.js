@@ -1,11 +1,12 @@
-var Layer = (function(){
+var Layer = (function(Canvas){
 
 	// constructor
-	var Layer = function(initialPriority, argType){
+	var Layer = function(initialPriority, argType, argBlockSize){
 		this.priority(initialPriority);
 		this.elements = [];
 		this.priorityNumber;
 		this.type = argType;
+		this.blocksize = argBlockSize
 	};
 
 	Layer.prototype = {
@@ -33,7 +34,7 @@ var Layer = (function(){
 		remove: function(objectToRemove) {
 			// if an object is passed in, use it to find the matching object, and terminate it
 			if(objectToRemove !== null && typeof objectToRemove === 'object'){
-				for(var i = 0; i < this.elements.length; i++){
+				for(var i = 0, len = this.elements.length; i < len; i++){
 					if(this.elements[i] === objectToRemove){
 						this.elements.splice(i, 1);
 						return true;
@@ -87,4 +88,4 @@ var Layer = (function(){
 
 	return Layer;
 
-})();
+})(Canvas);
