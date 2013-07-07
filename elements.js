@@ -40,7 +40,7 @@ function MapElement(x_pos, y_pos, arg_width, arg_height, xOffset, yOffset){
 	};
 }
 
-var materials = {
+var Materials = {
 
 
 	Grass: (function(MapElement){
@@ -82,6 +82,29 @@ var materials = {
 		};
 
 		return Rock;
+
+
+	})(MapElement),
+
+
+
+	Clipping: (function(MapElement){
+
+		// constructor
+		var Clipping = function(x_pos, y_pos, arg_width, arg_height){
+			MapElement.call(this, x_pos, y_pos, arg_width, arg_height);
+			this.type = "Clipping";
+		};
+
+		Clipping.prototype = new MapElement(); // inherit from MapElement
+		Clipping.prototype = {
+			constructor: Clipping,
+			talk: function(){
+				alert("Talking Clipping, dawg.");
+			},
+		};
+
+		return Clipping;
 
 
 	})(MapElement)

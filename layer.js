@@ -1,12 +1,11 @@
 var Layer = (function(){
-	
-	// private variables
-	var elements = [];
-	var priorityNumber;
 
 	// constructor
-	var Layer = function(initialPriority){
+	var Layer = function(initialPriority, argType){
 		this.priority(initialPriority);
+		this.elements = [];
+		this.priorityNumber;
+		this.type = argType;
 	};
 
 	Layer.prototype = {
@@ -14,17 +13,21 @@ var Layer = (function(){
 		constructor: Layer,
 
 		get: function(elementNumber) {
-			return this.elements[elementNumber];
+			return elements[elementNumber];
 		},
 
 		add: function(newObject){
-			this.elements[this.elements.length] = newObject;
+			this.elements.push(newObject);
 		},
 
 		draw: function(){
 			this.each(function(){
 				this.draw();
 			});
+		},
+
+		getElements: function(){
+			return this.elements;
 		},
 
 		remove: function(objectToRemove) {
@@ -72,6 +75,12 @@ var Layer = (function(){
 			this.sort(function(layer1, layer2){
 	   			return layer1.priority() > layer2.priority();
 	   		});
+		},
+
+		toString: function(){
+			this.each(function(){
+				console.log(this);
+			})
 		}
 
 	};
