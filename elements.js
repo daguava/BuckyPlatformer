@@ -1,40 +1,89 @@
-function position(x_pos, y_pos){
+function Position(x_pos, y_pos){
 	this.x = x_pos;
 	this.y = y_pos;
 }
 
-function tile(x_pos, y_pos, arg_width, arg_height){
-	this.position = new position(x_pos, y_pos);
+function HitBox(xArg, yArg){
+	// negative value = inward extension, positive = outward extension
+	this.xOffset = xArg;
+	this.yOffset = yArg;
+}
+
+function MapElement(x_pos, y_pos, arg_width, arg_height, xOffset, yOffset){
+	this.type = "";
+	this.position = new Position(x_pos, y_pos);
 	this.image = new Image();
 	this.visible = true;
 	this.width = arg_width;
 	this.height = arg_height;
+	this.hitbox;
+
+	if(typeof xOffset !== 'undefined' && typeof xOffset !== 'undefined'){
+		this.hitbox = new Hitbox(xOffset, yOffset);
+	}
+	
+
+	this.x = function(newX){
+		if(typeof newX === 'undefined'){
+			return this.position.x;
+		} else {
+			this.position.x = newX;
+		}
+	};
+
+	this.y = function(newY){
+		if(typeof newY === 'undefined'){
+			return this.position.y;
+		} else {
+			this.position.y = newY;
+		}
+	};
 }
 
-var elements = {
+var materials = {
 
 
-	grass: (function(tile){
+	Grass: (function(MapElement){
+
+		// constructor
+		var Grass = function(x_pos, y_pos, arg_width, arg_height){
+			MapElement.call(this, x_pos, y_pos, arg_width, arg_height);
+			this.type = "Grass";
+		};
+
+		Grass.prototype = new MapElement(); // inherit from MapElement
+		Grass.prototype = {
+			constructor: Grass,
+			talk: function(){
+				alert("Talking grass, dawg.");
+			},
+		};
+
+		return Grass;
 
 
-
-	// constructor
-	var grass = function(x_pos, y_pos, arg_width, arg_height){
-		tile.prototype.constructor.call(this, x_pos, y_pos, arg_width, arg_height);
-	};
-
-	grass.prototype = new tile();
-
-	grass.prototype.constructor = grass;
-
-	
-	grass.prototype.talk = function(){
-		alert("Talking grass, dawg.");
-	};
-
-	return grass;
+	})(MapElement),
 
 
-	})(tile)
+	Rock: (function(MapElement){
+
+		// constructor
+		var Rock = function(x_pos, y_pos, arg_width, arg_height){
+			MapElement.call(this, x_pos, y_pos, arg_width, arg_height);
+			this.type = "Rock";
+		};
+
+		Rock.prototype = new MapElement(); // inherit from MapElement
+		Rock.prototype = {
+			constructor: Rock,
+			talk: function(){
+				alert("Talking Rock, dawg.");
+			},
+		};
+
+		return Rock;
+
+
+	})(MapElement)
 
 };

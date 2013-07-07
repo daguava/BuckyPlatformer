@@ -1,17 +1,17 @@
-var layer = (function(){
+var Layer = (function(){
 	
 	// private variables
 	var elements = [];
 	var priorityNumber;
 
 	// constructor
-	var layer = function(initialPriority){
+	var Layer = function(initialPriority){
 		this.priority(initialPriority);
 	};
 
-	layer.prototype = {
+	Layer.prototype = {
 
-		constructor: layer,
+		constructor: Layer,
 
 		get: function(elementNumber) {
 			return this.elements[elementNumber];
@@ -76,6 +76,6 @@ var layer = (function(){
 
 	};
 
-	return layer;
+	return Layer;
 
 })();

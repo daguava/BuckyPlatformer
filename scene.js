@@ -1,4 +1,4 @@
-var scene = (function(layer){
+var Scene = (function(Layer){
 	var parallax 		= [];
 	var background 		= [];
 	var foreground 		= [];	
@@ -9,16 +9,16 @@ var scene = (function(layer){
 	var blocking;				// only one block-mask layer
 
 	var layersArray = {
-		parallax: 		parallax,
-		background: 	background, 
-		main: 			main, 
-		character:  	character,
-		npc: 			npc,
-		foreground: 	foreground, 
-		blocking: 		blocking
+		parallax: 		this.parallax,
+		background: 	this.background, 
+		main: 			this.main, 
+		character:  	this.character,
+		npc: 			this.npc,
+		foreground: 	this.foreground, 
+		blocking: 		this.blocking
 	};
 
-	var scene = function(map) {
+	var Scene = function(map) {
 
 		for(var currentLayer = 0; currentLayer < map.length; currentLayer++){
 
@@ -37,9 +37,9 @@ var scene = (function(layer){
 
 	};
 
-	scene.prototype = {
+	Scene.prototype = {
 
-		constructor: scene,
+		constructor: Scene,
 
 		addLayer: function(newLayer, destination){
 			if(this.layersArray[destination] instanceof Array){
@@ -60,8 +60,8 @@ var scene = (function(layer){
 
 		eachLayer: function(funcToCall, flags){
 			var defaults = {
-				includeNpcs: true;
-				includeCharacter: true;
+				includeNpcs: true,
+				includeCharacter: true,
 			};
 
 			var options = {};
@@ -77,9 +77,9 @@ var scene = (function(layer){
 				// execute if we're on char layer and including chars, 
 				// OR we're on npc layer and including npcs
 				// OR we're not on the npc layer and not on the char later at all (what a mouthfull)
-				if(    options.includeCharacters && this.layersArray[i] === character 
-					|| options.includeNpcs 		 && this.layersArray[i] === npc
-					|| (this.layersArray !== character && this.layersArray[i] !== npc) ){
+				if(    options.includeCharacters && this.layersArray[i] === this.character 
+					|| options.includeNpcs 		 && this.layersArray[i] === this.npc
+					|| (this.layersArray !== this.character && this.layersArray[i] !== this.npc) ){
 
 					if(this.layersArray[i] instanceof Array){
 						// if the element is an array of layers instead of a single layer, iterate through
@@ -124,6 +124,6 @@ var scene = (function(layer){
 
 	};
 
-	return scene;
+	return Scene;
 
-})(layer);
+})(Layer);
