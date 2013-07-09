@@ -65,6 +65,7 @@ var Scene = (function(Layer, Materials, Canvas){
 		addLayer: function(newLayer, destination){
 			if(this.layersObject[destination] instanceof Array){
 				this.layersObject[destination][this.layersObject[destination].length] = newLayer;
+				this.sortLayers();
 			}
 		},
 
@@ -161,6 +162,14 @@ var Scene = (function(Layer, Materials, Canvas){
 
 		getLayersArray: function(){
 			return this.layersArray;
+		},
+
+		sortLayers: function(){
+			for(var i = 0, len = this.layersArray.length; i < len; i++){
+				this.layersArray[i].sort(function(layer1, layer2){
+		   			return layer1.priority() > layer2.priority();
+		   		});
+			}
 		}
 
 	};

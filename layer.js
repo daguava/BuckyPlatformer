@@ -72,12 +72,6 @@ var Layer = (function(Canvas){
 			}
 		},
 
-		sort: function(){
-			this.sort(function(layer1, layer2){
-	   			return layer1.priority() > layer2.priority();
-	   		});
-		},
-
 		toString: function(){
 			this.each(function(){
 				console.log(this);
