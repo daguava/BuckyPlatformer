@@ -24,11 +24,13 @@ var Scene = (function(Layer, Materials, Canvas){
 			clipping: 		this.clipping
 		};
 
-		this.layersArray = [ this.parallax, this.background, this.main, this.character, this.npc, this.foreground, this.clipping ];
+		this.performance = {
+			graphics: performance.now(),
+			drawCorrect: 1,
+			drawFps: 60
+		};
 
-		this.graphicsPerformance = performance.now();
-		this.drawCorrect = 0;
-		this.drawFps = 0;
+		this.layersArray = [ this.parallax, this.background, this.main, this.character, this.npc, this.foreground, this.clipping ];
 
 		for(var currentLayer = 0; currentLayer < map.length; currentLayer++){
 
@@ -132,18 +134,17 @@ var Scene = (function(Layer, Materials, Canvas){
 			Canvas.fillStyle = "#7ADAE1";
 			Canvas.fillRect(0, 0, 1000, 600);
 
-			this.drawDelta = performance.now()-this.graphicsPerformance;
-			this.graphicsPerformance = performance.now(); 
-			this.drawFps = this.drawFps * (49/50) + 1000/this.drawDelta * 1/50;
-			if(this.drawFps > 1000) this.drawFps = 60; // sanity check (check for infinity)
-			this.drawCorrect = this.drawCorrect * (4/5) + this.drawDelta/this.drawExecuteMs * (1/5);
-			if(this.drawCorrect > 2) this.drawCorrect = 2;
+			var drawDelta = performance.now()-this.performance.graphics;
+			this.performance.graphics = performance.now(); 
+			this.performance.drawFps = this.performance.drawFps * (49/50) + 1000/drawDelta * 1/50;
+			if(this.performance.drawFps > 1000 || this.performance.drawFps < 10) this.performance.drawFps = 60; // sanity check (check for infinity)
 
 			this.eachLayer(function(){
 				this.draw();
 			});
-
-			Canvas.fillText(this.drawFps, 100, 100);
+			
+			Canvas.fillStyle = "#000000";
+			Canvas.fillText(this.performance.drawFps, 100, 100);
 		},
 
 		player: function(newCharacter){

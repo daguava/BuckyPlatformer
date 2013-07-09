@@ -9,30 +9,28 @@
 
 <script type="text/javascript">
   	document.getElementById("draw_canvas").focus();
-	Canvas = document.getElementById("draw_canvas").getContext("2d");
+	Canvas = 			document.getElementById("draw_canvas").getContext("2d");
 	physExecuteMs = 	7;
 </script>
 
 <script src="setup.js"></script>
+<script src="preloader.js"></script>
+
+<script type="text/javascript">
+Preloader.ready(function(){
+	console.log("WE ARE READY, CAPTAIN!");
+});
+Preloader.addImage('./images/items/beer_mug.png');
+</script>
+
+
+
 <script src="elements.js"></script>
 <script src="layer.js"></script>
 <script src="scene.js"></script>
 <script src="newmap.js"></script>
 
 <script type = "text/javascript">
-
-/////////// performance.now() shim
-
-window.performance = window.performance || {};
-performance.now = (function() {
-  return performance.now       ||
-         performance.mozNow    ||
-         performance.msNow     ||
-         performance.oNow      ||
-         performance.webkitNow ||
-         function() { return new Date().getTime(); };
-})();
-
 
 function mouse_move(event) {}
 function mouse_press(event) {}
@@ -41,11 +39,6 @@ function key_event_up(event) {}
 function mouse_up(event) {}
 function mouse_down(event) {}
 function mouse_scroll(event) {}
-
-
-
-
-
 
 function page_load() {
 	var mousewheelevt=(/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel";
