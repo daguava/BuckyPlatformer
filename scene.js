@@ -48,7 +48,10 @@ var Scene = (function(Layer, Materials, Canvas){
 				
 				// incomplete, need types of blocks, items, etc yet
 				// placeholder line adds the type text as the object, for now.
-				newLayer.add( new Materials[ newType ](tempElement.x*this.blocksize, tempElement.y*this.blocksize, newWidth, newHeight) );
+
+				/* Once I have defined my custom tiles, I need to come back and make this line work */
+
+				newLayer.add( new Materials.getTile( newType )(tempElement.x*this.blocksize, tempElement.y*this.blocksize, newWidth, newHeight) );
 
 			}
 
@@ -137,8 +140,8 @@ var Scene = (function(Layer, Materials, Canvas){
 
 			var drawDelta = performance.now()-this.performance.graphics;
 			this.performance.graphics = performance.now(); 
-			this.performance.drawFps = this.performance.drawFps * (49/50) + 1000/drawDelta * 1/50;
-			if(this.performance.drawFps > 1000 || this.performance.drawFps < 10) this.performance.drawFps = 60; // sanity check (check for infinity)
+			this.performance.drawFps = this.performance.drawFps * (49/50) + (1000/drawDelta) * (1/50);
+			if(this.performance.drawFps > 1000) this.performance.drawFps = 60; // sanity check (check for infinity)
 
 			this.eachLayer(function(){
 				this.draw();

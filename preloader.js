@@ -39,7 +39,6 @@ var Preloader = (function(){
 		getImage: function(argImageSrc) {
 			return images[argImageSrc];
 		},
-
 		addSound: function(argSoundSrc) {
 			addedCount++
 			sounds[argSoundSrc] = new Audio(argSoundSrc);

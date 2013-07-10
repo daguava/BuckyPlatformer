@@ -1,6 +1,6 @@
-function Position(x_pos, y_pos){
-	this.x = x_pos;
-	this.y = y_pos;
+function Position(xPos, yPos){
+	this.x = xPos;
+	this.y = yPos;
 }
 
 function HitBox(xArg, yArg){
@@ -9,14 +9,14 @@ function HitBox(xArg, yArg){
 	this.yOffset = yArg;
 }
 
-function MapElement(x_pos, y_pos, arg_width, arg_height, xOffset, yOffset){
+function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset){
 	this.type = "";
-	this.position = new Position(x_pos, y_pos);
+	this.position = new Position(xPos, yPos);
 	this.image = null;
 	this.visible = true;
-	this.width = arg_width || 25;
-	this.height = arg_height || 25;
-	this.hitbox;
+	this.width = argWidth || 25;
+	this.height = argHeight || 25;
+	this.hitbox = null;
 
 	if(typeof xOffset !== 'undefined' && typeof xOffset !== 'undefined'){
 		this.hitbox = new Hitbox(xOffset, yOffset);
@@ -65,78 +65,68 @@ function MapElement(x_pos, y_pos, arg_width, arg_height, xOffset, yOffset){
 	};
 }
 
-var Materials = {
 
 
-	Grass: (function(MapElement){
+var Materials = (function(MapElement){
 
-		// constructor
-		var Grass = function(x_pos, y_pos, arg_width, arg_height){
-			MapElement.call(this, x_pos, y_pos, arg_width, arg_height);
-			this.type = "Grass";
-			this.image = new Image();
-			this.image.src = "./images/grass_tileset/grass_top_middle.png";
-		};
+	var tilesetsArray = [];
+	var tilesetsObject = {};
+	var tileArray = [];
+	var tileObject = {};
 
-		Grass.prototype = new MapElement(); // inherit from MapElement
-		Grass.prototype = {
-			constructor: Grass,
-			talk: function(){
-				alert("Talking grass, dawg.");
-			}
-		};
+	var Tile = function(argType, xPos, yPos, argWidth, argHeight, xOffset, yOffset, argTileset){
+		MapElement.call(this, xPos, yPos, argWidth, argHeight, xOffset, yOffset);
+		this.type = argType;
+		this.tileset = argTileset;
+		this.image = new Image();
+	};
 
-		return Grass;
+	Tile.prototype = new MapElement(); // inherit from MapElement
+	Tile.prototype = {
+		constructor: Tile,
+		talk: function(){
+			alert("Talking tile, dawg.");
+		}
+	};
 
+	return {
 
-	})(MapElement),
-
-
-	Rock: (function(MapElement){
-
-		// constructor
-		var Rock = function(x_pos, y_pos, arg_width, arg_height){
-			MapElement.call(this, x_pos, y_pos, arg_width, arg_height);
-			this.type = "Rock";
-			this.image = new Image();
-			this.image.src = "./images/rock_tileset/platform.png";
-		};
-
-		Rock.prototype = new MapElement(); // inherit from MapElement
-		Rock.prototype = {
-			constructor: Rock,
-			talk: function(){
-				alert("Talking Rock, dawg.");
-			}
-		};
-
-		return Rock;
-
-
-	})(MapElement),
-
-
-
-	Clipping: (function(MapElement){
-
-		// constructor
-		var Clipping = function(x_pos, y_pos, arg_width, arg_height){
-			MapElement.call(this, x_pos, y_pos, arg_width, arg_height);
-			this.type = "Clipping";
-			this.image = new Image();
-		};
-
-		Clipping.prototype = new MapElement(); // inherit from MapElement
-		Clipping.prototype = {
-			constructor: Clipping,
-			talk: function(){
-				alert("Talking Clipping, dawg.");
-			}
-		};
-
-		return Clipping;
+		createTileset: function(argTileset) {
+			// two different methods of storing
+			// -- an array, for a fast foreach type scenario
+			// -- an object, for a quick retrieval by type
+			tilesetsArray[tilesetsArray.length] = argTileset;
+			tilesetsObject[argTileset.type] = argTileset;
+		},
+		getTileset: function(argTilesetType){
+			return tilesetsObject[argTilesetType];
+		},
+		defineTile: function(argType, argTileset, xPos, yPos, argWidth, argHeight, xOffset, yOffset){
+			var newTile = {
+				type: argType,
+				x: xPos,
+				y: yPos,
+				width: argWidth,
+				height: argHeight,
+				xOffset: xOffset,
+				yOffset: yOffset,
+				tileset: argTileset
+			};
+			
+			tileArray[tileArray.length] = newTile;
+			tileObject[newTile.type] = newTile;
+		},
+		createTile: function(argType, xPos, yPos){
+			var curr = tileObject[argType];
+			var newTile = new Tile(curr[argType].type, xPos, yPos, curr[argType].width, curr[argType].height, curr[argType].xOffset, curr[argType].yOffset, curr[argType].tileset);
+			return newTile;
+		}
+	};
+})(MapElement);
 
 
-	})(MapElement)
-
-};
+///////////////// NOTES TO SELF
+/*
+Need to make defining a tile and creating a tile separate things, otherwise, when I go
+to generate the map tiles, I can't just go new Tile, because i have it require x,y now
+*/
