@@ -10,15 +10,19 @@ var Preloader = (function(){
 
 	return {
 
-		addImage: function(argImageSrc) {
+		addImage: function(argImageSrc, skipAddCountFlag) {
 			// called with an array of images
 			if(argImageSrc instanceof Array){
 				addedCount += argImageSrc.length;
 				for(var i = 0, len = argImageSrc.length; i<len; i++){
-					Preloader.addImage(argImageSrc[i]);
+					Preloader.addImage(argImageSrc[i], true);
 				}
 			} else { // called with a single image
-				addedCount++;
+
+				if(typeof skipAddCountFlag === 'undefined' || !skipAddCountFlag){
+					addedCount++;
+				}
+
 				images[argImageSrc] = new Image();
 				images[argImageSrc].src = argImageSrc;
 

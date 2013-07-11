@@ -31,17 +31,19 @@ var Tileset = (function(Preloader){
 		this.pattern = argPattern;
 		this.clips = argClips;
 
-		for(var i = 0, len = argImgArray.length; i++){
+		for(var i = 0, len = argImgArray.length; i<len; i++){
 
 			if(Preloader.hasImage(argImgArray[i])){
 				// check preloader for image first
+				console.log("Grabbed " + argImgArray[i] + " from Preloader.");
 				this.images[i] = Preloader.getImage(argImgArray[i]);
 			} else {
 				// if preloader doesn't have it, load it in
 				// realistically, if one preloads properly right, this doesn't execute,
 				// this is a fallback for forgetting to preload an image
+				console.log("Preloader is missing " + argImgArray[i] + "!");
 				this.images[i] = new Image();
-				this.images[i].src = argImgArray[i]
+				this.images[i].src = argImgArray[i];
 			}
 		}
 	};
@@ -51,7 +53,7 @@ var Tileset = (function(Preloader){
 		constructor: Tileset,
 
 		get: function(elementNumber) {
-			return elements[elementNumber];
+			return this.images[elementNumber];
 		}
 
 	};

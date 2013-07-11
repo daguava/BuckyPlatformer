@@ -18,14 +18,17 @@
 
 <script type="text/javascript">
 Preloader.ready(function(){
-	console.log("WE ARE READY, CAPTAIN!");
+	console.log("Preloader finished: Beginning game...");
+	begin_game();
 });
-Preloader.addImage('./images/items/beer_mug.png');
+
+Preloader.addImage(["images/grass_tileset/grass_single.png", "images/grass_tileset/grass_bottom_single.png", "images/grass_tileset/grass_right_single.png", "images/grass_tileset/grass_bottom_right.png", "images/grass_tileset/grass_left_single.png", "images/grass_tileset/grass_bottom_left.png", "images/grass_tileset/grass_middle_single_horizontal.png", "images/grass_tileset/grass_bottom_middle.png", "images/grass_tileset/grass_top_single.png", "images/grass_tileset/grass_middle_single_vertical.png", "images/grass_tileset/grass_top_right.png", "images/grass_tileset/grass_middle_right.png", "images/grass_tileset/grass_top_left.png", "images/grass_tileset/grass_middle_left.png", "images/grass_tileset/grass_top_middle.png", "images/grass_tileset/ground_tile.png"]);
 </script>
 
 
 
 <script src="elements.js"></script>
+<script src="tileset.js"></script>
 <script src="layer.js"></script>
 <script src="scene.js"></script>
 <script src="newmap.js"></script>
@@ -47,11 +50,22 @@ function page_load() {
 	}else if (document.addEventListener){
 		document.addEventListener(mousewheelevt, function(e) {mouse_scroll(e)}, false);
 	}
-
-	begin_game();
 }
 
 function begin_game() {
+
+	
+
+	GrassTileset = new Tileset(
+		"Grass", 
+		["images/grass_tileset/grass_single.png", "images/grass_tileset/grass_bottom_single.png", "images/grass_tileset/grass_right_single.png", "images/grass_tileset/grass_bottom_right.png", "images/grass_tileset/grass_left_single.png", "images/grass_tileset/grass_bottom_left.png", "images/grass_tileset/grass_middle_single_horizontal.png", "images/grass_tileset/grass_bottom_middle.png", "images/grass_tileset/grass_top_single.png", "images/grass_tileset/grass_middle_single_vertical.png", "images/grass_tileset/grass_top_right.png", "images/grass_tileset/grass_middle_right.png", "images/grass_tileset/grass_top_left.png", "images/grass_tileset/grass_middle_left.png", "images/grass_tileset/grass_top_middle.png", "images/grass_tileset/ground_tile.png"], 
+		"full", 
+		true
+	);
+
+	Materials.defineTileset(GrassTileset);
+	Materials.defineTile(Materials.getTileset("Grass"), 25, 25, 0, 0);
+
 
 	BuckyGame = new Scene(map, 25);
 
@@ -82,7 +96,7 @@ function draw_world() {
 	 GRAPHICS TIMER, USED FOR STATS DISPLAY
 	 ******************************************/
 
-	//BuckyGame.draw();
+	BuckyGame.draw();
 
 	animId = window.requestAnimationFrame(draw_world);
 

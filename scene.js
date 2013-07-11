@@ -51,7 +51,7 @@ var Scene = (function(Layer, Materials, Canvas){
 
 				/* Once I have defined my custom tiles, I need to come back and make this line work */
 
-				newLayer.add( new Materials.getTile( newType )(tempElement.x*this.blocksize, tempElement.y*this.blocksize, newWidth, newHeight) );
+				newLayer.add( new Materials.createTile(newType, tempElement.x*this.blocksize, tempElement.y*this.blocksize) );
 
 			}
 

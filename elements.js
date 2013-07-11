@@ -3,7 +3,7 @@ function Position(xPos, yPos){
 	this.y = yPos;
 }
 
-function HitBox(xArg, yArg){
+function Hitbox(xArg, yArg){
 	// negative value = inward extension, positive = outward extension
 	this.xOffset = xArg;
 	this.yOffset = yArg;
@@ -17,13 +17,14 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset){
 	this.width = argWidth || 25;
 	this.height = argHeight || 25;
 	this.hitbox = null;
+	this.tempflag = false;
 
 	if(typeof xOffset !== 'undefined' && typeof xOffset !== 'undefined'){
 		this.hitbox = new Hitbox(xOffset, yOffset);
 	}
 
 	this.draw = function(){
-		if(this.image instanceof Image && this.image.src != ""){
+		if(this.image instanceof Image && this.image.src !== ""){
 			Canvas.drawImage( this.image, this.x(), this.y(), this.w(), this.h() );
 		} else {
 			Canvas.strokeStyle = "#FF0000";
@@ -91,7 +92,7 @@ var Materials = (function(MapElement){
 
 	return {
 
-		createTileset: function(argTileset) {
+		defineTileset: function(argTileset) {
 			// two different methods of storing
 			// -- an array, for a fast foreach type scenario
 			// -- an object, for a quick retrieval by type
@@ -101,11 +102,9 @@ var Materials = (function(MapElement){
 		getTileset: function(argTilesetType){
 			return tilesetsObject[argTilesetType];
 		},
-		defineTile: function(argType, argTileset, xPos, yPos, argWidth, argHeight, xOffset, yOffset){
+		defineTile: function(argTileset, argWidth, argHeight, xOffset, yOffset){
 			var newTile = {
-				type: argType,
-				x: xPos,
-				y: yPos,
+				type: argTileset.type,
 				width: argWidth,
 				height: argHeight,
 				xOffset: xOffset,
@@ -118,8 +117,16 @@ var Materials = (function(MapElement){
 		},
 		createTile: function(argType, xPos, yPos){
 			var curr = tileObject[argType];
-			var newTile = new Tile(curr[argType].type, xPos, yPos, curr[argType].width, curr[argType].height, curr[argType].xOffset, curr[argType].yOffset, curr[argType].tileset);
+			//console.log(curr);
+			var newTile = new Tile(argType, xPos, yPos, curr.width, curr.height, curr.xOffset, curr.yOffset, curr.tileset);
+			newTile.image = curr.tileset.get(0);
 			return newTile;
+		},
+		getTileArray: function(){
+			return tileArray;
+		},
+		getTileObject: function(){
+			return tileObject;
 		}
 	};
 })(MapElement);
