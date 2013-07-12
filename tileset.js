@@ -1,6 +1,7 @@
 /*
 
 IMG ARRAY TILE ORDER
+single-single 		0
 single-bottom		1
 single-right		2
 bottom-right		3
@@ -25,11 +26,12 @@ var Tileset = (function(Preloader){
 	// argImgArray is an array with a bunch of img src strings
 	//   we do this so we can query a preloader for the image object, or
 	//   make it if it isn't found
-	var Tileset = function(argType, argImgArray, argPattern, argClips){
+	var Tileset = function(argType, argImgArray, argPattern, argClips, argDraws){
 		this.type = argType;
 		this.images = [];
 		this.pattern = argPattern;
 		this.clips = argClips;
+		this.draws = argDraws;
 
 		for(var i = 0, len = argImgArray.length; i<len; i++){
 

@@ -22,7 +22,7 @@ var Layer = (function(Canvas){
 		},
 
 		draw: function(){
-			this.each(function(){
+			this.eachTile(function(){
 				this.draw();
 			});
 		},
@@ -54,9 +54,9 @@ var Layer = (function(Canvas){
 			
 		},
 
-		each: function(funcToCall){
+		eachTile: function(funcToCall, args){
 			for (var i = 0, len = this.elements.length; i < len; i++){
-				funcToCall.call(this.elements[i]);
+				funcToCall.call(this.elements[i], args);
 			}
 		},
 

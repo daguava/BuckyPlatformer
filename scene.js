@@ -6,22 +6,22 @@ var Scene = (function(Layer, Materials, Canvas){
 
 		this.defaultMapElement = 'Clipping';
 
-		this.parallax = 	[];
-		this.background = 	[];
-		this.main = 		[];
-		this.character = 	[];
-		this.npc = 			[];
-		this.foreground = 	[];
-		this.clipping = 	[];
+		this.Parallax = 	[];
+		this.Background = 	[];
+		this.Main = 		[];
+		this.Character = 	[];
+		this.Npc = 			[];
+		this.Foreground = 	[];
+		this.Clipping = 	[];
 
 		this.layersObject = {
-			parallax: 		this.parallax,
-			background: 	this.background,
-			main: 			this.main,
-			character:  	this.character,
-			npc: 			this.npc,
-			foreground: 	this.foreground,
-			clipping: 		this.clipping
+			Parallax: 		this.Parallax,
+			Background: 	this.Background,
+			Main: 			this.Main,
+			Character:  	this.Character,
+			Npc: 			this.Npc,
+			Foreground: 	this.Foreground,
+			Clipping: 		this.Clipping
 		};
 
 		this.performance = {
@@ -30,34 +30,62 @@ var Scene = (function(Layer, Materials, Canvas){
 			drawFps: 60
 		};
 
-		this.layersArray = [ this.parallax, this.background, this.main, this.character, this.npc, this.foreground, this.clipping ];
+		this.layersArray = [ this.Parallax, this.Background, this.Main, this.Character, this.Npc, this.Foreground, this.Clipping ];
 
-		for(var currentLayer = 0; currentLayer < map.length; currentLayer++){
+		for(var currLayer = 0; currLayer < map.length; currLayer++){
 
-			console.log("Adding new layer '" + map[currentLayer].layer + "' with priority " + map[currentLayer].priority);
-			var newLayer = new Layer(map[currentLayer].priority, map[currentLayer].layer, this.blocksize);
+			console.log("Adding new layer '" + map[currLayer].layer + "' with priority " + map[currLayer].priority);
+			var newLayer = new Layer(map[currLayer].priority, map[currLayer].layer, this.blocksize);
 
-			for(var currentElement = 0; currentElement < map[currentLayer].elements.length; currentElement++){
+			for(var eCount = 0; eCount < map[currLayer].elements.length; eCount++){
 
-				var tempElement = map[currentLayer].elements[currentElement];
-				var newType, newX, newY, newWidth, newHeight;
+				var tempE = map[currLayer].elements[eCount];
+				var newType, newWidth, newHeight;
 
-				newType = 	(typeof tempElement.type   !== 'undefined') ? tempElement.type 		: this.defaultMapElement;
-				newWidth = 	(typeof tempElement.width  !== 'undefined') ? tempElement.width 	: this.blocksize;
-				newHeight = (typeof tempElement.height !== 'undefined') ? tempElement.height 	: this.blocksize;
-				
-				// incomplete, need types of blocks, items, etc yet
-				// placeholder line adds the type text as the object, for now.
+				newType = 	(typeof tempE.type   !== 'undefined') ? tempE.type 	  : this.defaultMapElement;
+				newWidth = 	(typeof tempE.width  !== 'undefined') ? tempE.width   : this.blocksize;
+				newHeight = (typeof tempE.height !== 'undefined') ? tempE.height  : this.blocksize;
 
-				/* Once I have defined my custom tiles, I need to come back and make this line work */
+				newLayer.add( new Materials.createTile(newType, tempE.x, tempE.y) );
 
-				newLayer.add( new Materials.createTile(newType, tempElement.x*this.blocksize, tempElement.y*this.blocksize) );
+				if( Materials.getTileset(newType).clips ){
+					newLayer.add( new Materials.createTile("Clipping", tempE.x, tempE.y) );
+				}
 
 			}
 
-			this.addLayer(newLayer, map[currentLayer].layer);
+			this.addLayer(newLayer, map[currLayer].layer);
 
 		}
+
+		// time to assign images to each block, now that we can check it against its surroundings
+		// assign image of tile1 each time, tile2 is always the tile to be 'scored'
+		console.log("Begin autotiling...");
+		this.eachLayer(function(){
+			var _layer = this;
+			_layer.eachTile(function(){
+				var _tile1 = this;
+				_layer.eachTile(function(){
+					var _tile2 = this;
+					if(_tile1 !== _tile2){
+						if(_tile1.type === _tile2.type){
+							// same type, check four relational tiles
+							if( _tile2.northOf(_tile1) ){
+								_tile1.score(8);
+							} else if( _tile2.eastOf(_tile1) ){
+								_tile1.score(4);
+							} else if( _tile2.southOf(_tile1) ){
+								_tile1.score(1);
+							} else if( _tile2.westOf(_tile1) ){
+								_tile1.score(2);
+							}
+						}
+					}
+				});
+				_tile1.setImage( _tile1.tileset.get( _tile1.score() ) );
+			});
+		}, {includeNpcs: false, includeCharacter: false});
+		console.log("Autotiling complete.");
 
 	};
 
@@ -81,7 +109,7 @@ var Scene = (function(Layer, Materials, Canvas){
 			
 		},
 
-		eachLayer: function(funcToCall, flags){
+		eachLayer: function(funcToCall, flags, args){
 			var defaults = {
 				includeNpcs: true,
 				includeCharacter: true
@@ -111,7 +139,7 @@ var Scene = (function(Layer, Materials, Canvas){
 						}
 					} else if( this.layersArray[i] !== null ){
 						// otherwise deal with single layer
-						funcToCall.call(this.layersArray[i]);
+						funcToCall.call(this.layersArray[i], null, args);
 					}
 				}
 			}
@@ -120,11 +148,11 @@ var Scene = (function(Layer, Materials, Canvas){
 		},
 
 		addNpc: function(newNpc){
-			this.npc[this.npc.length] = newNpc;
+			this.Npc[this.Npc.length] = newNpc;
 		},
 
 		getNpc: function(arrayPos){
-			return this.npc[arrayPos];
+			return this.Npc[arrayPos];
 		},
 
 		eachNpc: function(funcToCall){
@@ -153,9 +181,9 @@ var Scene = (function(Layer, Materials, Canvas){
 
 		player: function(newCharacter){
 			if(typeof newCharacter === 'undefined'){
-				return this.character;
+				return this.Character;
 			} else {
-				this.character = newCharacter;
+				this.Character = newCharacter;
 			}
 		},
 
