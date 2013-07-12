@@ -30,7 +30,12 @@ var Scene = (function(Layer, Materials, Canvas){
 			drawFps: 60
 		};
 
+		console.log("Logging map-file to scene conversion time...");
+		var conversionTime = performance.now();
+
 		this.layersArray = [ this.Parallax, this.Background, this.Main, this.Character, this.Npc, this.Foreground, this.Clipping ];
+
+		var mapArray = [];
 
 		for(var currLayer = 0; currLayer < map.length; currLayer++){
 
@@ -46,7 +51,15 @@ var Scene = (function(Layer, Materials, Canvas){
 				newWidth = 	(typeof tempE.width  !== 'undefined') ? tempE.width   : this.blocksize;
 				newHeight = (typeof tempE.height !== 'undefined') ? tempE.height  : this.blocksize;
 
-				newLayer.add( new Materials.createTile(newType, tempE.x, tempE.y) );
+				var newTile = new Materials.createTile(newType, tempE.x, tempE.y);
+
+				if( ! (mapArray[ tempE.x ] instanceof Array) ){
+					mapArray[ tempE.x ] = [];
+				}
+
+				mapArray[ tempE.x ][ tempE.y ] = newTile;
+
+				newLayer.add( newTile );
 
 				if( Materials.getTileset(newType).clips ){
 					newLayer.add( new Materials.createTile("Clipping", tempE.x, tempE.y) );
@@ -58,34 +71,48 @@ var Scene = (function(Layer, Materials, Canvas){
 
 		}
 
+		console.log(mapArray);
+
 		// time to assign images to each block, now that we can check it against its surroundings
 		// assign image of tile1 each time, tile2 is always the tile to be 'scored'
 		console.log("Begin autotiling...");
 		this.eachLayer(function(){
 			var _layer = this;
-			_layer.eachTile(function(){
-				var _tile1 = this;
-				_layer.eachTile(function(){
-					var _tile2 = this;
-					if(_tile1 !== _tile2){
-						if(_tile1.type === _tile2.type){
-							// same type, check four relational tiles
-							if( _tile2.northOf(_tile1) ){
-								_tile1.score(8);
-							} else if( _tile2.eastOf(_tile1) ){
-								_tile1.score(4);
-							} else if( _tile2.southOf(_tile1) ){
-								_tile1.score(1);
-							} else if( _tile2.westOf(_tile1) ){
-								_tile1.score(2);
-							}
+			for( var i = 0; i < mapArray.length; i++){
+				for( var k = 0; k < mapArray[i].length; k++){
+
+					var mapTile = mapArray[ i ][ k ];
+					if( mapTile.hasOwnProperty('type') ){
+
+						// same type, check four relational tiles
+						if( 	   mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ].type === mapTile.type ){
+							//console.log(8);
+							mapTile.score(8);
+						} else if( mapArray[ mapTile.xTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ].type === mapTile.type ){
+							//console.log(4);
+							mapTile.score(4);
+						} else if( mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ].type === mapTile.type ){
+							//console.log(1);
+							mapTile.score(1);
+						} else if( mapArray[ mapTile.xTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ].type === mapTile.type ){
+							//console.log(2);
+							mapTile.score(2);
 						}
 					}
-				});
-				_tile1.setImage( _tile1.tileset.get( _tile1.score() ) );
-			});
+
+					console.log( mapTile.score() );
+					mapTile.setImage( mapTile.tileset.get( mapTile.score() ) );
+
+				}
+			}
+
 		}, {includeNpcs: false, includeCharacter: false});
+
 		console.log("Autotiling complete.");
+
+		conversionTime = performance.now() - conversionTime;
+
+		console.log("Map generation took " + conversionTime.toFixed(3) + "ms.");
 
 	};
 
@@ -198,7 +225,7 @@ var Scene = (function(Layer, Materials, Canvas){
 		sortLayers: function(){
 			for(var i = 0, len = this.layersArray.length; i < len; i++){
 				this.layersArray[i].sort(function(layer1, layer2){
-		   			return layer1.priority() > layer2.priority();
+		   			return layer1.priorityTile() > layer2.priorityTile();
 		   		});
 			}
 		}
