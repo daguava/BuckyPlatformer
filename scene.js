@@ -1,7 +1,6 @@
 var Scene = (function(Layer, Materials, Canvas){
 
 	var Scene = function(map, argSize) {
-
 		this.blocksize = 		argSize;
 
 		this.defaultMapElement = 'Clipping';
@@ -72,27 +71,28 @@ var Scene = (function(Layer, Materials, Canvas){
 					for( var y = 0; y < mapArray[ x ].length; y++){
 						if( mapArray[ x ][ y ] !== undefined){
 							var mapTile = mapArray[ x ][ y ];
-							if( typeof mapTile.type !== 'undefined' ){
-
+							if( typeof mapTile.type !== 'undefined'){
 								// same type, check four relational tiles
 								if( 	   mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ].type === mapTile.type ){
-									console.log(8);
-									mapTile.score();
-								} else if( mapArray[ mapTile.xTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ].type === mapTile.type ){
-									console.log(4);
-									mapTile.score(4);
-								} else if( mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ].type === mapTile.type ){
-									console.log(1);
-									mapTile.score(1);
-								} else if( mapArray[ mapTile.xTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ].type === mapTile.type ){
-									console.log(2);
+									mapTile.score(8);
+								} 
+
+								if( mapArray[ mapTile.xTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ].type === mapTile.type ){
 									mapTile.score(2);
+								} 
+
+								if( mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ].type === mapTile.type ){
+									mapTile.score(1);
+								} 
+								
+								if( mapArray[ mapTile.xTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ].type === mapTile.type ){
+									mapTile.score(4);
 								}
 
 							}
-							console.log( mapTile.score() );
-							mapTile.setImage( mapTile.tileset.get( mapTile.score() ) );
 
+							mapTile.setImage( mapTile.tileset.get( mapTile.score() ) );
+							console.log(mapTile);
 							newLayer.add( mapTile );
 						}
 					}

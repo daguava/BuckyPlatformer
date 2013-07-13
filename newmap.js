@@ -34,6 +34,9 @@ map = [{
                 x: 2, y: 14
             },{
                 type: "Grass",
+                x: 1, y: 15
+            },{
+                type: "Grass",
                 x: 1, y: 14
             },{
                 type: "Grass",

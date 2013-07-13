@@ -30,6 +30,11 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, argBlocks
 		if(this.draws){
 			if(this.image instanceof Image && this.image.src != ""){
 				Canvas.drawImage( this.image, this.x(), this.y(), this.w(), this.h() );
+				if(this.debugging){
+					Canvas.fillStyle = "#FFFFFF";
+					Canvas.font = '18px Calibri';
+					Canvas.fillText(this.tileScore, this.x() + 3, this.y() + 20);
+				}
 			} else {
 				Canvas.strokeStyle = "#FF0000";
 				Canvas.strokeRect(this.x(), this.y(), this.w(), this.h());
