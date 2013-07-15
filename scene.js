@@ -124,9 +124,10 @@ var Scene = (function(Layer, Materials, Canvas){
 					if( clippingArray[ x ][ y ] !== undefined){
 						var clipTile = clippingArray[ x ][ y ];
 						if( typeof clipTile.type !== 'undefined'){
-							if( clippingArray[ clipTile.xTile() + 1 ] !== undefined && clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ] !== undefined && clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ].type === clipTile.type ){
-								clipTile.w( clippingArray[ x ][ y ].w() + clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ].w() );
-								clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ] = undefined;
+							console.log(clipTile.xTile(), clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize));
+							if( clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ] !== undefined && clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ] !== undefined && clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ].type === clipTile.type ){
+								clipTile.w( clippingArray[ x ][ y ].w() + clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ].w() );
+								clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ] = undefined;
 								y--;
 							}
 						}
@@ -136,7 +137,7 @@ var Scene = (function(Layer, Materials, Canvas){
 		}
 
 
-
+		var clippingLayer = new Layer(0, "Clipping", this.blocksize);
 
 
 		for( var x = 0; x < clippingArray.length; x++){
@@ -144,13 +145,16 @@ var Scene = (function(Layer, Materials, Canvas){
 				for( var y = 0; y < clippingArray[ x ].length; y++){
 					if( clippingArray[ x ][ y ] !== undefined){
 						var clipTile = clippingArray[ x ][ y ];
-						this.getLayer(clipTile.type).add(clipTile);
+						console.log(clipTile);
+						clippingLayer.add(clipTile);
 					}
 				}
 			}
 		}
 
+		console.log(clippingLayer);
 
+		this.addLayer(clippingLayer, "Clipping");
 
 
 
@@ -178,6 +182,10 @@ var Scene = (function(Layer, Materials, Canvas){
 				return this.layersObject[layer][arrayPos];
 			}
 			
+		},
+
+		sublayerCount: function(argType){
+			return this.layersObject[argType].length;
 		},
 
 		eachLayer: function(funcToCall, flags, args){
