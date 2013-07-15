@@ -30,7 +30,7 @@ var Tileset = (function(Preloader){
 		this.type = argType;
 		this.images = [];
 		this.pattern = argPattern;
-		this.clips = argClips;
+		this.clipFlag = argClips;
 		this.draws = argDraws;
 
 		for(var i = 0, len = argImgArray.length; i<len; i++){
@@ -56,6 +56,9 @@ var Tileset = (function(Preloader){
 
 		get: function(elementNumber) {
 			return this.images[elementNumber];
+		},
+		clips: function(){
+			return this.clipFlag;
 		}
 
 	};

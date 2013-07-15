@@ -1,28 +1,4 @@
 map = [{
-        layer: "Background",
-        priority: 0,
-        elements: [
-            {
-                type: "Clipping",
-                x: 4, y: 15
-            },{
-                type: "Clipping",
-                x: 5, y: 15
-            },{
-                type: "Clipping",
-                x: 6, y: 15
-            },{
-                type: "Clipping",
-                x: 7, y: 15
-            },{
-                type: "Clipping",
-                x: 8, y: 15
-            },{
-                type: "Clipping",
-                x: 9, y: 15
-            }
-        ]
-    },{
         layer: "Main",
         priority: 0,
         elements: [

@@ -9,7 +9,12 @@ function Hitbox(xArg, yArg){
 	this.yOffset = yArg;
 }
 
-function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, argBlocksize){
+function Offset(xArg, yArg){
+	this.x = xArg;
+	this.y = yArg;
+}
+
+function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOff, argBlocksize){
 	this.type = "";
 	this.position = new Position(xPos, yPos);
 	this.image = null;
@@ -21,6 +26,7 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, argBlocks
 	this.blocksize = argBlocksize || 25;
 	this.draws = false;
 	this.tileScore = 0;
+	this.offset = new Offset(xOff, yOff);
 
 	if(typeof xOffset !== 'undefined' && typeof xOffset !== 'undefined'){
 		this.hitbox = new Hitbox(xOffset, yOffset);
@@ -72,9 +78,9 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, argBlocks
 
 	this.x = function(newX){
 		if(typeof newX === 'undefined'){
-			return this.position.x * this.blocksize;
+			return this.position.x * this.blocksize + this.offset.x;
 		} else {
-			this.position.x = newX;
+			this.position.x += newX;
 		}
 	};
 
@@ -82,17 +88,25 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, argBlocks
 		if(typeof newY === 'undefined'){
 			return this.position.y * this.blocksize;
 		} else {
-			this.position.y = newY;
+			this.position.y += newY;
 		}
 	};
 
-	this.xTile = function(){
-		return this.position.x;
+	this.xTile = function(newX){
+		if(typeof newX === 'undefined'){
+			return this.position.x;
+		} else {
+			this.position.y = newX;
+		}
 	};
 
-	this.yTile = function(){
-		return this.position.y;
-	}
+	this.yTile = function(newY){
+		if(typeof newY === 'undefined'){
+			return this.position.y;
+		} else {
+			this.position.y = newY;
+		}
+	};
 
 	this.w = function(newWidth){
 		if(typeof newWidth === 'undefined'){
@@ -120,11 +134,10 @@ var Materials = (function(MapElement){
 	var tileArray = [];
 	var tileObject = {};
 
-	var Tile = function(argType, xPos, yPos, argWidth, argHeight, xOffset, yOffset, argTileset){
-		MapElement.call(this, xPos, yPos, argWidth, argHeight, xOffset, yOffset);
+	var Tile = function(argType, xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOff, argTileset){
+		MapElement.call(this, xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOff);
 		this.type = argType;
 		this.tileset = argTileset;
-		this.image = new Image();
 		this.draws = argTileset.draws;
 	};
 
@@ -136,6 +149,10 @@ var Materials = (function(MapElement){
 		},
 		setImage: function(imgObj){
 			this.image = imgObj;
+		},
+		clips: function(){
+			console.log(this.tileset);
+			return this.tileset.clips();
 		}
 	};
 
@@ -167,7 +184,7 @@ var Materials = (function(MapElement){
 		},
 		createTile: function(argType, xPos, yPos){
 			var curr = tileObject[argType];
-			var newTile = new Tile(argType, xPos, yPos, curr.width, curr.height, curr.xOffset, curr.yOffset, curr.tileset);
+			var newTile = new Tile(argType, xPos, yPos, curr.width, curr.height, curr.xOffset, curr.yOffset, 0, 0, curr.tileset);
 			newTile.image = curr.tileset.get(0);
 			return newTile;
 		},
@@ -182,5 +199,5 @@ var Materials = (function(MapElement){
 
 
 // define the only premade tileset we need, the clipping tile (blocking tile)
-Materials.defineTileset( new Tileset( "Clipping", [], "none", false, false ) );
+Materials.defineTileset( new Tileset( "Clipping", [], "none", false, true) );
 Materials.defineTile( Materials.getTileset("Clipping"), 25, 25, 0, 0 );

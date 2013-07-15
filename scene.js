@@ -1,9 +1,15 @@
 var Scene = (function(Layer, Materials, Canvas){
 
+	function View(){
+
+	}
+
 	var Scene = function(map, argSize) {
 		this.blocksize = 		argSize;
 
 		this.defaultMapElement = 'Clipping';
+
+		this.view = new View();
 
 		this.Parallax = 	[];
 		this.Background = 	[];
@@ -34,7 +40,8 @@ var Scene = (function(Layer, Materials, Canvas){
 
 		this.layersArray = [ this.Parallax, this.Background, this.Main, this.Character, this.Npc, this.Foreground, this.Clipping ];
 
-		var mapArray;
+		var mapArray; // individual array for each layer
+		var clippingArray = []; // one array for whole map
 
 		for(var currLayer = 0; currLayer < map.length; currLayer++){
 			
@@ -54,13 +61,18 @@ var Scene = (function(Layer, Materials, Canvas){
 
 				var newTile = new Materials.createTile(newType, tempE.x, tempE.y);
 
+				if ( newTile.clips() ){
+					if( ! (clippingArray[ tempE.x ] instanceof Array) ){
+						clippingArray[ tempE.x ] = [];
+					}
+					clippingArray[ tempE.x ][ tempE.y ] = new Materials.createTile("Clipping", tempE.x, tempE.y);
+				}
+
 				if( ! (mapArray[ tempE.x ] instanceof Array) ){
 					mapArray[ tempE.x ] = [];
 				}
 
 				mapArray[ tempE.x ][ tempE.y ] = newTile;
-
-				
 
 			}
 
@@ -73,7 +85,7 @@ var Scene = (function(Layer, Materials, Canvas){
 							var mapTile = mapArray[ x ][ y ];
 							if( typeof mapTile.type !== 'undefined'){
 								// same type, check four relational tiles
-								if( 	   mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ].type === mapTile.type ){
+								if( mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ].type === mapTile.type ){
 									mapTile.score(8);
 								} 
 
@@ -92,7 +104,6 @@ var Scene = (function(Layer, Materials, Canvas){
 							}
 
 							mapTile.setImage( mapTile.tileset.get( mapTile.score() ) );
-							console.log(mapTile);
 							newLayer.add( mapTile );
 						}
 					}
@@ -104,6 +115,43 @@ var Scene = (function(Layer, Materials, Canvas){
 			this.addLayer(newLayer, map[currLayer].layer);
 
 		}
+
+		// time to optimize the clipping layer, which resides in clippingArray;
+
+		for( var x = 0; x < clippingArray.length; x++){
+			if( clippingArray[ x ] !== undefined ){
+				for( var y = 0; y < clippingArray[ x ].length; y++){
+					if( clippingArray[ x ][ y ] !== undefined){
+						var clipTile = clippingArray[ x ][ y ];
+						if( typeof clipTile.type !== 'undefined'){
+							if( clippingArray[ clipTile.xTile() + 1 ] !== undefined && clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ] !== undefined && clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ].type === clipTile.type ){
+								clipTile.w( clippingArray[ x ][ y ].w() + clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ].w() );
+								clippingArray[ clipTile.xTile() + 1 ][ clipTile.yTile() ] = undefined;
+								y--;
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+
+
+
+		for( var x = 0; x < clippingArray.length; x++){
+			if( clippingArray[ x ] !== undefined ){
+				for( var y = 0; y < clippingArray[ x ].length; y++){
+					if( clippingArray[ x ][ y ] !== undefined){
+						var clipTile = clippingArray[ x ][ y ];
+						this.getLayer(clipTile.type).add(clipTile);
+					}
+				}
+			}
+		}
+
+
+
 
 
 		conversionTime = performance.now() - conversionTime;
@@ -199,7 +247,8 @@ var Scene = (function(Layer, Materials, Canvas){
 			});
 			
 			Canvas.fillStyle = "#000000";
-			Canvas.fillText(this.performance.drawFps, 100, 100);
+			Canvas.font = "20px Calibri";
+			Canvas.fillText(Math.round(this.performance.drawFps), 900, 25);
 		},
 
 		player: function(newCharacter){
