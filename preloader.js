@@ -57,7 +57,9 @@ var Preloader = (function(){
 			if( readyCount === addedCount && failedCount === 0 && addedCount > 0 ){
 				callback();
 			} else {
-				console.log("Still loading -> successes: " + readyCount + ", failures: " + failedCount);
+				if(failedCount){
+					console.log("Still loading -> successes: " + readyCount + ", failures: " + failedCount);
+				}
 			}
 		},
 		ready: function(argCallback){

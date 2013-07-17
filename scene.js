@@ -76,31 +76,31 @@ var Scene = (function(Layer, Materials, Canvas){
 
 			}
 
-			console.log(mapArray);
-
 			for( var x = 0; x < mapArray.length; x++){
 				if( mapArray[ x ] !== undefined ){
 					for( var y = 0; y < mapArray[ x ].length; y++){
 						if( mapArray[ x ][ y ] !== undefined){
 							var mapTile = mapArray[ x ][ y ];
-							if( typeof mapTile.type !== 'undefined'){
-								// same type, check four relational tiles
-								if( mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ].type === mapTile.type ){
-									mapTile.score(8);
-								} 
+							if( mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ] !== undefined 
+								&& mapArray[ mapTile.xTile() ][ mapTile.yTile() + 1 ].type === mapTile.type ){
+								mapTile.score(8);
+							} 
 
-								if( mapArray[ mapTile.xTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ].type === mapTile.type ){
-									mapTile.score(2);
-								} 
+							if( mapArray[ mapTile.xTile() - 1 ] !== undefined 
+								&& mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ] !== undefined 
+								&& mapArray[ mapTile.xTile() - 1 ][ mapTile.yTile() ].type === mapTile.type ){
+								mapTile.score(2);
+							} 
 
-								if( mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ] !== undefined && mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ].type === mapTile.type ){
-									mapTile.score(1);
-								} 
-								
-								if( mapArray[ mapTile.xTile() + 1 ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ] !== undefined && mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ].type === mapTile.type ){
-									mapTile.score(4);
-								}
-
+							if( mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ] !== undefined 
+								&& mapArray[ mapTile.xTile() ][ mapTile.yTile() - 1 ].type === mapTile.type ){
+								mapTile.score(1);
+							} 
+							
+							if( mapArray[ mapTile.xTile() + 1 ] !== undefined 
+								&& mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ] !== undefined 
+								&& mapArray[ mapTile.xTile() + 1 ][ mapTile.yTile() ].type === mapTile.type ){
+								mapTile.score(4);
 							}
 
 							mapTile.setImage( mapTile.tileset.get( mapTile.score() ) );
@@ -124,17 +124,61 @@ var Scene = (function(Layer, Materials, Canvas){
 					if( clippingArray[ x ][ y ] !== undefined){
 						var clipTile = clippingArray[ x ][ y ];
 						if( typeof clipTile.type !== 'undefined'){
-							console.log(clipTile.xTile(), clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize));
-							if( clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ] !== undefined && clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ] !== undefined && clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ].type === clipTile.type ){
-								clipTile.w( clippingArray[ x ][ y ].w() + clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ].w() );
-								clippingArray[ clipTile.xTile() + Math.floor(clipTile.w() / this.blocksize) ][ clipTile.yTile() ] = undefined;
+							var newX = x + Math.floor(clipTile.w() / this.blocksize);
+							if(    clippingArray[ newX ] !== undefined 
+								&& clippingArray[ newX ][ y ] !== undefined 
+								&& clippingArray[ newX ][ y ].type === clipTile.type ){
+
+								clipTile.w( clipTile.w() + clippingArray[ newX ][ y ].w() );
+								clippingArray[ newX ][ y ] = undefined;
 								y--;
+
 							}
 						}
 					}
 				}
 			}
 		}
+
+
+
+
+
+
+
+
+
+
+		for( var x = 0; x < clippingArray.length; x++){
+			if( clippingArray[ x ] !== undefined ){
+				for( var y = 0; y < clippingArray[ x ].length; y++){
+					if( clippingArray[ x ][ y ] !== undefined){
+						var clipTile = clippingArray[ x ][ y ];
+						if( typeof clipTile.type !== 'undefined'){
+							var newY = y + Math.floor(clipTile.w() / this.blocksize);
+							if(    clippingArray[ x ] !== undefined 
+								&& clippingArray[ x ][ newY ] !== undefined 
+								&& clippingArray[ x ][ newY ].type === clipTile.type ){
+
+								clipTile.h( clipTile.h() + clippingArray[ x ][ newY ].h() );
+								clippingArray[ x ][ newY ] = undefined;
+								y--;
+
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+
+
+
+
+
+
+
 
 
 		var clippingLayer = new Layer(0, "Clipping", this.blocksize);
@@ -145,18 +189,13 @@ var Scene = (function(Layer, Materials, Canvas){
 				for( var y = 0; y < clippingArray[ x ].length; y++){
 					if( clippingArray[ x ][ y ] !== undefined){
 						var clipTile = clippingArray[ x ][ y ];
-						console.log(clipTile);
 						clippingLayer.add(clipTile);
 					}
 				}
 			}
 		}
 
-		console.log(clippingLayer);
-
 		this.addLayer(clippingLayer, "Clipping");
-
-
 
 		conversionTime = performance.now() - conversionTime;
 

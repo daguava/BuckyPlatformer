@@ -151,7 +151,6 @@ var Materials = (function(MapElement){
 			this.image = imgObj;
 		},
 		clips: function(){
-			console.log(this.tileset);
 			return this.tileset.clips();
 		}
 	};

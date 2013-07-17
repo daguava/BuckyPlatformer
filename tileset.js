@@ -37,7 +37,6 @@ var Tileset = (function(Preloader){
 
 			if(Preloader.hasImage(argImgArray[i])){
 				// check preloader for image first
-				console.log("Grabbed " + argImgArray[i] + " from Preloader.");
 				this.images[i] = Preloader.getImage(argImgArray[i]);
 			} else {
 				// if preloader doesn't have it, load it in
