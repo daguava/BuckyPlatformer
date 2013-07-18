@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <head>
+	<style>
+		::selection {
+		    background-color:Transparent;
+		    color:#000;
+	    }
+	    .unselectable {
+		    -moz-user-select: none;
+		    -webkit-user-select: none;
+		    -ms-user-select: none;
+		    user-select: none;
+		    -webkit-user-drag: none;
+		    user-drag: none;
+		}
+	</style>
 </head>
-<body style="overflow: hidden;"  onload="page_load()" oncontextmenu="return false;">
+<body style="overflow: hidden;" oncontextmenu="return false;">
 
-<canvas onmousemove="mouse_move(event)" onmousedown="mouse_press(event)" id="draw_canvas" width="1000" height="600" tabindex="1"></canvas>
+<canvas id="draw_canvas" width="1000" height="600" tabindex="1" draggable="false" class="unselectable" onmousedown="event.preventDefault()"></canvas>
 
 <textarea id="MapOutput" style="width: 400px; height: 150px;">Map Output</textarea>
 
 <script type="text/javascript">
-  	document.getElementById("draw_canvas").focus();
-	Canvas = 			document.getElementById("draw_canvas").getContext("2d");
+	window.addEventListener('dragstart', function(){return false;}, true);
+  	CanvasTag = 		document.getElementById("draw_canvas");
+  	CanvasTag.focus();
+	Canvas = 			CanvasTag.getContext("2d");
 	physExecuteMs = 	7;
+	tempFlag = false;
 </script>
 
 <script src="setup.js"></script>
 <script src="preloader.js"></script>
+<script src="tileset.js"></script>
+<script src="elements.js"></script>
+<script src="layer.js"></script>
+<script src="scene.js"></script>
+<script src="newmap.js"></script>
+<script src="controller.js"></script>
 
 <script type="text/javascript">
 Preloader.ready(function(){
@@ -28,30 +51,8 @@ Preloader.addImage(["images/grass_tileset/grass_single.png", "images/grass_tiles
 
 
 
-<script src="tileset.js"></script>
-<script src="elements.js"></script>
-<script src="layer.js"></script>
-<script src="scene.js"></script>
-<script src="newmap.js"></script>
 
 <script type = "text/javascript">
-
-function mouse_move(event) {}
-function mouse_press(event) {}
-function key_event(event) {}
-function key_event_up(event) {}
-function mouse_up(event) {}
-function mouse_down(event) {}
-function mouse_scroll(event) {}
-
-function page_load() {
-	var mousewheelevt=(/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel";
-	if (document.attachEvent){
-		document.attachEvent("on"+mousewheelevt, function(e) {mouse_scroll(e)}, false);
-	}else if (document.addEventListener){
-		document.addEventListener(mousewheelevt, function(e) {mouse_scroll(e)}, false);
-	}
-}
 
 function begin_game() {
 
@@ -78,7 +79,17 @@ function caller(){
 }
 
 function physics(){
-
+	Controller.poller();
+	if(Controller.mouse().click.left){
+		tempFlag = true;
+		BuckyGame.getLayer('Main', 0).add(
+			new Materials.createTile("Grass", Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25))
+		);
+		map[0].elements[map[0].elements.length] = {type: "Grass", x: Math.floor(Controller.mouse().move.x/25), y: Math.floor(Controller.mouse().move.y/25)};
+	} else if(tempFlag){
+		tempFlag = false;
+		BuckyGame.reloadMap();
+	}
 }
 
 function stats() {
@@ -101,12 +112,6 @@ function draw_world() {
 	animId = window.requestAnimationFrame(draw_world);
 
 }
-
-
-window.addEventListener('keydown', 	 key_event,		true);
-window.addEventListener('keyup', 	 key_event_up,	true);
-window.addEventListener('mouseup', 	 mouse_up, 		false);
-window.addEventListener('mousedown', mouse_down, 	false);
 
 </script> 
 
