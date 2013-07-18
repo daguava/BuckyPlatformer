@@ -140,25 +140,17 @@ var Scene = (function(Layer, Materials, Canvas){
 			}
 		}
 
-
-
-
-
-
-
-
-
-
 		for( var x = 0; x < clippingArray.length; x++){
 			if( clippingArray[ x ] !== undefined ){
 				for( var y = 0; y < clippingArray[ x ].length; y++){
 					if( clippingArray[ x ][ y ] !== undefined){
 						var clipTile = clippingArray[ x ][ y ];
 						if( typeof clipTile.type !== 'undefined'){
-							var newY = y + Math.floor(clipTile.w() / this.blocksize);
+							var newY = y + Math.floor(clipTile.h() / this.blocksize);
 							if(    clippingArray[ x ] !== undefined 
 								&& clippingArray[ x ][ newY ] !== undefined 
-								&& clippingArray[ x ][ newY ].type === clipTile.type ){
+								&& clippingArray[ x ][ newY ].type === clipTile.type
+								&& clippingArray[ x ][ newY ].w() === clipTile.w() ){
 
 								clipTile.h( clipTile.h() + clippingArray[ x ][ newY ].h() );
 								clippingArray[ x ][ newY ] = undefined;
@@ -171,18 +163,7 @@ var Scene = (function(Layer, Materials, Canvas){
 			}
 		}
 
-
-
-
-
-
-
-
-
-
-
 		var clippingLayer = new Layer(0, "Clipping", this.blocksize);
-
 
 		for( var x = 0; x < clippingArray.length; x++){
 			if( clippingArray[ x ] !== undefined ){

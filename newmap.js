@@ -55,6 +55,18 @@ map = [{
                 x: 6, y: 16
             },{
                 type: "Grass",
+                x: 7, y: 15
+            },{
+                type: "Grass",
+                x: 7, y: 16
+            },{
+                type: "Grass",
+                x: 7, y: 17
+            },{
+                type: "Grass",
+                x: 6, y: 17
+            },{
+                type: "Grass",
                 x: 7, y: 12
             },{
                 type: "Grass",
@@ -82,6 +94,6 @@ map = [{
     }
 ];
 
-for(var i = 0; i < 1000000; i++){
+for(var i = 0; i < 100000; i++){
     //map[0].elements[map[0].elements.length] = {type: "Grass", x: Math.floor(Math.random()*30), y: Math.floor(Math.random()*20)};
 }
