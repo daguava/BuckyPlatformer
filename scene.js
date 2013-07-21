@@ -137,7 +137,7 @@ var Scene = (function(Layer, Materials, Canvas){
 			
 			Canvas.fillStyle = "#000000";
 			Canvas.font = "20px Calibri";
-			Canvas.fillText(Math.round(this.performance.drawFps), 900, 25);
+			Canvas.fillText(Math.round(this.performance.drawFps), 750, 25);
 		},
 
 		player: function(newCharacter){

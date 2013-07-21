@@ -91,6 +91,15 @@ map = [{
                 x: 11, y: 11
             }
         ]
+    }, {
+        layer: "Main",
+        priority: 1,
+        elements: [
+            {
+                type: "Grass",
+                x: 15, y: 15
+            }
+        ]
     }
 ];
 

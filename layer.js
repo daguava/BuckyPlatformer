@@ -7,6 +7,7 @@ var Layer = (function(Canvas){
 		this.priorityNumber;
 		this.type = argType;
 		this.blocksize = argBlockSize
+		this.layerDraws = true;
 	};
 
 	Layer.prototype = {
@@ -22,9 +23,27 @@ var Layer = (function(Canvas){
 		},
 
 		draw: function(){
-			this.eachTile(function(){
-				this.draw();
-			});
+			if(this.layerDraws){
+				this.eachTile(function(){
+					this.draw();
+				});
+			}
+		},
+
+		draws: function(argDraws){
+			if(typeof argDraws === 'undefined'){
+				return this.layerDraws;
+			} else {
+				this.layerDraws = argDraws;
+			}
+		},
+
+		toggleDraw: function(){
+			this.layerDraws = !this.layerDraws;
+		},
+
+		getType: function(){
+			return this.type;
 		},
 
 		getElements: function(){
@@ -70,12 +89,6 @@ var Layer = (function(Canvas){
 			} else {
 				this.priorityNumber = newPriority;
 			}
-		},
-
-		toString: function(){
-			this.each(function(){
-				console.log(this);
-			})
 		}
 
 	};

@@ -1,121 +1,36 @@
 <!DOCTYPE html>
-<head>
-	<style>
-		::selection {
-		    background-color:Transparent;
-		    color:#000;
-	    }
-	    .unselectable {
-		    -moz-user-select: none;
-		    -webkit-user-select: none;
-		    -ms-user-select: none;
-		    user-select: none;
-		    -webkit-user-drag: none;
-		    user-drag: none;
-		}
-	</style>
-</head>
-<body style="overflow: hidden;" oncontextmenu="return false;">
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css" />
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="preloader.js" 	async></script>
+		<script src="newmap.js" 	async></script>
+		<script src="tileset.js" 	async></script>
+		<script src="elements.js" 	async></script>
+		<script src="setup.js" 		defer></script>
+		<script src="layer.js" 		defer></script>
+		<script src="scene.js" 		defer></script>
+		<script src="controller.js" defer></script>
+		<script src="main.js"		defer></script>
+		<script src="editor.js"		defer></script>
+	</head>
 
-<canvas id="draw_canvas" width="1000" height="600" tabindex="1" draggable="false" class="unselectable" onmousedown="event.preventDefault()"></canvas>
+	<body>
 
-<textarea id="MapOutput" style="width: 400px; height: 150px;">Map Output</textarea>
+		<canvas id="draw_canvas" oncontextmenu="return false;" width="800" height="600" tabindex="1" draggable="false" class="unselectable" >
+		</canvas><div id="editor_container">
+			<div id="layer" class="editor_tab active">Layers</div>
+			<div id="mapping" class="editor_tab inactive">Mapping</div>
+			<div id="extra" class="editor_tab inactive">Extras</div>
+			<div style="clear: both;"></div>
 
-<script type="text/javascript">
-	window.addEventListener('dragstart', function(){return false;}, true);
-  	CanvasTag = 		document.getElementById("draw_canvas");
-  	CanvasTag.focus();
-	Canvas = 			CanvasTag.getContext("2d");
-	physExecuteMs = 	7;
-	tempFlag = false;
-</script>
+			<div id="layer_content" class="editor_content" style="">Layers Content<br /></div>
+			<div id="mapping_content"  class="editor_content"style="display: none;">Mapping Content<br /></div>
+			<div id="extra_content"  class="editor_content"style="display: none;">Extras Content<br /></div>
+		</div>
+		<br />
+		<textarea id="MapOutput" style="width: 1050px; height: 150px;">Map Output</textarea>
 
-<script src="setup.js"></script>
-<script src="preloader.js"></script>
-<script src="tileset.js"></script>
-<script src="elements.js"></script>
-<script src="layer.js"></script>
-<script src="scene.js"></script>
-<script src="newmap.js"></script>
-<script src="controller.js"></script>
-
-<script type="text/javascript">
-Preloader.ready(function(){
-	console.log("Preloader finished: Beginning game...");
-	begin_game();
-});
-
-Preloader.addImage(["images/grass_tileset/grass_single.png", "images/grass_tileset/grass_bottom_single.png", "images/grass_tileset/grass_right_single.png", "images/grass_tileset/grass_bottom_right.png", "images/grass_tileset/grass_left_single.png", "images/grass_tileset/grass_bottom_left.png", "images/grass_tileset/grass_middle_single_horizontal.png", "images/grass_tileset/grass_bottom_middle.png", "images/grass_tileset/grass_top_single.png", "images/grass_tileset/grass_middle_single_vertical.png", "images/grass_tileset/grass_top_right.png", "images/grass_tileset/grass_middle_right.png", "images/grass_tileset/grass_top_left.png", "images/grass_tileset/grass_middle_left.png", "images/grass_tileset/grass_top_middle.png", "images/grass_tileset/ground_tile.png"]);
-</script>
-
-
-
-
-
-<script type = "text/javascript">
-
-function begin_game() {
-
-	GrassTileset = new Tileset(
-		"Grass", 
-		["images/grass_tileset/grass_single.png", "images/grass_tileset/grass_bottom_single.png", "images/grass_tileset/grass_right_single.png", "images/grass_tileset/grass_bottom_right.png", "images/grass_tileset/grass_left_single.png", "images/grass_tileset/grass_bottom_left.png", "images/grass_tileset/grass_middle_single_horizontal.png", "images/grass_tileset/grass_bottom_middle.png", "images/grass_tileset/grass_top_single.png", "images/grass_tileset/grass_middle_single_vertical.png", "images/grass_tileset/grass_top_right.png", "images/grass_tileset/grass_middle_right.png", "images/grass_tileset/grass_top_left.png", "images/grass_tileset/grass_middle_left.png", "images/grass_tileset/grass_top_middle.png", "images/grass_tileset/ground_tile.png"], 
-		"full", 
-		true, // clips
-		true  // draws
-	);
-
-	Materials.defineTileset(GrassTileset);
-
-	Materials.defineTile(Materials.getTileset("Grass"), 25, 25, 0, 0);
-
-	BuckyGame = new Scene(map, 25);
-
-	caller();	// start the physics and drawing loops to start game
-}
-
-function caller(){
-	physInterval = setInterval(physics, physExecuteMs);
-	draw_world();
-}
-
-function physics(){
-	Controller.poller();
-	if(Controller.mouse().click.left){
-		tempFlag = true;
-		BuckyGame.getLayer('Main', 0).add(
-			new Materials.createTile("Grass", Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25))
-		);
-		map[0].elements[map[0].elements.length] = {type: "Grass", x: Math.floor(Controller.mouse().move.x/25), y: Math.floor(Controller.mouse().move.y/25)};
-	} else if(tempFlag){
-		tempFlag = false;
-		BuckyGame.reloadMap();
-	}
-}
-
-function stats() {
-
-	/******************************************
-	 GENERATE SOME STATISTICS FOR SHOWING ONSCREEN
-	 ******************************************/
-	 // currently unused, replaced by canvas infobox.
-}
-
-
-function draw_world() { 
-
-	/******************************************
-	 GRAPHICS TIMER, USED FOR STATS DISPLAY
-	 ******************************************/
-
-	BuckyGame.draw();
-
-	animId = window.requestAnimationFrame(draw_world);
-
-}
-
-</script> 
-
-
-</body>
+	</body>
 </html>
 

@@ -36,3 +36,17 @@ performance.now = (function() {
          performance.webkitNow ||
          function() { return new Date().getTime(); };
 })();
+
+window.addEventListener('dragstart', function(){return false;}, true);
+CanvasTag = document.getElementById("draw_canvas");
+CanvasTag.focus();
+Canvas = CanvasTag.getContext("2d");
+physExecuteMs = 7;
+tempFlag = false;
+
+Preloader.ready(function(){
+  console.log("Preloader finished: Beginning game...");
+  begin_game();
+});
+
+Preloader.addImage(["images/grass_tileset/grass_single.png", "images/grass_tileset/grass_bottom_single.png", "images/grass_tileset/grass_right_single.png", "images/grass_tileset/grass_bottom_right.png", "images/grass_tileset/grass_left_single.png", "images/grass_tileset/grass_bottom_left.png", "images/grass_tileset/grass_middle_single_horizontal.png", "images/grass_tileset/grass_bottom_middle.png", "images/grass_tileset/grass_top_single.png", "images/grass_tileset/grass_middle_single_vertical.png", "images/grass_tileset/grass_top_right.png", "images/grass_tileset/grass_middle_right.png", "images/grass_tileset/grass_top_left.png", "images/grass_tileset/grass_middle_left.png", "images/grass_tileset/grass_top_middle.png", "images/grass_tileset/ground_tile.png"]);
