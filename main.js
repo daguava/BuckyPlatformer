@@ -15,6 +15,7 @@ function begin_game() {
 	BuckyGame = new Scene(map, 25);
 
 	Editor.initialize(BuckyGame);
+	Editor.editing(true);
 
 	caller();	// start the physics and drawing loops to start game
 }
@@ -25,18 +26,9 @@ function caller(){
 }
 
 function physics(){
-	Controller.poller();
-	if(Controller.mouse().click.left){
-		tempFlag = true;
-		BuckyGame.getLayer('Main', 0).add(
-			new Materials.createTile("Grass", Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25))
-		);
-		map[0].elements[map[0].elements.length] = {type: "Grass", x: Math.floor(Controller.mouse().move.x/25), y: Math.floor(Controller.mouse().move.y/25)};
-	} else if(tempFlag){
-		tempFlag = false;
-		BuckyGame.reloadMap();
-		Editor.genLayerContent();
-	}
+
+	
+
 }
 
 function stats() {

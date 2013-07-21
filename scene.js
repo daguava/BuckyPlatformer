@@ -310,6 +310,39 @@ var Scene = (function(Layer, Materials, Canvas){
 			conversionTime = performance.now() - conversionTime;
 
 			console.log("Map generation took " + conversionTime.toFixed(3) + "ms.");
+		},
+		mapify: function(){
+			var newMap = [];
+			var conversionTime = performance.now();
+
+			this.eachLayer(function(){
+				if(this.getType() === "Clipping") return;
+				var elementsList = [];
+
+				this.eachTile(function(){
+					elementsList[elementsList.length] = {
+						type: this.getType(),
+						x: this.xTile(),
+						y: this.yTile()
+					}
+				});
+
+				newMap[newMap.length] = {
+					layer: this.getType(),
+					priority: this.priority(),
+					elements: elementsList
+				}
+
+			});
+
+			conversionTime = performance.now() - conversionTime;
+
+			console.log("Mapify took " + conversionTime.toFixed(3) + "ms.");
+
+			return newMap;
+		},
+		mapString: function(){
+			return "map = " + JSON.stringify(this.mapify()) + ";";
 		}
 
 	};

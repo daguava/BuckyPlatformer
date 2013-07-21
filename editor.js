@@ -1,4 +1,7 @@
-var Editor = (function(){
+var Editor = (function(Controller, CanvasTag){
+
+	var isEditing = false;
+	var sceneIsCurrent = false;
 
 	var scene = null;
 
@@ -14,6 +17,8 @@ var Editor = (function(){
 	var sublayer = $('<div class="sublayer"></div>');
 	var checkbox = $('<input type="checkbox"/>');
 	var radio = $('<input type="radio">');
+
+	var selectedLayerObj = null;
 
 	$('.editor_tab').click(function(){
 
@@ -34,7 +39,48 @@ var Editor = (function(){
 		initialize: function(argScene) {
 			scene = argScene;
 			Editor.genLayerContent();
+
+			$(CanvasTag).bind('mousedown.editorMapping', function(){
+				$(CanvasTag).bind('mousemove', function(){
+					if( Editor.editing() ){
+						Editor.mapping();
+					} 
+				});
+			});
+			$(CanvasTag).bind('mouseup', function(){$(CanvasTag).unbind('mousedown.editorMapping')} );
 		},
+
+		editing: function(argStatus){
+			if(typeof argStatus !== 'undefined'){
+				return isEditing = argStatus;
+			} else {
+				return isEditing;
+			}
+		},
+
+		mapping: function(){
+			if( Controller.mouse().click.left ){
+				sceneIsCurrent = false;
+				var radioBtn = $('input[name="drawLayer"]:checked');
+				scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).add(
+					new Materials.createTile("Grass", Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25))
+				);
+			} else if( !sceneIsCurrent ){
+				map = scene.mapify();
+				scene.reloadMap();
+				Editor.genLayerContent();
+				sceneIsCurrent = true;
+			}
+		},
+
+		selectedLayer: function(argLayerObj){
+			if(typeof argLayerObj !== 'undefined'){
+				selectedLayerObj = argLayerObj;
+			} else {
+				return selectedLayerObj;
+			}
+		},
+
 		genLayerContent: function(){
 
 			var sceneLayers = scene.getLayersObject();
@@ -52,8 +98,19 @@ var Editor = (function(){
 					var newRd = radio.clone();
 					newRd.data( "layerType", current.getType() );
 					newRd.data( "pos", _i );
-					newRd.attr('checked', !radioSetFlag);
+					if(Editor.selectedLayer() != null && Editor.selectedLayer().type === current.getType() && Editor.selectedLayer().pos === _i){
+						newRd.attr('checked', true);
+					} else {
+						newRd.attr('checked', !radioSetFlag);
+					}
+					
 					newRd.attr('name', "drawLayer");
+					newRd.click(function(){
+						Editor.selectedLayer({
+							type: $(this).data("layerType"),
+							pos: $(this).data("pos")
+						});
+					});
 
 					var newCb = checkbox.clone();
 					newCb.data( "layerType", current.getType() );
@@ -77,9 +134,11 @@ var Editor = (function(){
 
 			}
 		},
+
 		genMappingContent: function(){
 
 		},
+
 		genExtraContent: function(){
 
 		}
@@ -88,4 +147,4 @@ var Editor = (function(){
 
 	};
 
-})();
+})(Controller, CanvasTag);

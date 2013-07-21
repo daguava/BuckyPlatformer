@@ -39,9 +39,6 @@ var Controller = (function(){
 
 
 	return {
-		poller: function(){
-
-		},
 
 		keyEventDown: function(e){
 			for(currKey in codes){
@@ -76,6 +73,7 @@ var Controller = (function(){
 			}
 		},
 		mouseDown: function(e){
+			console.log("Called");
 			switch(e.which){
 				case 1: mouseStates.click.left =   true; break;
 				case 2: mouseStates.click.middle = true; break;
@@ -106,8 +104,8 @@ var Controller = (function(){
 })();
 
 
-CanvasTag.addEventListener('keydown', 	 Controller.keyEventDown,	true);
-CanvasTag.addEventListener('keyup', 	 Controller.keyEventUp,		true);
-CanvasTag.addEventListener('mouseup', 	 Controller.mouseUp, 		false);
+CanvasTag.addEventListener('keydown', 	Controller.keyEventDown,	true);
+CanvasTag.addEventListener('keyup', 	Controller.keyEventUp,		true);
+CanvasTag.addEventListener('mouseup', 	Controller.mouseUp, 		false);
 CanvasTag.addEventListener('mousedown', Controller.mouseDown, 		false);
 CanvasTag.addEventListener('mousemove', Controller.mouseMove,	 	false);

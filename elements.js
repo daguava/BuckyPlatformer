@@ -152,6 +152,9 @@ var Materials = (function(MapElement){
 		},
 		clips: function(){
 			return this.tileset.clips();
+		},
+		getType: function(){
+			return this.type;
 		}
 	};
 
@@ -193,6 +196,7 @@ var Materials = (function(MapElement){
 		getTileObject: function(){
 			return tileObject;
 		}
+
 	};
 })(MapElement);
 

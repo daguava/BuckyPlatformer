@@ -102,7 +102,3 @@ map = [{
         ]
     }
 ];
-
-for(var i = 0; i < 100000; i++){
-    //map[0].elements[map[0].elements.length] = {type: "Grass", x: Math.floor(Math.random()*30), y: Math.floor(Math.random()*20)};
-}
