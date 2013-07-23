@@ -66,6 +66,7 @@ var Editor = (function(Controller, CanvasTag){
 					new Materials.createTile("Grass", Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25))
 				);
 			} else if( !sceneIsCurrent ){
+				var radioBtn = $('input[name="drawLayer"]:checked');
 				map = scene.mapify();
 				scene.reloadMap();
 				Editor.genLayerContent();
