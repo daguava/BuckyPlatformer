@@ -43,7 +43,9 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOf
 				}
 			} else {
 				Canvas.strokeStyle = "#FF0000";
+				Canvas.fillStyle = "rgba(255, 0, 0, 0.25)";
 				Canvas.strokeRect(this.x(), this.y(), this.w(), this.h());
+				Canvas.fillRect(this.x(), this.y(), this.w(), this.h());
 			}
 		}
 	};

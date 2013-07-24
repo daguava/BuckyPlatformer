@@ -73,7 +73,6 @@ var Controller = (function(){
 			}
 		},
 		mouseDown: function(e){
-			console.log("Called");
 			switch(e.which){
 				case 1: mouseStates.click.left =   true; break;
 				case 2: mouseStates.click.middle = true; break;

@@ -14,8 +14,17 @@ var Layer = (function(Canvas){
 
 		constructor: Layer,
 
-		get: function(elementNumber) {
-			return elements[elementNumber];
+		get: function(firstArg, secondArg) {
+			if(typeof secondArg === 'undefined'){
+				return this.elements[firstArg];
+			} else {
+				for(var i = 0, len = this.elements.length; i < len; i++){
+					if(this.elements[i].xTile() === firstArg && this.elements[i].yTile() === secondArg){
+						return this.elements[i];
+					}
+				}
+				return false;
+			}
 		},
 
 		add: function(newObject){
@@ -50,19 +59,27 @@ var Layer = (function(Canvas){
 			return this.elements;
 		},
 
-		remove: function(objectToRemove) {
+		remove: function(firstArg, secondArg) {
 			// if an object is passed in, use it to find the matching object, and terminate it
-			if(objectToRemove !== null && typeof objectToRemove === 'object'){
+			if(firstArg !== null && typeof firstArg === 'object'){
 				for(var i = 0, len = this.elements.length; i < len; i++){
-					if(this.elements[i] === objectToRemove){
+					if(this.elements[i] === firstArg){
 						this.elements.splice(i, 1);
 						return true;
 					}
 				}
 			// otherwise, if an integer was passed in, find its index and splice it out
-			} else {
-				if(objectToRemove <= this.elements.length){
+			} else if( typeof firstArg === 'number' && typeof secondArg === 'undefined'){
+				if(firstArg <= this.elements.length){
 					for(var i = 0; i < this.elements.length; i++){
+						this.elements.splice(i, 1);
+						return true;
+					}
+				}
+			// otherwise, check if x,y coordinate tile pair was passed in
+			} else if( typeof firstArg === 'number' && typeof secondArg === 'number'){
+				for(var i = 0, len = this.elements.length; i < len; i++){
+					if(this.elements[i].xTile() === firstArg && this.elements[i].yTile() === secondArg){
 						this.elements.splice(i, 1);
 						return true;
 					}

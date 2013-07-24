@@ -104,5 +104,5 @@ map = [{
 ];
 
 for(var i = 0; i < 12500; i++){
-    map[0].elements.push({type: "Grass", x: Math.floor(Math.random()*500), y: Math.floor(Math.random()*25)});
+    //map[0].elements.push({type: "Grass", x: Math.floor(Math.random()*500), y: Math.floor(Math.random()*25)});
 }
