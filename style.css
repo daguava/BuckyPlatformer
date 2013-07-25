@@ -97,3 +97,11 @@ table {
 	border-right: 0px;
 	border-top: 0px;
 }
+
+.subTileset{
+	height: 30px;
+	padding: 3px;
+	padding-top: 3px;
+	border: 1px solid #333333;
+	border-bottom: 0px;
+}

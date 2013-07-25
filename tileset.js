@@ -58,6 +58,13 @@ var Tileset = (function(Preloader){
 		},
 		clips: function(){
 			return this.clipFlag;
+		},
+		getType: function(){
+			return this.type;
+		},
+		getImage: function(pos){
+			if( pos > this.images.length || pos < 0) return null;
+			return this.images[pos];
 		}
 
 	};

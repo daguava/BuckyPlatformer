@@ -197,6 +197,12 @@ var Materials = (function(MapElement){
 		},
 		getTileObject: function(){
 			return tileObject;
+		},
+		getTilesetArray: function(){
+			return tilesetsArray;
+		},
+		getTilesetObject: function(){
+			return tilesetsObject;
 		}
 
 	};

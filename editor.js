@@ -3,6 +3,7 @@ var Editor = (function(Controller, CanvasTag){
 	var isEditing = false;
 	var sceneIsCurrent = false;
 	var currentTool = "";
+	var currentTileset = "";
 
 	var scene = null;
 
@@ -19,7 +20,10 @@ var Editor = (function(Controller, CanvasTag){
 	var mappingContent = $('#mapping_content');
 
 	var layerDiv = $('<div class="layerDiv"></div>');
-	var sublayer = $('<div class="sublayer"></div>');
+	var sublayer = $('<div class="subLayer"></div>');
+
+	var tilesetDiv = $('<div class="tilesetDiv"></div>');
+	var subTileset = $('<div class="subTileset"></div>');
 
 	var toolsDiv = $('<div class="tools"></div>');
 	var toolButton = $('<div class="tool_button"></div>');
@@ -78,6 +82,7 @@ var Editor = (function(Controller, CanvasTag){
 
 			// generate layer content
 			Editor.genLayerContent();
+			Editor.genMappingContent();
 
 			// bind handlers
 			$(CanvasTag).bind('mousedown.editorMapping', function(){
@@ -96,6 +101,16 @@ var Editor = (function(Controller, CanvasTag){
 				Editor.tool( $(this).attr('id') );
 			});
 
+			$('.subTileset').last().css('border-bottom', '1px solid #333333');
+
+			$('.subTileset').click(function(){
+				$('.subTileset').removeClass('active').addClass('inactive');
+				$(this).removeClass('inactive').addClass('active');
+				Editor.tileset( $(this).attr('id') );
+			});
+
+			$('.subTileset').first().trigger('click');
+
 			
 		},
 
@@ -104,6 +119,14 @@ var Editor = (function(Controller, CanvasTag){
 				currentTool = argTool;
 			} else {
 				return currentTool;
+			}
+		},
+
+		tileset: function(argTileset){
+			if(typeof argTileset !== 'undefined'){
+				currentTileset = argTileset;
+			} else {
+				return currentTileset;
 			}
 		},
 
@@ -126,19 +149,24 @@ var Editor = (function(Controller, CanvasTag){
 		},
 
 		pencilTool: function(){
+
+			var x = Math.floor(Controller.mouse().move.x/25);
+			var y = Math.floor(Controller.mouse().move.y/25);
+			var radioBtn = $('input[name="drawLayer"]:checked');
+			var currentLayer =  scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ); 
+
 			if( Controller.mouse().click.left ){
 				sceneIsCurrent = false;
-				var radioBtn = $('input[name="drawLayer"]:checked');
-				scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).add(
-					new Materials.createTile("Grass", Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25))
-				);
+				
+				if( !currentLayer.get(x, y) || currentLayer.get(x, y).getType() !== Editor.tileset() ){
+					if( currentLayer.get(x, y) ) currentLayer.remove(x, y);
+					currentLayer.add( new Materials.createTile(Editor.tileset(), x, y) );
+				}
+				
 			} else if( Controller.mouse().click.right ){
 				sceneIsCurrent = false;
-				var radioBtn = $('input[name="drawLayer"]:checked');
-				layer = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") );
-				layer.remove(  Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25) );
+				currentLayer.remove(x, y);
 			} else if( !sceneIsCurrent ){
-				var radioBtn = $('input[name="drawLayer"]:checked');
 				map = scene.mapify();
 				scene.reloadMap();
 				Editor.genLayerContent();
@@ -148,7 +176,9 @@ var Editor = (function(Controller, CanvasTag){
 
 		bucketTool: function(){
 
-			function floodFill(x, y, count){
+			var floodLimit = 250;
+
+			function floodFill(x, y, count, type){
 
 				if( typeof count === "undefined"){
 					count = 0;
@@ -156,21 +186,31 @@ var Editor = (function(Controller, CanvasTag){
 
 				count++;
 
-				if( count > 100 ){
-					console.log("max flood reached"); 
-					return;
+				if( count > floodLimit ){
+					//console.log("max flood reached"); 
+					return false;
 				} 
+				
+				var currentElement = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).get(x, y);
+				if( currentElement ) currentElement = currentElement.getType();
 
-				if( !scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).get(x, y) ){
-					// mark this one
-					scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).add(
-						new Materials.createTile("Grass", x, y)
-					);
+				if(  currentElement === type && Editor.tileset() !== type ){
+					var layer = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") );
+
+					layer.remove(x, y);
+					layer.add( new Materials.createTile(Editor.tileset(), x, y) );
 					// call surrounding four
-					floodFill(x+1, y, count);
-					floodFill(x-1, y, count);
-					floodFill(x, y+1, count);
-					floodFill(x, y-1, count);
+
+					if( count > floodLimit ){
+						//console.log("max flood reached"); 
+						return false;
+					} 
+
+					
+					floodFill(x+1, y, count, type);
+					floodFill(x-1, y, count, type);
+					floodFill(x, y+1, count, type);
+					floodFill(x, y-1, count, type);
 				} else {
 					return false;
 				}
@@ -183,8 +223,12 @@ var Editor = (function(Controller, CanvasTag){
 			if( Controller.mouse().click.left ){
 				sceneIsCurrent = false;
 				var radioBtn = $('input[name="drawLayer"]:checked');
+				var x = Math.floor(Controller.mouse().move.x/25);
+				var y = Math.floor(Controller.mouse().move.y/25);
+				var lookupType = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).get(x, y);
+				if( lookupType ) lookupType = lookupType.getType();
 
-				floodFill( Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25) );
+				floodFill( x, y, 0, lookupType );
 
 			} else if( Controller.mouse().click.right ){
 				sceneIsCurrent = false;
@@ -270,6 +314,26 @@ var Editor = (function(Controller, CanvasTag){
 
 		genMappingContent: function(){
 
+			var tilesetArray = Materials.getTilesetArray();
+			var newTilesetDiv = tilesetDiv.clone();
+
+			mappingContent.empty();
+			
+			for(_tileset = 0; _tileset < tilesetArray.length; _tileset++){
+				var currentTileset = tilesetArray[_tileset];
+				var newSubTileset = subTileset.clone();
+				newSubTileset.attr('id', currentTileset.getType() );
+				var layerImage = currentTileset.getImage(0);
+				var layerImageElement;
+				if( layerImage ){
+					layerImageElement = "<img src='" + layerImage.src + "' /> ";
+				} else {
+					layerImageElement = "<div style='width: 23px; height: 23px; border: 1px solid red; display: inline-block;'> </div>";
+				}
+				newSubTileset.html( layerImageElement + " " + currentTileset.getType() );
+				newTilesetDiv.append( newSubTileset );
+			}
+			mappingContent.append(newTilesetDiv);
 		},
 
 		genExtraContent: function(){
