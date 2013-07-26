@@ -4,6 +4,7 @@ var Editor = (function(Controller, CanvasTag){
 	var sceneIsCurrent = false;
 	var currentTool = "";
 	var currentTileset = "";
+	var floodTerminate = false;
 
 	var scene = null;
 
@@ -162,7 +163,7 @@ var Editor = (function(Controller, CanvasTag){
 					if( currentLayer.get(x, y) ) currentLayer.remove(x, y);
 					currentLayer.add( new Materials.createTile(Editor.tileset(), x, y) );
 				}
-				
+
 			} else if( Controller.mouse().click.right ){
 				sceneIsCurrent = false;
 				currentLayer.remove(x, y);
@@ -176,7 +177,7 @@ var Editor = (function(Controller, CanvasTag){
 
 		bucketTool: function(){
 
-			var floodLimit = 250;
+			var floodLimit = 1000;
 
 			function floodFill(x, y, count, type){
 
@@ -186,8 +187,11 @@ var Editor = (function(Controller, CanvasTag){
 
 				count++;
 
-				if( count > floodLimit ){
-					//console.log("max flood reached"); 
+				if( count > floodLimit || floodTerminate ){
+					if(count > floodLimit && !floodTerminate){
+						console.log("MAX FLOOD REACHED, NO BOUNDS FOUND"); 
+					}
+					floodTerminate = true;
 					return false;
 				} 
 				
@@ -201,16 +205,11 @@ var Editor = (function(Controller, CanvasTag){
 					layer.add( new Materials.createTile(Editor.tileset(), x, y) );
 					// call surrounding four
 
-					if( count > floodLimit ){
-						//console.log("max flood reached"); 
-						return false;
-					} 
-
-					
 					floodFill(x+1, y, count, type);
 					floodFill(x-1, y, count, type);
 					floodFill(x, y+1, count, type);
 					floodFill(x, y-1, count, type);
+					if(count === 1) floodTerminate = false;
 				} else {
 					return false;
 				}
