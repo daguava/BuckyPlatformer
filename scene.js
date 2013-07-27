@@ -1,8 +1,57 @@
 var Scene = (function(Layer, Materials, Canvas){
 
-	function View(){
-
+	function Offset(argX, argY){
+		this.x = argX;
+		this.y = argY;
 	}
+
+	var View = (function(){
+		var View = function(xArg, yArg, widthArg, heightArg){
+			this.Offset = new Offset(xArg, yArg);
+			this.width = widthArg;
+			this.height = heightArg;
+			this.zoomLevel = 1;
+		};
+
+		View.prototype = {
+			constructor: View,
+			x: function(newX){
+				if(typeof newX === 'undefined'){
+					return this.Offset.x;
+				} else {
+					this.Offset.x += newX;
+				}
+			},
+			y: function(newY){
+				if(typeof newY === 'undefined'){
+					return this.Offset.y;
+				} else {
+					this.Offset.y += newY;
+				}
+			},
+			zoom: function(newZoom){
+				if(typeof newZoom === 'undefined'){
+					return this.zoomLevel;
+				} else {
+					varZoomIncrement = (1/10) * newZoom;
+					this.zoomLevel += varZoomIncrement;
+					//this.x(-this.x()/25*varZoomIncrement);
+					//this.y(-this.x()/25*varZoomIncrement);
+					if(this.zoomLevel === 0){
+						if(newZoom > 0){	// prevent divide by zero, its a good thing
+							this.zoomLevel = (1/100);
+						} else {
+							this.zoomLevel = -(1/100);
+						}
+					}
+				}
+			}
+		}
+
+		return View;
+
+	})(Offset);
+
 	var Scene = function(map, argSize) {
 		this.initialize(map, argSize);
 	};
@@ -12,7 +61,9 @@ var Scene = (function(Layer, Materials, Canvas){
 		constructor: Scene,
 
 		reloadMap: function(){
+			viewBackup = this.view;
 			this.initialize(this.map, this.blocksize);
+			this.view = viewBackup;
 		},
 		initialize: function(map, argSize){
 			this.map = 				map;
@@ -20,7 +71,7 @@ var Scene = (function(Layer, Materials, Canvas){
 
 			this.defaultMapElement = 'Clipping';
 
-			this.view = new View();
+			this.view = new View( 0, 0, CanvasTag.offsetWidth, CanvasTag.offsetHeight );
 
 			this.Parallax = 	[];
 			this.Background = 	[];
@@ -95,11 +146,11 @@ var Scene = (function(Layer, Materials, Canvas){
 					if(this.layersArray[i] instanceof Array){
 						// if the element is an array of layers instead of a single layer, iterate through
 						for(var k = 0, len2 = this.layersArray[i].length; k < len2; k++){
-							funcToCall.call(this.layersArray[i][k]);
+							funcToCall.call(this.layersArray[i][k], args);
 						}
 					} else if( this.layersArray[i] !== null ){
 						// otherwise deal with single layer
-						funcToCall.call(this.layersArray[i], null, args);
+						funcToCall.call(this.layersArray[i], args);
 					}
 				}
 			}
@@ -122,6 +173,7 @@ var Scene = (function(Layer, Materials, Canvas){
 		},
 
 		draw: function(){
+			that = this;
 
 			Canvas.fillStyle = "#7ADAE1";
 			Canvas.fillRect(0, 0, 1000, 600);
@@ -131,9 +183,9 @@ var Scene = (function(Layer, Materials, Canvas){
 			this.performance.drawFps = this.performance.drawFps * (49/50) + (1000/drawDelta) * (1/50);
 			if(this.performance.drawFps > 1000) this.performance.drawFps = 60; // sanity check (check for infinity)
 
-			this.eachLayer(function(){
-				this.draw();
-			});
+			this.eachLayer(function(drawView){
+				this.draw(drawView);
+			}, undefined, this.view);
 			
 			Canvas.fillStyle = "#000000";
 			Canvas.font = "20px Calibri";
@@ -154,6 +206,10 @@ var Scene = (function(Layer, Materials, Canvas){
 
 		getLayersArray: function(){
 			return this.layersArray;
+		},
+
+		getBlocksize: function(){
+			return this.blocksize;
 		},
 
 		sortLayers: function(){
@@ -188,13 +244,13 @@ var Scene = (function(Layer, Materials, Canvas){
 					newWidth = 	(typeof tempE.width  !== 'undefined') ? tempE.width   : this.blocksize;
 					newHeight = (typeof tempE.height !== 'undefined') ? tempE.height  : this.blocksize;
 
-					var newTile = new Materials.createTile(newType, tempE.x, tempE.y);
+					var newTile = new Materials.createTile(newType, tempE.x, tempE.y, this.blocksize, this.blocksize);
 
 					if ( newTile.clips() ){
 						if( ! (clippingArray[ tempE.x ] instanceof Array) ){
 							clippingArray[ tempE.x ] = [];
 						}
-						clippingArray[ tempE.x ][ tempE.y ] = new Materials.createTile("Clipping", tempE.x, tempE.y);
+						clippingArray[ tempE.x ][ tempE.y ] = new Materials.createTile("Clipping", tempE.x, tempE.y, this.blocksize, this.blocksize);
 					}
 
 					if( ! (mapArray[ tempE.x ] instanceof Array) ){

@@ -31,10 +31,10 @@ var Layer = (function(Canvas){
 			this.elements.push(newObject);
 		},
 
-		draw: function(){
+		draw: function(drawView){
 			if(this.layerDraws){
 				this.eachTile(function(){
-					this.draw();
+					this.draw(drawView);
 				});
 			}
 		},

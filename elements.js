@@ -9,12 +9,7 @@ function Hitbox(xArg, yArg){
 	this.yOffset = yArg;
 }
 
-function Offset(xArg, yArg){
-	this.x = xArg;
-	this.y = yArg;
-}
-
-function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOff, argBlocksize){
+function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, argBlocksize){
 	this.type = "";
 	this.position = new Position(xPos, yPos);
 	this.image = null;
@@ -26,16 +21,17 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOf
 	this.blocksize = argBlocksize || 25;
 	this.draws = false;
 	this.tileScore = 0;
-	this.offset = new Offset(xOff, yOff);
 
 	if(typeof xOffset !== 'undefined' && typeof xOffset !== 'undefined'){
 		this.hitbox = new Hitbox(xOffset, yOffset);
 	}
 
-	this.draw = function(){
+	this.draw = function(drawView){
+		//if(this.x() > -drawView.Offset.x + drawView.width || this.x() + this.w() < -drawView.Offset.x) return;
+		//if(this.y() > -drawView.Offset.y + drawView.height || this.y() + this.w() < -drawView.Offset.y) return;
 		if(this.draws){
 			if(this.image instanceof Image && this.image.src != ""){
-				Canvas.drawImage( this.image, this.x(), this.y(), this.w(), this.h() );
+				Canvas.drawImage( this.image, this.x() * drawView.zoom() + drawView.Offset.x, this.y() * drawView.zoom() + drawView.Offset.y, this.w()  * drawView.zoom(), this.h()  * drawView.zoom());
 				if(this.debugging){
 					Canvas.fillStyle = "#FFFFFF";
 					Canvas.font = '18px Calibri';
@@ -44,8 +40,8 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOf
 			} else {
 				Canvas.strokeStyle = "#FF0000";
 				Canvas.fillStyle = "rgba(255, 0, 0, 0.25)";
-				Canvas.strokeRect(this.x(), this.y(), this.w(), this.h());
-				Canvas.fillRect(this.x(), this.y(), this.w(), this.h());
+				Canvas.strokeRect( this.x() * drawView.zoom() + drawView.Offset.x, this.y() * drawView.zoom() + drawView.Offset.y, this.w() * drawView.zoom(), this.h() * drawView.zoom());
+				Canvas.fillRect(  this.x() * drawView.zoom() + drawView.Offset.x, this.y() * drawView.zoom() + drawView.Offset.y, this.w() * drawView.zoom(), this.h() * drawView.zoom());
 			}
 		}
 	};
@@ -80,7 +76,7 @@ function MapElement(xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOf
 
 	this.x = function(newX){
 		if(typeof newX === 'undefined'){
-			return this.position.x * this.blocksize + this.offset.x;
+			return this.position.x * this.blocksize;
 		} else {
 			this.position.x += newX;
 		}
@@ -136,8 +132,8 @@ var Materials = (function(MapElement){
 	var tileArray = [];
 	var tileObject = {};
 
-	var Tile = function(argType, xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOff, argTileset){
-		MapElement.call(this, xPos, yPos, argWidth, argHeight, xOffset, yOffset, xOff, yOff);
+	var Tile = function(argType, xPos, yPos, argWidth, argHeight, xOffset, yOffset, argTileset, argBlocksize){
+		MapElement.call(this, xPos, yPos, argWidth, argHeight, xOffset, yOffset, argBlocksize);
 		this.type = argType;
 		this.tileset = argTileset;
 		this.draws = argTileset.draws;
@@ -186,9 +182,9 @@ var Materials = (function(MapElement){
 			tileArray[tileArray.length] = newTile;
 			tileObject[newTile.type] = newTile;
 		},
-		createTile: function(argType, xPos, yPos){
+		createTile: function(argType, xPos, yPos, argBlocksize){
 			var curr = tileObject[argType];
-			var newTile = new Tile(argType, xPos, yPos, curr.width, curr.height, curr.xOffset, curr.yOffset, 0, 0, curr.tileset);
+			var newTile = new Tile(argType, xPos, yPos, curr.width, curr.height, curr.xOffset, curr.yOffset, curr.tileset, argBlocksize);
 			newTile.image = curr.tileset.get(0);
 			return newTile;
 		},
@@ -210,5 +206,4 @@ var Materials = (function(MapElement){
 
 
 // define the only premade tileset we need, the clipping tile (blocking tile)
-Materials.defineTileset( new Tileset( "Clipping", [], "none", false, true) );
-Materials.defineTile( Materials.getTileset("Clipping"), 25, 25, 0, 0 );
+

@@ -29,7 +29,7 @@
 
 window.performance = window.performance || {};
 performance.now = (function() {
-  return performance.now      ||
+ return performance.now       ||
         performance.mozNow    ||
         performance.msNow     ||
         performance.oNow      ||
@@ -49,4 +49,26 @@ Preloader.ready(function(){
     begin_game();
 });
 
-Preloader.addImage(["images/grass_tileset/grass_single.png", "images/grass_tileset/grass_bottom_single.png", "images/grass_tileset/grass_right_single.png", "images/grass_tileset/grass_bottom_right.png", "images/grass_tileset/grass_left_single.png", "images/grass_tileset/grass_bottom_left.png", "images/grass_tileset/grass_middle_single_horizontal.png", "images/grass_tileset/grass_bottom_middle.png", "images/grass_tileset/grass_top_single.png", "images/grass_tileset/grass_middle_single_vertical.png", "images/grass_tileset/grass_top_right.png", "images/grass_tileset/grass_middle_right.png", "images/grass_tileset/grass_top_left.png", "images/grass_tileset/grass_middle_left.png", "images/grass_tileset/grass_top_middle.png", "images/grass_tileset/ground_tile.png"]);
+Preloader.addImage([
+    "images/grass_tileset/grass_single.png", 
+    "images/grass_tileset/grass_bottom_single.png", 
+    "images/grass_tileset/grass_right_single.png", 
+    "images/grass_tileset/grass_bottom_right.png", 
+    "images/grass_tileset/grass_left_single.png", 
+    "images/grass_tileset/grass_bottom_left.png", 
+    "images/grass_tileset/grass_middle_single_horizontal.png", 
+    "images/grass_tileset/grass_bottom_middle.png", 
+    "images/grass_tileset/grass_top_single.png", 
+    "images/grass_tileset/grass_middle_single_vertical.png", 
+    "images/grass_tileset/grass_top_right.png", 
+    "images/grass_tileset/grass_middle_right.png", 
+    "images/grass_tileset/grass_top_left.png", 
+    "images/grass_tileset/grass_middle_left.png", 
+    "images/grass_tileset/grass_top_middle.png", 
+    "images/grass_tileset/ground_tile.png",
+    "images/rock_tileset/platform_only.png",
+    "images/rock_tileset/platform_underneath.png",
+    "images/rock_tileset/platform.png",
+    "images/spike_tileset/spike_pit.png",
+    "images/spike_tileset/spike_lower.png"
+]);

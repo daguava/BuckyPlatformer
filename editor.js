@@ -61,10 +61,14 @@ var Editor = (function(Controller, CanvasTag){
 			var bucketTool = toolButton.clone();
 			bucketTool.html("<img src='images/ui/editor/bucket.png' id='bucket' />");
 			bucketTool.attr('id', 'bucket');
+			var panTool = toolButton.clone();
+			panTool.html("<img src='images/ui/editor/pan.png' id='pan' />");
+			panTool.attr('id', 'pan');
 
 			// add tool buttons to tools div
 			newToolsDiv.append(pencilTool);
 			newToolsDiv.append(bucketTool);
+			newToolsDiv.append(panTool);
 
 			// add tools div before layersContent (so it doesn't clear when layers update)
 			layerContainer.prepend(newToolsDiv);
@@ -86,17 +90,38 @@ var Editor = (function(Controller, CanvasTag){
 			Editor.genMappingContent();
 
 			// bind handlers
-			$(CanvasTag).bind('mousedown.editorMapping', function(){
-				$(CanvasTag).bind('mousemove', function(){
+			$(CanvasTag).bind('mousedown', function(){
+				if(Editor.tool() === "pencil" || Editor.tool() === "pan"){
+					$(CanvasTag).bind('mousemove.editorMapping', function(){
+						if( Editor.editing() ){
+							Editor.mapping();
+						} 
+					});
+				} else if(Editor.tool() === "bucket"){
 					if( Editor.editing() ){
 						Editor.mapping();
 					} 
-				});
+				}
+				
 			});
 
-			$(CanvasTag).bind('mouseup', function(){$(CanvasTag).unbind('mousedown.editorMapping')} );
+			$(CanvasTag).bind('mousewheel.editorMappingWheel', function(){
+				if(Editor.tool() === "pan"){
+					if( Editor.editing() ){
+						Editor.mapping();
+					} 
+				}
+			});
+
+			$(CanvasTag).bind('mouseup', function(){
+				$(CanvasTag).unbind('mousemove.editorMapping');
+				if( Editor.editing() ){ // final mapping call, for regen
+					Editor.mapping();
+				} 
+			});
 
 			$('.tool_button').click(function(){
+				Controller.mouse().scroll.editorSum = 0;
 				$('.tool_button').removeClass('active').addClass('inactive');
 				$(this).removeClass('inactive').addClass('active');
 				Editor.tool( $(this).attr('id') );
@@ -145,14 +170,16 @@ var Editor = (function(Controller, CanvasTag){
 				Editor.pencilTool();
 			} else if( Editor.tool() === "bucket" ){
 				Editor.bucketTool();
+			} else if( Editor.tool() === "pan" ){
+				Editor.panTool();
 			}
 
 		},
 
 		pencilTool: function(){
 
-			var x = Math.floor(Controller.mouse().move.x/25);
-			var y = Math.floor(Controller.mouse().move.y/25);
+			var x = Math.floor( (Controller.mouse().move.x-scene.view.x() )/scene.getBlocksize()/scene.view.zoom());
+			var y = Math.floor( (Controller.mouse().move.y-scene.view.y() )/scene.getBlocksize()/scene.view.zoom());
 			var radioBtn = $('input[name="drawLayer"]:checked');
 			var currentLayer =  scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ); 
 
@@ -161,7 +188,7 @@ var Editor = (function(Controller, CanvasTag){
 				
 				if( !currentLayer.get(x, y) || currentLayer.get(x, y).getType() !== Editor.tileset() ){
 					if( currentLayer.get(x, y) ) currentLayer.remove(x, y);
-					currentLayer.add( new Materials.createTile(Editor.tileset(), x, y) );
+					currentLayer.add( new Materials.createTile(Editor.tileset(), x, y, scene.getBlocksize() ) );
 				}
 
 			} else if( Controller.mouse().click.right ){
@@ -199,10 +226,11 @@ var Editor = (function(Controller, CanvasTag){
 				if( currentElement ) currentElement = currentElement.getType();
 
 				if(  currentElement === type && Editor.tileset() !== type ){
+					sceneIsCurrent = false;
 					var layer = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") );
 
 					layer.remove(x, y);
-					layer.add( new Materials.createTile(Editor.tileset(), x, y) );
+					layer.add( new Materials.createTile(Editor.tileset(), x, y, scene.getBlocksize()) );
 					// call surrounding four
 
 					floodFill(x+1, y, count, type);
@@ -216,26 +244,38 @@ var Editor = (function(Controller, CanvasTag){
 			}
 
 			function floodRemove(x, y){
+				
+				var currentElement = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).get(x, y);
 
+				if(  currentElement  ){
+					sceneIsCurrent = false;
+					var layer = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") );
+					layer.remove(x, y);
+					// call surrounding four
+
+					floodRemove(x+1, y);
+					floodRemove(x-1, y);
+					floodRemove(x, y+1);
+					floodRemove(x, y-1);
+				} else {
+					return false;
+				}
 			}
 
 			if( Controller.mouse().click.left ){
-				sceneIsCurrent = false;
 				var radioBtn = $('input[name="drawLayer"]:checked');
-				var x = Math.floor(Controller.mouse().move.x/25);
-				var y = Math.floor(Controller.mouse().move.y/25);
+				var x = Math.floor((Controller.mouse().move.x-scene.view.x())/scene.getBlocksize()/scene.view.zoom());
+				var y = Math.floor((Controller.mouse().move.y-scene.view.y())/scene.getBlocksize()/scene.view.zoom());
 				var lookupType = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") ).get(x, y);
 				if( lookupType ) lookupType = lookupType.getType();
 
 				floodFill( x, y, 0, lookupType );
 
 			} else if( Controller.mouse().click.right ){
-				sceneIsCurrent = false;
+				var x = Math.floor((Controller.mouse().move.x-scene.view.x())/scene.getBlocksize()/scene.view.zoom());
+				var y = Math.floor((Controller.mouse().move.y-scene.view.y())/scene.getBlocksize()/scene.view.zoom());
 				var radioBtn = $('input[name="drawLayer"]:checked');
-
-				//layer = scene.getLayer( radioBtn.data("layerType"), radioBtn.data("pos") );
-				//layer.remove(  Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25) );
-				floodRemove( Math.floor(Controller.mouse().move.x/25), Math.floor(Controller.mouse().move.y/25) );
+				floodRemove( x, y );
 
 			} else if( !sceneIsCurrent ){
 				var radioBtn = $('input[name="drawLayer"]:checked');
@@ -244,6 +284,18 @@ var Editor = (function(Controller, CanvasTag){
 				Editor.genLayerContent();
 				sceneIsCurrent = true;
 			}
+		},
+
+		panTool: function(){
+			if( Controller.mouse().click.left ){
+				scene.view.x(Controller.mouse().move.deltaX);
+				scene.view.y(Controller.mouse().move.deltaY);
+			}
+			if ( Controller.mouse().scroll.editorSum !== 0 ){
+				scene.view.zoom(Controller.mouse().scroll.editorSum);
+				Controller.mouse().scroll.editorSum = 0;
+			}
+			
 		},
 
 		selectedLayer: function(argLayerObj){

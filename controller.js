@@ -33,7 +33,13 @@ var Controller = (function(){
 			},
 			move: {
 				x: 0,
-				y: 0
+				y: 0,
+				deltaX: 0,
+				deltaY: 0
+			},
+			scroll: {
+				amount: 0,
+				editorSum: 0
 			}
 		}
 
@@ -48,7 +54,6 @@ var Controller = (function(){
 							keyStates[currKey] = true;
 						}
 					}
-					
 				} else {
 					if(e.keyCode === codes[currKey]){
 						keyStates[currKey] = true;
@@ -78,8 +83,8 @@ var Controller = (function(){
 				case 2: mouseStates.click.middle = true; break;
 				case 3: mouseStates.click.right =  true; break;
 			}
-			mouseStates.click.x = event.offsetX?(event.offsetX):event.pageX-document.getElementById("draw_canvas").offsetLeft;
-			mouseStates.click.y = event.offsetY?(event.offsetY):event.pageY-document.getElementById("draw_canvas").offsetTop;
+			mouseStates.click.x = event.offsetX?(event.offsetX):event.pageX-CanvasTag.offsetLeft;
+			mouseStates.click.y = event.offsetY?(event.offsetY):event.pageY-CanvasTag.offsetTop;
 		},
 		mouseUp: function(e){
 			switch(e.which){
@@ -89,22 +94,37 @@ var Controller = (function(){
 			}
 		},
 		mouseMove: function(e){
-			mouseStates.move.x = event.offsetX?(event.offsetX):event.pageX-document.getElementById("draw_canvas").offsetLeft;
-			mouseStates.move.y = event.offsetY?(event.offsetY):event.pageY-document.getElementById("draw_canvas").offsetTop;
+			var newX = e.offsetX?(e.offsetX):e.pageX-CanvasTag.offsetLeft;
+			var newY = e.offsetY?(e.offsetY):e.pageY-CanvasTag.offsetTop;
+			mouseStates.move.deltaX = newX - mouseStates.move.x;
+			mouseStates.move.deltaY = newY - mouseStates.move.y;
+			mouseStates.move.x = newX;
+			mouseStates.move.y = newY;
 		},
-		key: function(btn){
+		mouseScroll: function(e){
+			var delta=e.detail? e.detail : e.wheelDelta/120;
+			mouseStates.scroll.amount = delta;
+			mouseStates.scroll.editorSum += delta;
+		},
+		key: function(){
 			return keyStates;
 		},
-		mouse: function(btn){
+		mouse: function(){
 			return mouseStates;
 		}
 
 	}
 })();
 
+var mousewheelevt=(/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel";
 
-CanvasTag.addEventListener('keydown', 	Controller.keyEventDown,	true);
-CanvasTag.addEventListener('keyup', 	Controller.keyEventUp,		true);
-CanvasTag.addEventListener('mouseup', 	Controller.mouseUp, 		false);
-CanvasTag.addEventListener('mousedown', Controller.mouseDown, 		false);
-CanvasTag.addEventListener('mousemove', Controller.mouseMove,	 	false);
+CanvasTag.addEventListener('keydown', 		Controller.keyEventDown,	true);
+CanvasTag.addEventListener('keyup', 		Controller.keyEventUp,		true);
+CanvasTag.addEventListener('mouseup', 		Controller.mouseUp, 		false);
+CanvasTag.addEventListener('mousedown', 	Controller.mouseDown, 		false);
+CanvasTag.addEventListener('mousemove', 	Controller.mouseMove,	 	false);
+CanvasTag.addEventListener(mousewheelevt, 	Controller.mouseScroll, 	false);
+
+
+
+
