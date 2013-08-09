@@ -97,6 +97,11 @@ var Scene = (function(Layer, Materials, Canvas){
 				drawFps: 60
 			};
 
+			this.debugging = {
+				active: true,
+				guides: true
+			}
+
 			this.mapGen();
 		},
 
@@ -186,19 +191,47 @@ var Scene = (function(Layer, Materials, Canvas){
 			this.eachLayer(function(drawView){
 				this.draw(drawView);
 			}, undefined, this.view);
+
+			
+
+			if(this.debugging.guides){
+				Canvas.beginPath();
+
+				Canvas.moveTo(
+					0 + this.view.Offset.x, 
+					0 + this.view.Offset.y
+				);
+
+				Canvas.lineTo(
+					800, 
+					0 + this.view.Offset.y
+				);
+
+				Canvas.moveTo(
+					0 + this.view.Offset.x, 
+					0 + this.view.Offset.y
+				);
+
+				Canvas.lineTo(
+					0 + this.view.Offset.x, 
+					600
+				);
+			}
+
+			Canvas.stroke();
 			
 			Canvas.fillStyle = "#000000";
 			Canvas.font = "20px Calibri";
 			Canvas.fillText(Math.round(this.performance.drawFps), 750, 25);
 		},
 
-		player: function(newCharacter){
-			if(typeof newCharacter === 'undefined'){
-				return this.Character;
-			} else {
-				this.Character = newCharacter;
-			}
-		},
+		// player: function(newCharacter){
+		// 	if(typeof newCharacter === 'undefined'){
+		// 		return this.layersObject['Character'];
+		// 	} else {
+		// 		this.layersObject['Character'] = newCharacter;
+		// 	}
+		// },
 
 		getLayersObject: function(){
 			return this.layersObject;
@@ -362,6 +395,8 @@ var Scene = (function(Layer, Materials, Canvas){
 			}
 
 			this.addLayer(clippingLayer, "Clipping");
+
+			this.addLayer(new Layer(0, "Character", this.blocksize), "Character");
 
 			conversionTime = performance.now() - conversionTime;
 

@@ -8,6 +8,7 @@ var Layer = (function(Canvas){
 		this.type = argType;
 		this.blocksize = argBlockSize
 		this.layerDraws = true;
+		this.char = null;
 	};
 
 	Layer.prototype = {
@@ -37,6 +38,9 @@ var Layer = (function(Canvas){
 					this.draw(drawView);
 				});
 			}
+			if(this.char !== null){
+				this.char.draw(drawView);
+			}
 		},
 
 		draws: function(argDraws){
@@ -45,6 +49,18 @@ var Layer = (function(Canvas){
 			} else {
 				this.layerDraws = argDraws;
 			}
+		},
+
+		player: function(argPlayer){
+			if(typeof argPlayer === 'undefined'){
+				return this.char;
+			} else {
+				this.char = argPlayer;
+			}
+		},
+
+		removePlayer: function(){
+			this.char = null;
 		},
 
 		toggleDraw: function(){

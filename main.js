@@ -98,6 +98,9 @@ function begin_game() {
 
 	BuckyGame = new Scene(map, blocksize);
 
+	Character = new Player(10, 10, 25, 50, blocksize);
+	BuckyGame.getLayer("Character", 0).player(Character); // define our new character
+
 	Editor.initialize(BuckyGame);
 	Editor.editing(true);
 
